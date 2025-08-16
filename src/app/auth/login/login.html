@@ -1,0 +1,57 @@
+@let currentUser = auth.currentUser();
+
+<h1>{{currentUser?.name || "Username not found"}}</h1>
+
+<div class="login-container">
+  <div class="login-form">
+    <h1>Sign In</h1>
+    <p class="subtitle">Welcome back! Please sign in to your account.</p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        @let userName = loginForm.controls.userName;
+        <label for="userName">User Name</label>
+        <input
+          type="text"
+          id="userName"
+          [formControl]="userName"
+          placeholder="Enter your user name"
+          required
+        />
+
+        @if (userName.invalid && userName.touched) {
+        <div class="error-message">
+          @if (userName.errors?.['required']) {
+          <span>User Name is required</span>
+          }
+        </div>
+        }
+      </div>
+
+      <div class="form-group">
+        @let password = loginForm.controls.password;
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          [formControl]="password"
+          placeholder="Enter your password"
+          required
+        />
+        @if (password.invalid && password.touched) {
+        <div class="error-message">
+          @if (password.errors?.['required']) {
+          <span>Password is required</span>
+          } @if (password.errors?.['minlength']) {
+          <span>Password must be at least 6 characters long</span>
+          }
+        </div>
+        }
+      </div>
+
+      <button type="submit" class="login-btn" [disabled]="loginForm.invalid">
+        Sign In
+      </button>
+    </form>
+  </div>
+</div>
