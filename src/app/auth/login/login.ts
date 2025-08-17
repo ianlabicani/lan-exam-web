@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Auth } from '../services/auth';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -11,9 +12,10 @@ import { Auth } from '../services/auth';
 export class Login {
   protected formBuilder = inject(FormBuilder);
   protected auth = inject(Auth);
+  protected router = inject(Router);
 
   protected loginForm = this.formBuilder.nonNullable.group({
-    userName: ['', [Validators.required]],
+    userId: ['', [Validators.required]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
@@ -23,10 +25,18 @@ export class Login {
       return;
     }
 
-    const { userName, password } = this.loginForm.getRawValue();
+    const { userId, password } = this.loginForm.getRawValue();
 
-    this.auth.login(userName, password);
+    const user = this.auth.login(userId, password);
+    if (!user) {
+      this.loginForm.setErrors({ invalidLogin: true });
+      return;
+    }
 
-    console.log(this.loginForm.getRawValue());
+    if (user.role === 'teacher') {
+      this.router.navigate(['/teacher/dashboard']);
+    } else if (user.role === 'student') {
+      this.router.navigate(['/student/dashboard']);
+    }
   }
 }

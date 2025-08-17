@@ -1,55 +1,94 @@
-@let currentUser = auth.currentUser();
+<div
+  class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4"
+>
+  <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-900">Sign In</h1>
+      <p class="text-sm text-gray-600 mt-1">
+        Welcome back! Please sign in to your account.
+      </p>
+    </div>
 
-<h1>{{currentUser?.name || "Username not found"}}</h1>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-5">
+      @if (loginForm.errors?.['invalidLogin']) {
+      <div class="rounded-md bg-red-50 p-3 text-sm text-red-700">
+        Invalid user id or password
+      </div>
+      }
 
-<div class="login-container">
-  <div class="login-form">
-    <h1>Sign In</h1>
-    <p class="subtitle">Welcome back! Please sign in to your account.</p>
-
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        @let userName = loginForm.controls.userName;
-        <label for="userName">User Name</label>
+      <div>
+        @let userId = loginForm.controls.userId;
+        <label for="userId" class="block text-sm font-medium text-gray-700 mb-1"
+          >User ID</label
+        >
         <input
           type="text"
           id="userName"
-          [formControl]="userName"
-          placeholder="Enter your user name"
+          [formControl]="userId"
+          placeholder="Enter your user Id"
           required
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [attr.aria-invalid]="userId.invalid && userId.touched"
         />
 
-        @if (userName.invalid && userName.touched) {
-        <div class="error-message">
-          @if (userName.errors?.['required']) {
-          <span>User Name is required</span>
+        @if (userId.invalid && userId.touched) {
+        <p class="mt-2 text-sm text-red-600">
+          @if (userId.errors?.['required']) {
+          <span>User Id is required</span>
           }
-        </div>
+        </p>
         }
       </div>
 
-      <div class="form-group">
+      <div>
         @let password = loginForm.controls.password;
-        <label for="password">Password</label>
+        <label
+          for="password"
+          class="block text-sm font-medium text-gray-700 mb-1"
+          >Password</label
+        >
         <input
           type="password"
           id="password"
           [formControl]="password"
           placeholder="Enter your password"
           required
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [attr.aria-invalid]="password.invalid && password.touched"
         />
+
         @if (password.invalid && password.touched) {
-        <div class="error-message">
+        <div class="mt-2 text-sm text-red-600">
           @if (password.errors?.['required']) {
-          <span>Password is required</span>
+          <div>Password is required</div>
           } @if (password.errors?.['minlength']) {
-          <span>Password must be at least 6 characters long</span>
+          <div>Password must be at least 6 characters long</div>
           }
         </div>
         }
       </div>
 
-      <button type="submit" class="login-btn" [disabled]="loginForm.invalid">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <input
+            id="remember"
+            type="checkbox"
+            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          />
+          <label for="remember" class="ml-2 block text-sm text-gray-900"
+            >Remember me</label
+          >
+        </div>
+        <a href="#" class="text-sm text-blue-600 hover:underline"
+          >Forgot password?</a
+        >
+      </div>
+
+      <button
+        type="submit"
+        class="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+        [disabled]="loginForm.invalid"
+      >
         Sign In
       </button>
     </form>

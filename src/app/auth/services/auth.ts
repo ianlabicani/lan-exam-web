@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 
 export interface IUser {
-  id: number;
+  id: string;
   username: string;
   password: string;
   name: string;
@@ -26,19 +26,19 @@ export class Auth {
     this.currentUser.set(JSON.parse(localCurrentUser));
   }
 
-  login(username: string, password: string): void {
+  login(userId: string, password: string): IUser | null {
     const users = this.database.users as IUser[];
 
-    const user = users.find(
-      (u) => u.username === username && u.password === password
-    );
-    if (user) {
-      this.currentUser.set(user);
-      localStorage.setItem('currentUser', JSON.stringify(user));
-    } else {
+    const user = users.find((u) => u.id === userId && u.password === password);
+
+    if (!user) {
       this.currentUser.set(null);
-      console.log('Login failed');
+      return null;
     }
+
+    this.currentUser.set(user);
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    return user;
   }
 
   logout() {
