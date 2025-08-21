@@ -1,0 +1,134 @@
+@if(loading()) {
+<div class="p-10 text-center text-gray-500">Loading exam...</div>
+} @else if(error()) {
+<div class="max-w-3xl mx-auto p-8 bg-white border rounded-lg text-center">
+  <p class="text-red-600 font-medium mb-2">{{ error() }}</p>
+  <a routerLink="/student/exams" class="text-blue-600 underline text-sm"
+    >Back to exams</a
+  >
+</div>
+} @else if(exam()) {
+<div class="max-w-5xl mx-auto space-y-8">
+  <div
+    class="flex flex-col md:flex-row md:items-start md:justify-between gap-4"
+  >
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">{{ exam()!.title }}</h1>
+      @if(exam()!.description){
+      <p class="text-sm text-gray-600 mt-2 max-w-prose">
+        {{ exam()!.description }}
+      </p>
+      }
+      <div class="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
+        @if(exam()!.duration){
+        <span>Duration: {{ exam()!.duration }} mins</span> }
+        @if(exam()!.endsAt){
+        <span>Ends: {{ exam()!.endsAt | date:'short' }}</span> }
+        <span>Total Points: {{ totalPoints() }}</span>
+      </div>
+    </div>
+    <div class="flex flex-col items-end gap-2">
+      @if(displayTime()){
+      <div
+        class="text-sm font-semibold px-3 py-2 rounded bg-gray-900 text-white"
+      >
+        ⏱ {{ displayTime() }}
+      </div>
+      }
+      <div class="w-48">
+        <div class="flex justify-between text-[10px] text-gray-500 mb-1">
+          <span>Progress</span><span>{{ progressPercent() }}%</span>
+        </div>
+        <div class="h-2 bg-gray-200 rounded overflow-hidden">
+          <div
+            class="h-full bg-blue-600 transition-all"
+            [style.width]="progressPercent() + '%'"
+          ></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="space-y-6">
+    @for(item of items(); track item.id; let idx = $index){
+    <div class="bg-white border rounded-lg p-5 shadow-sm">
+      <div class="flex items-start justify-between mb-2 gap-4">
+        <h2 class="font-medium text-gray-800">
+          Q{{ idx + 1 }}. {{ item.question }}
+        </h2>
+        <span
+          class="text-[10px] uppercase px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"
+          [ngClass]="{
+							'bg-blue-100 text-blue-700': item.type==='mcq',
+							'bg-indigo-100 text-indigo-700': item.type==='truefalse',
+							'bg-emerald-100 text-emerald-700': item.type==='essay'
+						}"
+          >{{ item.type }}</span
+        >
+      </div>
+      <p class="text-xs text-gray-400 mb-3">{{ item.points }} pts</p>
+
+      @if(item.type==='mcq'){
+      <div class="space-y-2">
+        @for(opt of item.options || []; track opt.text; let oi = $index){
+        <label class="flex items-center gap-2 text-sm cursor-pointer">
+          <input
+            type="radio"
+            name="mcq-{{item.id}}"
+            class="text-blue-600"
+            (change)="setMcqAnswer(item, oi)"
+            [checked]="answers()[item.id] === oi"
+          />
+          <span>{{ opt.text }}</span>
+        </label>
+        }
+      </div>
+      } @else if (item.type==='truefalse') {
+      <div class="flex gap-4 text-sm">
+        <label class="flex items-center gap-1 cursor-pointer">
+          <input
+            type="radio"
+            name="tf-{{item.id}}"
+            (change)="toggleTrueFalse(item,true)"
+            [checked]="answers()[item.id] === true"
+          />
+          True
+        </label>
+        <label class="flex items-center gap-1 cursor-pointer">
+          <input
+            type="radio"
+            name="tf-{{item.id}}"
+            (change)="toggleTrueFalse(item,false)"
+            [checked]="answers()[item.id] === false"
+          />
+          False
+        </label>
+      </div>
+      } @else if (item.type==='essay') {
+      <textarea
+        rows="4"
+        class="w-full border rounded px-3 py-2 text-sm"
+        placeholder="Your answer..."
+        (input)="setEssay(item, $any($event.target).value)"
+      >
+{{ answers()[item.id] || '' }}</textarea
+      >
+      }
+    </div>
+    }
+  </div>
+
+  <div class="flex items-center justify-between pt-4">
+    <a routerLink="/student/exams" class="text-sm text-gray-600 hover:underline"
+      >Cancel</a
+    >
+    <button
+      (click)="submit()"
+      [disabled]="submitting()"
+      class="px-5 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium disabled:opacity-50"
+    >
+      {{ submitting() ? 'Submitting...' : 'Submit Exam' }}
+    </button>
+  </div>
+</div>
+}

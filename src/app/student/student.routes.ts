@@ -10,4 +10,9 @@ export const routes: Routes = [
     path: 'exams',
     loadComponent: () => import('./exams/exams').then((c) => c.Exams),
   },
+  {
+    path: 'take-exam/:id',
+    loadComponent: () =>
+      import('./exams/take-exam/take-exam').then((c) => c.TakeExam),
+  },
 ];

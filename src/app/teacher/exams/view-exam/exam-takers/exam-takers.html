@@ -1,0 +1,91 @@
+@if(loading()){
+<div class="p-10 text-center text-gray-500">Loading...</div>
+} @else { @if(!exam()){
+<div class="p-10 text-center">
+  <p class="text-gray-600 font-medium mb-2">Exam not found</p>
+  <a routerLink="/teacher/exams" class="text-sm text-blue-600 hover:underline"
+    >Return</a
+  >
+</div>
+} @else {
+<div class="container mx-auto mt-8 space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-xl font-semibold text-gray-900">
+        Exam Takers – {{ exam()?.title }}
+      </h1>
+      <p class="text-xs text-gray-500">Attempts: {{ attempts().length }}</p>
+    </div>
+    <a
+      [routerLink]="['/teacher/exams/view-exam', exam()!.id]"
+      class="px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium"
+      >Back to Exam</a
+    >
+  </div>
+
+  @if(attempts().length === 0){
+  <div class="p-8 text-center bg-white border rounded-lg text-gray-500 text-sm">
+    No attempts yet.
+  </div>
+  } @else {
+  <div class="overflow-x-auto bg-white border rounded-lg">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-600">
+        <tr>
+          <th class="text-left px-4 py-2 font-semibold">Student</th>
+          <th class="text-left px-4 py-2 font-semibold">Started</th>
+          <th class="text-left px-4 py-2 font-semibold">Submitted</th>
+          <th class="text-left px-4 py-2 font-semibold">Progress</th>
+          <th class="text-left px-4 py-2 font-semibold">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(a of attempts(); track a.id){
+        <tr class="border-t">
+          <td class="px-4 py-2">
+            <div class="font-medium text-gray-800">
+              {{ userFor(a.userId)?.name || a.userId }}
+            </div>
+            <div class="text-[11px] text-gray-500">
+              {{ userFor(a.userId)?.year }} - {{ userFor(a.userId)?.section |
+              uppercase }}
+            </div>
+          </td>
+          <td class="px-4 py-2 text-gray-600">
+            {{ a.startedAt | date:'short' }}
+          </td>
+          <td class="px-4 py-2 text-gray-600">
+            @if(a.submittedAt){{{ a.submittedAt | date:'short' }}} @else {<span
+              class="text-xs text-gray-400"
+              >—</span
+            >}
+          </td>
+          <td class="px-4 py-2">
+            <div class="w-40 bg-gray-100 rounded h-2 overflow-hidden">
+              <div
+                class="h-2 bg-blue-500"
+                [style.width]="progressPercent(a) + '%'"
+              ></div>
+            </div>
+            <div class="text-[11px] text-gray-500 mt-1">
+              {{ attemptAnswersCount(a.id) }}/{{ items().length }} ({{
+              progressPercent(a) }}%)
+            </div>
+          </td>
+          <td class="px-4 py-2">
+            @if(a.submittedAt){<span
+              class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[11px] font-medium"
+              >Submitted</span
+            >} @else {<span
+              class="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 text-[11px] font-medium"
+              >In Progress</span
+            >}
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+</div>
+} }

@@ -68,12 +68,9 @@
         </div>
         <div class="mt-auto">
           <button
-            class="w-full font-medium py-2 px-4 rounded-md transition-colors duration-200 text-white disabled:opacity-70 disabled:cursor-not-allowed"
+            [class]="buttonClass(exam)"
             [disabled]="actionDisabled(exam)"
-            [ngClass]="{
-                  'bg-blue-600 hover:bg-blue-700': !actionDisabled(exam),
-                  'bg-gray-400': actionDisabled(exam)
-                }"
+            (click)="goTo(exam)"
           >
             {{ actionText(exam) }}
           </button>

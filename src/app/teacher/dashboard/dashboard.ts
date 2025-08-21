@@ -1,10 +1,10 @@
 import { Component, signal, computed } from '@angular/core';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-teacher-dashboard',
-  imports: [DatePipe, NgClass, RouterLink],
+  imports: [DatePipe, RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })

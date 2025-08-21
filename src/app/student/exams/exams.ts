@@ -1,17 +1,19 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { IExam } from '../../teacher/exams/exams';
-import { DatePipe, TitleCasePipe, NgClass } from '@angular/common';
+import { DatePipe, TitleCasePipe } from '@angular/common';
+import { Router } from '@angular/router';
 import { AuthService } from '../../auth/services/auth.service';
 
 @Component({
   selector: 'app-exams',
-  imports: [DatePipe, TitleCasePipe, NgClass],
+  imports: [DatePipe, TitleCasePipe],
   templateUrl: './exams.html',
   styleUrl: './exams.css',
 })
 export class Exams implements OnInit {
   exams = signal<IExam[]>([]);
   auth = inject(AuthService);
+  private router = inject(Router);
 
   ngOnInit() {
     const exams = localStorage.getItem('exams');
@@ -39,15 +41,48 @@ export class Exams implements OnInit {
   }
 
   actionText(exam: IExam): string {
-    if (exam.status === 'archived') return 'View';
-    if (exam.status === 'draft') return 'Locked';
-    if (exam.status === 'active' || exam.status === 'published')
-      return 'Start Exam';
-    return 'Open';
+    // Lifecycle reference:
+    // draft -> published -> active -> archived (terminal)
+    // Students can only take exams during 'active'.
+    switch (exam.status) {
+      case 'draft':
+        return 'Locked';
+      case 'published':
+        return 'Scheduled'; // not yet open for students
+      case 'active':
+        return 'Start Exam'; // could later switch to 'Continue' if attempt stored
+      case 'archived':
+        return 'Review';
+      default:
+        return 'Open';
+    }
   }
 
   actionDisabled(exam: IExam): boolean {
-    return exam.status === 'draft';
+    // disable unless exam is active (only active is actionable)
+    return exam.status !== 'active';
+  }
+
+  buttonClass(exam: IExam): string {
+    const base =
+      'w-full font-medium py-2 px-4 rounded-md transition-colors duration-200 text-white disabled:opacity-60 disabled:cursor-not-allowed';
+    switch (exam.status) {
+      case 'draft':
+        return base + ' bg-gray-400';
+      case 'published':
+        return base + ' bg-indigo-500';
+      case 'active':
+        return base + ' bg-blue-600 hover:bg-blue-700';
+      case 'archived':
+        return base + ' bg-yellow-500 hover:bg-yellow-600';
+      default:
+        return base + ' bg-gray-500';
+    }
+  }
+
+  goTo(exam: IExam) {
+    if (this.actionDisabled(exam)) return;
+    this.router.navigate(['/student/take-exam', exam.id]);
   }
 
   cardIcon(exam: IExam): { bg: string; icon: string; color: string } {
