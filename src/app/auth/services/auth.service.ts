@@ -6,12 +6,14 @@ export interface IUser {
   password: string;
   name: string;
   role: string;
+  section: 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g';
+  year: '1' | '2' | '3' | '4';
 }
 
 @Injectable({
   providedIn: 'root',
 })
-export class Auth {
+export class AuthService {
   currentUser = signal<null | undefined | IUser>(undefined);
   database = JSON.parse(localStorage.getItem('database') || '{}');
 

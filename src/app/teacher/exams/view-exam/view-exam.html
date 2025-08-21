@@ -1,0 +1,357 @@
+@if (!loading()) {
+<div class="space-y-6 container mx-auto mt-10">
+  @if(!exam()){
+  <div class="p-10 border border-dashed rounded-lg text-center bg-white">
+    <p class="text-gray-600 font-medium mb-2">Exam not found</p>
+    <a routerLink="/teacher/exams" class="text-sm text-blue-600 hover:underline"
+      >Return to exams list</a
+    >
+  </div>
+  } @if(exam()){
+  <div
+    class="flex flex-col md:flex-row md:items-start md:justify-between gap-4"
+  >
+    <div>
+      <div class="flex items-center gap-3 mb-2">
+        <h1 class="text-2xl font-bold text-gray-900">{{ exam()?.title }}</h1>
+        <span
+          class="px-2 py-0.5 text-xs font-semibold rounded-full tracking-wide uppercase {{ statusBadge(exam()?.status) }}"
+          >{{ exam()?.status }}</span
+        >
+      </div>
+      @if(exam()?.description) {
+      <p class="text-sm text-gray-600 max-w-prose">{{ exam()?.description }}</p>
+      }
+      <div class="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
+        @if(exam()?.startsAt){<span
+          >Starts: {{ exam()?.startsAt | date:'medium' }}</span
+        >} @if(exam()?.endsAt){<span
+          >Ends: {{ exam()?.endsAt | date:'medium' }}</span
+        >}
+        <span>Created: {{ exam()?.createdAt | date:'short' }}</span>
+        <span>Updated: {{ exam()?.updatedAt | date:'short' }}</span>
+        <span
+          >Year {{ exam()?.year }} • Section {{ exam()?.section | uppercase
+          }}</span
+        >
+      </div>
+    </div>
+    <div class="flex items-center gap-2 self-start">
+      <a
+        routerLink="/teacher/exams"
+        class="px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium"
+        >Back</a
+      >
+      <button
+        class="px-3 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
+      >
+        Edit
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+      <p
+        class="text-[11px] uppercase tracking-wide font-medium text-gray-500 mb-1"
+      >
+        Total Points
+      </p>
+      <p class="text-xl font-semibold text-gray-800">{{ totalPoints() }}</p>
+    </div>
+    <div class="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+      <p
+        class="text-[11px] uppercase tracking-wide font-medium text-gray-500 mb-1"
+      >
+        MCQ
+      </p>
+      <p class="text-xl font-semibold text-blue-600">{{ mcqCount() }}</p>
+    </div>
+    <div class="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+      <p
+        class="text-[11px] uppercase tracking-wide font-medium text-gray-500 mb-1"
+      >
+        True/False
+      </p>
+      <p class="text-xl font-semibold text-indigo-600">{{ tfCount() }}</p>
+    </div>
+    <div class="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+      <p
+        class="text-[11px] uppercase tracking-wide font-medium text-gray-500 mb-1"
+      >
+        Essay
+      </p>
+      <p class="text-xl font-semibold text-emerald-600">{{ essayCount() }}</p>
+    </div>
+  </div>
+
+  <!-- Item authoring & list -->
+  <div class="space-y-8">
+    <div class="grid md:grid-cols-3 gap-6">
+      <!-- MCQ -->
+      <div class="bg-white border rounded-lg p-4 shadow-sm">
+        <h3 class="text-sm font-semibold mb-3">Add MCQ</h3>
+        <div class="space-y-2">
+          <input
+            type="text"
+            [(ngModel)]="mcq.question"
+            placeholder="Question"
+            class="w-full border rounded px-2 py-1 text-sm"
+          />
+          <div class="space-y-1">
+            @for(opt of mcq.options; track opt.id; let i = $index){
+            <div class="flex items-center gap-2">
+              <input
+                [(ngModel)]="mcq.options[i].text"
+                class="flex-1 border rounded px-2 py-1 text-xs"
+                placeholder="Option"
+              />
+              <input
+                type="checkbox"
+                [(ngModel)]="mcq.options[i].correct"
+                class="scale-90"
+              />
+            </div>
+            }
+          </div>
+          <div class="flex items-center gap-2">
+            <input
+              type="number"
+              min="1"
+              [(ngModel)]="mcq.points"
+              class="w-20 border rounded px-2 py-1 text-sm"
+            />
+            <button
+              (click)="addMcq()"
+              class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-1.5 rounded"
+            >
+              Add MCQ
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- True/False -->
+      <div class="bg-white border rounded-lg p-4 shadow-sm">
+        <h3 class="text-sm font-semibold mb-3">Add True / False</h3>
+        <div class="space-y-2">
+          <input
+            type="text"
+            [(ngModel)]="tf.question"
+            placeholder="Statement"
+            class="w-full border rounded px-2 py-1 text-sm"
+          />
+          <select
+            [(ngModel)]="tf.answer"
+            class="w-full border rounded px-2 py-1 text-sm"
+          >
+            <option value="true">True</option>
+            <option value="false">False</option>
+          </select>
+          <div class="flex items-center gap-2">
+            <input
+              type="number"
+              min="1"
+              [(ngModel)]="tf.points"
+              class="w-20 border rounded px-2 py-1 text-sm"
+            />
+            <button
+              (click)="addTrueFalse()"
+              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3 py-1.5 rounded"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Essay -->
+      <div class="bg-white border rounded-lg p-4 shadow-sm">
+        <h3 class="text-sm font-semibold mb-3">Add Essay</h3>
+        <div class="space-y-2">
+          <input
+            type="text"
+            [(ngModel)]="essay.question"
+            placeholder="Prompt"
+            class="w-full border rounded px-2 py-1 text-sm"
+          />
+          <textarea
+            rows="3"
+            [(ngModel)]="essay.expectedAnswer"
+            placeholder="Expected Answer (optional)"
+            class="w-full border rounded px-2 py-1 text-sm"
+          ></textarea>
+          <div class="flex items-center gap-2">
+            <input
+              type="number"
+              min="1"
+              [(ngModel)]="essay.points"
+              class="w-20 border rounded px-2 py-1 text-sm"
+            />
+            <button
+              (click)="addEssay()"
+              class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-3 py-1.5 rounded"
+            >
+              Add Essay
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-900">
+        Items ({{ items().length }})
+      </h2>
+      @if(items().length === 0){
+      <div
+        class="p-6 text-center border border-dashed rounded-lg bg-white text-gray-500 text-sm"
+      >
+        No items added.
+      </div>
+      } @else {
+      <div class="space-y-3">
+        @for(item of items(); track item.id){
+        <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
+          @if(editingItemId() === item.id){
+          <div class="space-y-2">
+            <input
+              [(ngModel)]="item.question"
+              class="w-full border rounded px-2 py-1 text-sm"
+            />
+            <div class="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                [(ngModel)]="item.points"
+                class="w-24 border rounded px-2 py-1 text-sm"
+              />
+              <span
+                class="text-[10px] uppercase tracking-wide font-semibold px-2 py-0.5 rounded-full bg-gray-50 border"
+                >{{ item.type }}</span
+              >
+            </div>
+            @if(item.type==='mcq'){
+            <div class="space-y-1">
+              @for(opt of item.options || []; track opt.text; let oi = $index){
+              <div class="flex items-center gap-2">
+                <input
+                  [(ngModel)]="item.options![oi].text"
+                  class="flex-1 border rounded px-2 py-1 text-xs"
+                />
+                <input
+                  type="checkbox"
+                  [(ngModel)]="item.options![oi].correct"
+                />
+              </div>
+              }
+            </div>
+            } @else if (item.type==='truefalse') {
+            <select
+              [(ngModel)]="item.answer"
+              class="border rounded px-2 py-1 text-sm"
+            >
+              <option [ngValue]="true">True</option>
+              <option [ngValue]="false">False</option>
+            </select>
+            } @else if (item.type==='essay') {
+            <textarea
+              rows="2"
+              [(ngModel)]="item.expectedAnswer"
+              class="w-full border rounded px-2 py-1 text-sm"
+              placeholder="Expected answer (optional)"
+            ></textarea>
+            }
+            <div class="flex gap-2 pt-2">
+              <button
+                class="text-xs bg-blue-600 text-white px-3 py-1 rounded"
+                (click)="saveEdit(item)"
+              >
+                Save
+              </button>
+              <button
+                class="text-xs px-3 py-1 rounded border"
+                (click)="cancelEdit()"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+          } @else {
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span
+                  class="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-white border"
+                  [ngClass]="{
+                        'border-blue-300 text-blue-700': item.type==='mcq',
+                        'border-indigo-300 text-indigo-700': item.type==='truefalse',
+                        'border-emerald-300 text-emerald-700': item.type==='essay'
+                      }"
+                  >{{ item.type }}</span
+                >
+                <span class="text-xs text-gray-400">{{ item.points }} pts</span>
+              </div>
+              <p class="text-sm font-medium text-gray-800 mb-1">
+                {{ item.question }}
+              </p>
+              @if(item.type==='mcq'){
+              <ul class="text-xs space-y-0.5">
+                @for(opt of item.options || []; track opt.text){
+                <li
+                  [ngClass]="{'text-green-600 font-medium': opt.correct}"
+                  class="flex items-center gap-1"
+                >
+                  <span
+                    class="w-1.5 h-1.5 rounded-full"
+                    [ngClass]="opt.correct ? 'bg-green-500' : 'bg-gray-300'"
+                  ></span>
+                  <span>{{ opt.text }}</span>
+                  @if(opt.correct){<span
+                    class="ml-1 text-[9px] px-1 py-px rounded bg-green-100 text-green-700"
+                    >✔</span
+                  >}
+                </li>
+                }
+              </ul>
+              } @else if (item.type==='truefalse') {
+              <p class="text-xs text-gray-600">
+                Answer:
+                <span
+                  [ngClass]="{'text-green-600': item.answer, 'text-red-600': !item.answer}"
+                  class="font-semibold"
+                  >{{ item.answer ? 'True' : 'False' }}</span
+                >
+              </p>
+              } @else if (item.type==='essay') { @if(item.expectedAnswer){
+              <p class="text-xs text-gray-600">
+                Expected: <span class="italic">{{ item.expectedAnswer }}</span>
+              </p>
+              } }
+            </div>
+            <div class="flex flex-col gap-1 text-xs">
+              <button
+                class="text-blue-600 hover:underline"
+                (click)="startEdit(item.id)"
+              >
+                Edit
+              </button>
+              <button
+                class="text-red-600 hover:underline"
+                (click)="deleteItem(item.id)"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+          }
+        </div>
+        }
+      </div>
+      }
+    </div>
+  </div>
+  }
+</div>
+} @else {
+<div class="p-10 text-center text-gray-500">Loading exam...</div>
+}

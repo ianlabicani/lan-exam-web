@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 
 interface BaseItem {
   id: string;
+  examId?: string; // will be assigned at finalize when normalized
   type: 'mcq' | 'truefalse' | 'essay';
   question: string;
   points: number;
@@ -154,18 +155,30 @@ export class CreateExam {
 
   finalize() {
     if (this.items.length === 0) return; // need at least one item
+    const examId = crypto.randomUUID();
+    const raw = this.examForm.getRawValue();
     const newExam = {
-      id: crypto.randomUUID(),
-      ...this.examForm.getRawValue(),
+      id: examId,
+      ...raw,
       createdAt: new Date(),
       updatedAt: new Date(),
-      items: this.items,
       totalPoints: this.totalPoints(),
     };
+
+    // Persist exams (without items)
     const exams = localStorage.getItem('exams');
     const examsArray = exams ? JSON.parse(exams) : [];
     examsArray.push(newExam);
     localStorage.setItem('exams', JSON.stringify(examsArray));
+
+    // Persist items separately, add examId to each
+    const existingItems = JSON.parse(localStorage.getItem('examItems') || '[]');
+    const itemsToStore = this.items.map((i) => ({ ...i, examId }));
+    localStorage.setItem(
+      'examItems',
+      JSON.stringify([...existingItems, ...itemsToStore])
+    );
+
     // Reset wizard
     this.examForm.reset({
       title: '',

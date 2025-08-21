@@ -1,12 +1,12 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { Auth } from '../../auth/services/auth';
+import { AuthService } from '../../auth/services/auth.service';
 
 export const isTeacherGuard: CanActivateFn = (route, state) => {
-  const auth = inject(Auth);
+  const authService = inject(AuthService);
   const router = inject(Router);
 
-  const currentUser = auth.currentUser();
+  const currentUser = authService.currentUser();
 
   if (!currentUser || currentUser.role !== 'teacher') {
     router.navigate(['/login']);

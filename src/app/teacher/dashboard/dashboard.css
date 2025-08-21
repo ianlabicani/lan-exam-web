@@ -1,0 +1,4 @@
+/* Tailwind handles most styling; optional custom tweaks */
+.dashboard-container {
+  @apply space-y-8;
+}

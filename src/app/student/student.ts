@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
+import { Navbar } from './navbar/navbar';
 
 @Component({
   selector: 'app-student',
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, Navbar],
   templateUrl: './student.html',
   styleUrl: './student.css',
 })

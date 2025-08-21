@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Auth } from './auth/services/auth';
+import { AuthService } from './auth/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -9,12 +9,12 @@ import { Auth } from './auth/services/auth';
   styleUrl: './app.css',
 })
 export class App implements OnInit {
-  protected auth = inject(Auth);
+  protected authService = inject(AuthService);
 
   protected title = 'lan-exam-web';
 
   ngOnInit(): void {
-    this.auth.initLocalCurrentUser();
+    this.authService.initLocalCurrentUser();
 
     const database = localStorage.getItem('database');
 
@@ -29,6 +29,8 @@ export class App implements OnInit {
               role: 'student',
               email: 'john.doe@example.com',
               password: 'password',
+              section: 'f',
+              year: '1',
             },
             {
               id: '222',

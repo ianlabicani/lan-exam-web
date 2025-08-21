@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Auth } from '../services/auth';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 })
 export class Login {
   protected formBuilder = inject(FormBuilder);
-  protected auth = inject(Auth);
+  protected authService = inject(AuthService);
   protected router = inject(Router);
 
   protected loginForm = this.formBuilder.nonNullable.group({
@@ -27,7 +27,7 @@ export class Login {
 
     const { userId, password } = this.loginForm.getRawValue();
 
-    const user = this.auth.login(userId, password);
+    const user = this.authService.login(userId, password);
     if (!user) {
       this.loginForm.setErrors({ invalidLogin: true });
       return;

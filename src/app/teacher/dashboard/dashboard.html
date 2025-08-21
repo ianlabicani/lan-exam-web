@@ -1,3 +1,262 @@
-<div class="dashboard-container">
-  <h1>Teacher Dashboard</h1>
+<div class="space-y-8">
+  <!-- Header -->
+  <div
+    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+  >
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Teacher Dashboard</h1>
+      <p class="text-sm text-gray-500 mt-1">
+        Overview of your exams and recent activity
+      </p>
+    </div>
+    <a
+      routerLink="/teacher/exams/create"
+      class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 shadow"
+    >
+      <svg
+        class="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 6v12m6-6H6"
+        />
+      </svg>
+      New Exam
+    </a>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-5">
+    <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+      <p class="text-xs font-medium text-gray-500 mb-1">Total Exams</p>
+      <p class="text-2xl font-semibold text-gray-800">{{ totalExams() }}</p>
+    </div>
+    <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+      <p class="text-xs font-medium text-gray-500 mb-1">Active</p>
+      <p class="text-2xl font-semibold text-blue-600">{{ activeExams() }}</p>
+    </div>
+    <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+      <p class="text-xs font-medium text-gray-500 mb-1">Published</p>
+      <p class="text-2xl font-semibold text-green-600">
+        {{ publishedExams() }}
+      </p>
+    </div>
+    <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+      <p class="text-xs font-medium text-gray-500 mb-1">Drafts</p>
+      <p class="text-2xl font-semibold text-gray-700">{{ draftExams() }}</p>
+    </div>
+    <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+      <p class="text-xs font-medium text-gray-500 mb-1">Avg Completion</p>
+      <p class="text-2xl font-semibold text-emerald-600">
+        {{ completionRate() }}%
+      </p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+    <!-- Exams Performance -->
+    <div class="xl:col-span-2 space-y-6">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Exam Progress</h2>
+        <a
+          routerLink="/teacher/exams"
+          class="text-sm text-blue-600 hover:underline"
+          >View all</a
+        >
+      </div>
+      <div class="space-y-4">
+        @for(exam of exams(); track exam.id){
+        <div class="bg-white p-5 rounded-lg border border-gray-100 shadow-sm">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="font-medium text-gray-900 truncate">
+                  {{ exam.title }}
+                </h3>
+                <span
+                  class="text-[10px] px-2 py-0.5 rounded-full font-semibold tracking-wide uppercase {{ statusBadge(exam.status) }}"
+                  >{{ exam.status }}</span
+                >
+              </div>
+              <p class="text-xs text-gray-500">
+                @if(exam.status === 'active') { Running now } @else if
+                (exam.status === 'published') { Scheduled } @else if
+                (exam.status === 'draft') { Not published } @else { Completed }
+              </p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm font-semibold text-gray-800">
+                {{ exam.submissions }}/{{ exam.totalStudents }}
+              </p>
+              <p class="text-[11px] text-gray-500">Submissions</p>
+            </div>
+          </div>
+          <div class="mt-4">
+            <div
+              class="flex justify-between text-[11px] font-medium text-gray-500 mb-1"
+            >
+              <span>Progress</span>
+              <span>{{ progressPercent(exam) }}%</span>
+            </div>
+            <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div
+                class="h-full bg-gradient-to-r from-blue-500 to-blue-600"
+                [style.width]="progressPercent(exam)+'%'"
+              ></div>
+            </div>
+          </div>
+          <div class="mt-3 flex items-center text-[11px] text-gray-500 gap-3">
+            @if(exam.startsAt){<span
+              >Starts {{ exam.startsAt | date:'short' }}</span
+            >} @if(exam.endsAt){<span
+              >Ends {{ exam.endsAt | date:'short' }}</span
+            >}
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="space-y-6">
+      <h2 class="text-lg font-semibold text-gray-900">Recent Activity</h2>
+      <div
+        class="bg-white border border-gray-100 rounded-lg divide-y divide-gray-100 shadow-sm"
+      >
+        @for(act of recentActivity(); track act.id){ @let meta =
+        activityIcon(act.type);
+        <div class="p-4 flex items-start gap-3">
+          <div
+            class="w-10 h-10 rounded-lg flex items-center justify-center {{ meta.bg }}"
+          >
+            <svg
+              class="w-5 h-5 {{ meta.color }}"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                [attr.d]="meta.icon"
+              />
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-gray-700">
+              @if(act.type === 'submission') {
+              <span
+                ><span class="font-medium">{{ act.student }}</span> submitted
+                <span class="font-medium">{{ act.exam }}</span></span
+              >
+              } @else if (act.type === 'published') {
+              <span
+                >Published <span class="font-medium">{{ act.exam }}</span></span
+              >
+              } @else if (act.type === 'graded') {
+              <span
+                >Graded <span class="font-medium">{{ act.student }}</span>'s
+                work for <span class="font-medium">{{ act.exam }}</span></span
+              >
+              } @else {
+              <span
+                >Updated <span class="font-medium">{{ act.exam }}</span></span
+              >
+              }
+            </p>
+            <p class="text-[11px] text-gray-500 mt-1">
+              {{ act.time | date:'shortTime' }} • {{ act.time |
+              date:'mediumDate' }}
+            </p>
+          </div>
+        </div>
+        }
+      </div>
+      <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
+        <h3 class="text-sm font-semibold text-gray-800 mb-4">Quick Actions</h3>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <a
+            routerLink="/teacher/exams/create"
+            class="flex items-center gap-2 px-3 py-2 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6v12m6-6H6"
+              />
+            </svg>
+            Create Exam
+          </a>
+          <a
+            routerLink="/teacher/exams"
+            class="flex items-center gap-2 px-3 py-2 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100 font-medium"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 7h18M3 12h18M3 17h18"
+              />
+            </svg>
+            Manage Exams
+          </a>
+          <button
+            class="flex items-center gap-2 px-3 py-2 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            Grade Work
+          </button>
+          <button
+            class="flex items-center gap-2 px-3 py-2 rounded-md bg-purple-50 text-purple-700 hover:bg-purple-100 font-medium"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10m-13 8h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            Schedule
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

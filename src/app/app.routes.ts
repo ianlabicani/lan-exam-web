@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { isTeacherGuard } from './teacher/guards/is-teacher-guard';
-import { isStudentGuard } from './student/guards/is-student-guard';
+import { isStudentGuard } from './student/guards/is-student.guard';
 
 export const routes: Routes = [
   {

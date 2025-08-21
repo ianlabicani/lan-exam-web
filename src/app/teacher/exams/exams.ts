@@ -1,6 +1,12 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DatePipe, NgClass } from '@angular/common';
+import {
+  DatePipe,
+  NgClass,
+  NgIf,
+  TitleCasePipe,
+  UpperCasePipe,
+} from '@angular/common';
 
 export interface IExam {
   id: string;
@@ -10,21 +16,23 @@ export interface IExam {
   endsAt?: Date;
   duration?: number;
   status: 'draft' | 'published' | 'archived' | 'active';
+  section: 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g';
+  year: '1' | '2' | '3' | '4';
   createdAt: Date;
   updatedAt: Date;
 }
 
 @Component({
   selector: 'app-exams',
-  imports: [RouterLink, DatePipe, NgClass],
+  imports: [RouterLink, DatePipe, NgClass, NgIf, TitleCasePipe, UpperCasePipe],
   templateUrl: './exams.html',
   styleUrl: './exams.css',
 })
 export class Exams implements OnInit {
   exams = signal<IExam[]>([]);
+  // Simplified: item management moved to view-exam page
 
   ngOnInit(): void {
-    this.seedExams();
     this.loadExams();
   }
 
@@ -32,34 +40,6 @@ export class Exams implements OnInit {
     const exams = localStorage.getItem('exams');
     if (exams) {
       this.exams.set(JSON.parse(exams));
-    }
-  }
-
-  private seedExams() {
-    if (!localStorage.getItem('exams')) {
-      localStorage.setItem(
-        'exams',
-        JSON.stringify([
-          {
-            id: '1',
-            title: 'Math Exam',
-            description: 'A comprehensive math exam.',
-            duration: 60,
-            status: 'draft',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          {
-            id: '2',
-            title: 'Science Exam',
-            description: 'A comprehensive science exam.',
-            duration: 45,
-            status: 'published',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ])
-      );
     }
   }
 

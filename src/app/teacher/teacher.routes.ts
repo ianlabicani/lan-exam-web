@@ -15,4 +15,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./exams/create-exam/create-exam').then((c) => c.CreateExam),
   },
+  {
+    path: 'exams/view-exam/:id',
+    loadComponent: () =>
+      import('./exams/view-exam/view-exam').then((c) => c.ViewExam),
+  },
 ];
