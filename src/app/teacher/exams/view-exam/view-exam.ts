@@ -98,6 +98,49 @@ export class ViewExam implements OnInit {
       : 'bg-gray-100 text-gray-700';
   }
 
+  // Lifecycle helpers
+  isEditable() {
+    return this.exam()?.status === 'draft';
+  }
+
+  allowedNextStatuses(): { value: StoredExam['status']; label: string }[] {
+    const current = this.exam()?.status;
+    if (!current) return [];
+    const map: Record<StoredExam['status'], StoredExam['status'][]> = {
+      draft: ['published', 'archived'],
+      published: ['active', 'archived'],
+      active: ['archived'],
+      archived: [],
+    };
+    return (map[current] || []).map((s) => ({ value: s, label: s }));
+  }
+
+  updateStatus(next: StoredExam['status']) {
+    if (!this.exam()) return;
+    const current = this.exam()!;
+    if (current.status === next) return;
+    // validate transition
+    const valid = this.allowedNextStatuses().some((s) => s.value === next);
+    if (!valid) return;
+    const exams: StoredExam[] = JSON.parse(
+      localStorage.getItem('exams') || '[]'
+    );
+    const idx = exams.findIndex((e) => e.id === current.id);
+    if (idx !== -1) {
+      exams[idx] = {
+        ...exams[idx],
+        status: next,
+        updatedAt: new Date(),
+      } as StoredExam;
+      localStorage.setItem('exams', JSON.stringify(exams));
+      this.exam.set(exams[idx]);
+    }
+    // If exam becomes non-editable, clear editing state
+    if (!this.isEditable()) {
+      this.editingItemId.set(null);
+    }
+  }
+
   // Item creation
   addMcq() {
     if (!this.exam()) return;
