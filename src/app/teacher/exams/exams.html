@@ -7,11 +7,8 @@
       >Create Exam</a
     >
   </div>
-
-  <div
-    class="overflow-x-auto bg-white shadow rounded-lg"
-    *ngIf="exams().length; else empty"
-  >
+  @if ( exams().length ) {
+  <div class="overflow-x-auto bg-white shadow rounded-lg">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
@@ -54,12 +51,10 @@
           <td class="px-4 py-2 text-sm text-gray-600">
             <div>
               <div>
-                {{ exam.startsAt | date: 'MMM d, y HH:mm' }} → {{ exam.endsAt |
-                date: 'MMM d, y HH:mm' }}
+                {{ exam.starts_at | date: 'MMM d, y HH:mm' }} → {{ exam.ends_at
+                | date: 'MMM d, y HH:mm' }}
               </div>
-              <div class="text-xs text-gray-400">
-                Duration: {{ exam.duration }} mins
-              </div>
+              <div class="text-xs text-gray-400">Duration: {{ 0 }} mins</div>
             </div>
           </td>
           <td class="px-4 py-2 text-sm">
@@ -85,14 +80,16 @@
       </tbody>
     </table>
   </div>
-  <ng-template #empty>
-    <div class="p-8 text-center bg-gray-50 rounded border">
-      <p class="text-gray-500 mb-4">No exams found</p>
-      <a routerLink="./create-exam" class="text-blue-600 underline"
-        >Create your first exam</a
-      >
-    </div>
-  </ng-template>
+  } @else {
+  <div class="p-8 text-center bg-gray-50 rounded border">
+    <p class="text-gray-500 mb-4">No exams found</p>
+    <a routerLink="./create-exam" class="text-blue-600 underline"
+      >Create your first exam</a
+    >
+  </div>
+
+  }
+
   <p class="text-xs text-gray-400 mt-4">
     Open an exam to view and manage its items.
   </p>

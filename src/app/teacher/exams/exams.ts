@@ -1,46 +1,28 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { ExamService, IExam } from './exam.service';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   DatePipe,
   NgClass,
-  NgIf,
   TitleCasePipe,
   UpperCasePipe,
 } from '@angular/common';
 
-export interface IExam {
-  id: string;
-  title: string;
-  description?: string;
-  startsAt?: Date;
-  endsAt?: Date;
-  duration?: number;
-  status: 'draft' | 'published' | 'archived' | 'active';
-  section: 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g';
-  year: '1' | '2' | '3' | '4';
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 @Component({
   selector: 'app-exams',
-  imports: [RouterLink, DatePipe, NgClass, NgIf, TitleCasePipe, UpperCasePipe],
+  imports: [RouterLink, DatePipe, NgClass, TitleCasePipe, UpperCasePipe],
   templateUrl: './exams.html',
   styleUrl: './exams.css',
 })
 export class Exams implements OnInit {
+  examService = inject(ExamService);
+
   exams = signal<IExam[]>([]);
-  // Simplified: item management moved to view-exam page
 
   ngOnInit(): void {
-    this.loadExams();
-  }
-
-  private loadExams() {
-    const exams = localStorage.getItem('exams');
-    if (exams) {
-      this.exams.set(JSON.parse(exams));
-    }
+    this.examService.getAllExams().subscribe(({ exams }) => {
+      this.exams.set(exams);
+    });
   }
 
   calculateDuration(startsAt: Date, endsAt: Date): number {
@@ -62,7 +44,7 @@ export class Exams implements OnInit {
     );
   }
 
-  remove(id: string) {
+  remove(id: number) {
     this.exams.set(this.exams().filter((exam) => exam.id !== id));
     localStorage.setItem('exams', JSON.stringify(this.exams()));
   }

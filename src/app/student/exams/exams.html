@@ -56,9 +56,9 @@
           class="flex items-center justify-between text-sm text-gray-500 mb-4"
         >
           <span>
-            @if(exam.endsAt){ 📅 Ends: {{ exam.endsAt | date:'mediumDate' }} }
-            @else if (exam.startsAt){ 📅 Starts: {{ exam.startsAt |
-            date:'mediumDate' }} } @else { 📅 Created: {{ exam.createdAt |
+            @if(exam.ends_at){ 📅 Ends: {{ exam.ends_at | date:'mediumDate' }} }
+            @else if (exam.starts_at){ 📅 Starts: {{ exam.starts_at |
+            date:'mediumDate' }} } @else { 📅 Created: {{ exam.created_at |
             date:'mediumDate' }} }
           </span>
           <span>

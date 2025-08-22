@@ -2,6 +2,8 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ExamService } from '../exam.service';
+import { Router } from '@angular/router';
 
 interface BaseItem {
   id: string;
@@ -36,7 +38,11 @@ type ExamItem = McqItem | TrueFalseItem | EssayItem;
 })
 export class CreateExam {
   private fb = inject(FormBuilder);
-  step = 1; // 1 = details, 2 = items, 3 = review
+  private examService = inject(ExamService);
+  private router = inject(Router);
+  step = 1;
+  saving = false;
+  errorMsg: string | null = null;
 
   examForm = this.fb.nonNullable.group({
     title: ['', Validators.required],
@@ -154,41 +160,61 @@ export class CreateExam {
   }
 
   finalize() {
-    if (this.items.length === 0) return; // need at least one item
-    const examId = crypto.randomUUID();
+    if (this.items.length === 0 || this.examForm.invalid || this.saving) return;
+    this.errorMsg = null;
+    this.saving = true;
+
     const raw = this.examForm.getRawValue();
-    const newExam = {
-      id: examId,
-      ...raw,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      totalPoints: this.totalPoints(),
+    const payload = {
+      title: raw.title!,
+      description: raw.description || '',
+      starts_at: raw.startsAt ? new Date(raw.startsAt).toISOString() : null,
+      ends_at: raw.endsAt ? new Date(raw.endsAt).toISOString() : null,
+      year: String(raw.year),
+      section: String(raw.section),
+      status: raw.status!,
+      total_points: this.totalPoints(),
+      items: this.items.map((i) => this.mapItemForApi(i)),
     };
 
-    // Persist exams (without items)
-    const exams = localStorage.getItem('exams');
-    const examsArray = exams ? JSON.parse(exams) : [];
-    examsArray.push(newExam);
-    localStorage.setItem('exams', JSON.stringify(examsArray));
-
-    // Persist items separately, add examId to each
-    const existingItems = JSON.parse(localStorage.getItem('examItems') || '[]');
-    const itemsToStore = this.items.map((i) => ({ ...i, examId }));
-    localStorage.setItem(
-      'examItems',
-      JSON.stringify([...existingItems, ...itemsToStore])
-    );
-
-    // Reset wizard
-    this.examForm.reset({
-      title: '',
-      description: '',
-      startsAt: '',
-      endsAt: '',
-      status: 'draft',
+    this.examService.createExam(payload).subscribe({
+      next: (res) => {
+        this.saving = false;
+        this.router.navigate(['/teacher/exams']);
+      },
+      error: (err) => {
+        this.saving = false;
+        this.errorMsg = err?.error?.message || 'Failed to create exam';
+      },
     });
-    this.items = [];
-    this.step = 1;
-    console.log('Exam created', newExam);
+  }
+
+  private mapItemForApi(item: ExamItem) {
+    switch (item.type) {
+      case 'mcq':
+        return {
+          type: 'mcq',
+          question: item.question,
+          points: item.points,
+          options: item.options.map((o) => ({
+            text: o.text,
+            correct: o.correct,
+          })),
+        };
+      case 'truefalse':
+        return {
+          type: 'truefalse',
+          question: item.question,
+          points: item.points,
+          answer: item.answer,
+        };
+      case 'essay':
+        return {
+          type: 'essay',
+          question: item.question,
+          points: item.points,
+          expected_answer: item.expectedAnswer || null,
+        };
+    }
   }
 }

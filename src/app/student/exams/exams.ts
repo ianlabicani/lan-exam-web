@@ -1,5 +1,5 @@
+import { ExamService, IExam } from './../../teacher/exams/exam.service';
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { IExam } from '../../teacher/exams/exams';
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../auth/services/auth.service';
@@ -11,31 +11,17 @@ import { AuthService } from '../../auth/services/auth.service';
   styleUrl: './exams.css',
 })
 export class Exams implements OnInit {
+  examService = inject(ExamService);
   exams = signal<IExam[]>([]);
   auth = inject(AuthService);
   private router = inject(Router);
 
   ngOnInit() {
-    const exams = localStorage.getItem('exams');
-    const allExams = JSON.parse(exams || '[]');
-    console.log(allExams);
-
-    if (!exams) {
-      this.exams.set([]);
-    } else {
-      const currentUser = this.auth.currentUser()?.user;
-      const userExams = JSON.parse(exams).filter((exam: IExam) => {
-        const isSameYear = String(exam.year) === String(currentUser?.year);
-        const isSameSection =
-          String(exam.section) === String(currentUser?.section);
-
-        console.log({ isSameYear, isSameSection });
-
-        return isSameYear && isSameSection;
-      });
-
-      this.exams.set(userExams);
-    }
+    this.examService.getAllExams().subscribe(({ exams }) => {
+      console.log(exams);
+      this.exams.set(exams);
+      console.log('here');
+    });
   }
 
   statusBadgeClass(status: IExam['status']): string {
@@ -119,13 +105,12 @@ export class Exams implements OnInit {
   }
 
   durationMinutes(exam: IExam): number | null {
-    // We now base the shown duration off the student's session start (attempt.startedAt)
-    // rather than just the static exam window. This makes the value reflect the
-    // remaining time (in whole minutes) for an in‑progress attempt.
-
+    // Remaining minutes based on attempt start; falls back to full window (starts_at -> ends_at)
+    // IExam uses snake_case fields from backend.
     try {
       const currentUser = this.auth.currentUser()?.user;
       if (!currentUser) return null;
+
       const takenExamsRaw = localStorage.getItem('takenExams') || '[]';
       const attempts = JSON.parse(takenExamsRaw) as any[];
       const attempt = attempts.find(
@@ -133,35 +118,25 @@ export class Exams implements OnInit {
           a.examId === exam.id && a.userId === currentUser.id && !a.submittedAt
       );
 
+      const endsAt = exam.ends_at ? new Date(exam.ends_at).getTime() : null;
+      const startsAt = exam.starts_at
+        ? new Date(exam.starts_at).getTime()
+        : null;
       const now = Date.now();
 
-      // If we have an active attempt, compute remaining time.
       if (attempt && attempt.startedAt) {
-        const startedAtMs = new Date(attempt.startedAt).getTime();
-
-        // Case 1: Fixed duration exams (exam.duration in minutes)
-        if (exam.duration && exam.duration > 0) {
-          const endByDuration = startedAtMs + exam.duration * 60000;
-          const remainingMs = endByDuration - now;
+        // Without an explicit fixed duration, we constrain by ends_at window.
+        if (endsAt) {
+          const remainingMs = endsAt - now;
           if (remainingMs <= 0) return 0;
-          return Math.max(0, Math.ceil(remainingMs / 60000));
+          return Math.ceil(remainingMs / 60000);
         }
-
-        // Case 2: Window-based (startsAt / endsAt). Remaining is until endsAt.
-        if (exam.endsAt) {
-          const endWindowMs = new Date(exam.endsAt).getTime();
-          const remainingMs = endWindowMs - now;
-          if (remainingMs <= 0) return 0;
-          return Math.max(0, Math.ceil(remainingMs / 60000));
-        }
+        return null;
       }
 
-      // If no active attempt yet: show the total potential duration.
-      if (exam.duration) return exam.duration;
-      if (exam.startsAt && exam.endsAt) {
-        const start = new Date(exam.startsAt).getTime();
-        const end = new Date(exam.endsAt).getTime();
-        if (end > start) return Math.round((end - start) / 60000);
+      // No active attempt: show total scheduled window length if both timestamps exist.
+      if (startsAt && endsAt && endsAt > startsAt) {
+        return Math.round((endsAt - startsAt) / 60000);
       }
       return null;
     } catch {
