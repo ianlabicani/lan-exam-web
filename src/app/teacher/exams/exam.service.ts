@@ -15,6 +15,25 @@ export interface IExam {
   created_at: Date;
   updated_at: Date;
   pivot: IExam_Teacher;
+  items: Item[];
+}
+
+export interface Item {
+  id: number;
+  exam_id: number;
+  type: string;
+  question: string;
+  points: number;
+  expected_answer: null | string;
+  answer: boolean | null;
+  options: Option[] | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Option {
+  text: string;
+  correct: boolean;
 }
 
 export interface IExam_Teacher {
@@ -62,6 +81,51 @@ export class ExamService {
           Authorization: `Bearer ${token}`,
         },
       }
+    );
+  }
+
+  private authHeader() {
+    const token = this.authService.currentUser()?.token.substring(2);
+    return {
+      Authorization: `Bearer ${token}`,
+    };
+  }
+
+  getExam(id: number) {
+    return this.http.get<IExam>(
+      `http://127.0.0.1:8000/api/teacher/exams/${id}`,
+      { headers: this.authHeader() }
+    );
+  }
+
+  updateExamStatus(id: number | string, status: string) {
+    return this.http.patch<{ exam: IExam }>(
+      `http://127.0.0.1:8000/api/teacher/exams/${id}/status`,
+      { status },
+      { headers: this.authHeader() }
+    );
+  }
+
+  createItem(examId: number, payload: any) {
+    return this.http.post<{ item: Item }>(
+      `http://127.0.0.1:8000/api/teacher/exams/${examId}/items`,
+      payload,
+      { headers: this.authHeader() }
+    );
+  }
+
+  updateItem(itemId: number | string, payload: any) {
+    return this.http.patch<{ item: any }>(
+      `http://127.0.0.1:8000/api/teacher/exams/items/${itemId}`,
+      payload,
+      { headers: this.authHeader() }
+    );
+  }
+
+  deleteItem(itemId: number | string) {
+    return this.http.delete<{ success: boolean }>(
+      `http://127.0.0.1:8000/api/teacher/exams/items/${itemId}`,
+      { headers: this.authHeader() }
     );
   }
 }

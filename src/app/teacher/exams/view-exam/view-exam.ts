@@ -2,32 +2,7 @@ import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe, NgClass, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface StoredExamItem {
-  id: string;
-  examId: string;
-  type: 'mcq' | 'truefalse' | 'essay';
-  question: string;
-  points: number;
-  options?: { text: string; correct: boolean }[]; // mcq
-  answer?: boolean; // truefalse
-  expectedAnswer?: string; // essay
-}
-
-interface StoredExam {
-  id: string;
-  title: string;
-  description?: string;
-  startsAt?: string | Date;
-  endsAt?: string | Date;
-  duration?: number;
-  status: 'draft' | 'published' | 'archived' | 'active';
-  section: string;
-  year: string;
-  createdAt: string | Date;
-  updatedAt: string | Date;
-  totalPoints: number;
-}
+import { ExamService, IExam, Item } from '../exam.service';
 
 @Component({
   selector: 'app-view-exam',
@@ -37,9 +12,9 @@ interface StoredExam {
 })
 export class ViewExam implements OnInit {
   private route = inject(ActivatedRoute);
-  exam = signal<StoredExam | null>(null);
-  items = signal<StoredExamItem[]>([]);
-  editingItemId = signal<string | null>(null);
+  exam = signal<IExam | null>(null);
+  items = signal<Item[]>([]);
+  editingItemId = signal<number | null>(null);
   // creation model states
   mcq = {
     question: '',
@@ -54,6 +29,9 @@ export class ViewExam implements OnInit {
   tf = { question: '', answer: 'true', points: 1 };
   essay = { question: '', expectedAnswer: '', points: 5 };
   loading = signal(true);
+  saving = signal(false);
+  errorMsg = signal<string | null>(null);
+  private examService = inject(ExamService);
 
   totalPoints = computed(() =>
     this.items().reduce((s, i) => s + (i.points || 0), 0)
@@ -74,16 +52,24 @@ export class ViewExam implements OnInit {
       this.loading.set(false);
       return;
     }
-    const exams: StoredExam[] = JSON.parse(
-      localStorage.getItem('exams') || '[]'
-    );
-    const exam = exams.find((e) => e.id === id) || null;
-    this.exam.set(exam);
-    const allItems: StoredExamItem[] = JSON.parse(
-      localStorage.getItem('examItems') || '[]'
-    );
-    this.items.set(allItems.filter((i) => i.examId === id));
-    this.loading.set(false);
+    this.fetchExam(+id);
+  }
+
+  private fetchExam(id: number) {
+    this.loading.set(true);
+    this.examService.getExam(id).subscribe({
+      next: (exam) => {
+        console.log(exam);
+        this.exam.set(exam);
+        const items = exam.items || [];
+        this.items.set(items);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.errorMsg.set(err?.error?.message || 'Failed to load exam');
+        this.loading.set(false);
+      },
+    });
   }
 
   statusBadge(status?: string) {
@@ -103,10 +89,10 @@ export class ViewExam implements OnInit {
     return this.exam()?.status === 'draft';
   }
 
-  allowedNextStatuses(): { value: StoredExam['status']; label: string }[] {
+  allowedNextStatuses(): { value: IExam['status']; label: string }[] {
     const current = this.exam()?.status;
     if (!current) return [];
-    const map: Record<StoredExam['status'], StoredExam['status'][]> = {
+    const map: Record<IExam['status'], IExam['status'][]> = {
       draft: ['published', 'archived'],
       published: ['active', 'archived'],
       active: ['archived'],
@@ -115,30 +101,24 @@ export class ViewExam implements OnInit {
     return (map[current] || []).map((s) => ({ value: s, label: s }));
   }
 
-  updateStatus(next: StoredExam['status']) {
+  updateStatus(next: IExam['status']) {
     if (!this.exam()) return;
     const current = this.exam()!;
     if (current.status === next) return;
-    // validate transition
     const valid = this.allowedNextStatuses().some((s) => s.value === next);
     if (!valid) return;
-    const exams: StoredExam[] = JSON.parse(
-      localStorage.getItem('exams') || '[]'
-    );
-    const idx = exams.findIndex((e) => e.id === current.id);
-    if (idx !== -1) {
-      exams[idx] = {
-        ...exams[idx],
-        status: next,
-        updatedAt: new Date(),
-      } as StoredExam;
-      localStorage.setItem('exams', JSON.stringify(exams));
-      this.exam.set(exams[idx]);
-    }
-    // If exam becomes non-editable, clear editing state
-    if (!this.isEditable()) {
-      this.editingItemId.set(null);
-    }
+    this.saving.set(true);
+    this.examService.updateExamStatus(current.id, next).subscribe({
+      next: (res) => {
+        this.exam.set(res.exam as any);
+        this.saving.set(false);
+        if (!this.isEditable()) this.editingItemId.set(null);
+      },
+      error: (err) => {
+        this.errorMsg.set(err?.error?.message || 'Failed to update status');
+        this.saving.set(false);
+      },
+    });
   }
 
   // Item creation
@@ -147,16 +127,78 @@ export class ViewExam implements OnInit {
     const q = this.mcq.question.trim();
     const opts = this.mcq.options.filter((o) => o.text.trim());
     if (!q || opts.length < 2 || !opts.some((o) => o.correct)) return;
-    const item: StoredExamItem = {
-      id: crypto.randomUUID(),
-      examId: this.exam()!.id,
-      type: 'mcq',
-      question: q,
-      options: opts.map((o) => ({ text: o.text, correct: o.correct })),
-      points: this.mcq.points || 1,
-    };
-    this.persistItem(item);
-    // reset
+    this.saving.set(true);
+    this.examService
+      .createItem(this.exam()!.id, {
+        type: 'mcq',
+        question: q,
+        points: this.mcq.points || 1,
+        options: opts.map((o) => ({ text: o.text, correct: o.correct })),
+      })
+      .subscribe({
+        next: (res) => {
+          this.items.set([res.item, ...this.items()]);
+          this.resetMcq();
+          this.saving.set(false);
+        },
+        error: (err) => {
+          this.errorMsg.set(err?.error?.message || 'Failed to add MCQ');
+          this.saving.set(false);
+        },
+      });
+  }
+
+  addTrueFalse() {
+    if (!this.exam()) return;
+    const q = this.tf.question.trim();
+    if (!q) return;
+    this.saving.set(true);
+    this.examService
+      .createItem(this.exam()!.id, {
+        type: 'truefalse',
+        question: q,
+        points: this.tf.points || 1,
+        answer: this.tf.answer === 'true',
+      })
+      .subscribe({
+        next: (res) => {
+          this.items.set([res.item, ...this.items()]);
+          this.tf = { question: '', answer: 'true', points: 1 };
+          this.saving.set(false);
+        },
+        error: (err) => {
+          this.errorMsg.set(err?.error?.message || 'Failed to add item');
+          this.saving.set(false);
+        },
+      });
+  }
+
+  addEssay() {
+    if (!this.exam()) return;
+    const q = this.essay.question.trim();
+    if (!q) return;
+    this.saving.set(true);
+    this.examService
+      .createItem(this.exam()!.id, {
+        type: 'essay',
+        question: q,
+        points: this.essay.points || 5,
+        expected_answer: this.essay.expectedAnswer.trim() || null,
+      })
+      .subscribe({
+        next: (res) => {
+          this.items.set([res.item, ...this.items()]);
+          this.essay = { question: '', expectedAnswer: '', points: 5 };
+          this.saving.set(false);
+        },
+        error: (err) => {
+          this.errorMsg.set(err?.error?.message || 'Failed to add essay');
+          this.saving.set(false);
+        },
+      });
+  }
+
+  private resetMcq() {
     this.mcq.question = '';
     this.mcq.options = [
       { id: crypto.randomUUID(), text: '', correct: false },
@@ -167,100 +209,52 @@ export class ViewExam implements OnInit {
     this.mcq.points = 1;
   }
 
-  addTrueFalse() {
-    if (!this.exam()) return;
-    const q = this.tf.question.trim();
-    if (!q) return;
-    const item: StoredExamItem = {
-      id: crypto.randomUUID(),
-      examId: this.exam()!.id,
-      type: 'truefalse',
-      question: q,
-      answer: this.tf.answer === 'true',
-      points: this.tf.points || 1,
-    };
-    this.persistItem(item);
-    this.tf = { question: '', answer: 'true', points: 1 };
-  }
-
-  addEssay() {
-    if (!this.exam()) return;
-    const q = this.essay.question.trim();
-    if (!q) return;
-    const item: StoredExamItem = {
-      id: crypto.randomUUID(),
-      examId: this.exam()!.id,
-      type: 'essay',
-      question: q,
-      expectedAnswer: this.essay.expectedAnswer.trim() || undefined,
-      points: this.essay.points || 5,
-    };
-    this.persistItem(item);
-    this.essay = { question: '', expectedAnswer: '', points: 5 };
-  }
-
-  private persistItem(item: StoredExamItem) {
-    const all: StoredExamItem[] = JSON.parse(
-      localStorage.getItem('examItems') || '[]'
-    );
-    all.push(item);
-    localStorage.setItem('examItems', JSON.stringify(all));
-    this.items.set([item, ...this.items()]);
-    this.updateExamPoints();
-  }
-
-  startEdit(id: string) {
+  startEdit(id: number) {
     this.editingItemId.set(id);
   }
 
   cancelEdit() {
     this.editingItemId.set(null);
-    // reload items from storage to discard edits
-    if (this.exam()) {
-      const all: StoredExamItem[] = JSON.parse(
-        localStorage.getItem('examItems') || '[]'
-      );
-      this.items.set(all.filter((i) => i.examId === this.exam()!.id));
-    }
+    // reload from API for consistency
+    if (this.exam()) this.fetchExam(this.exam()!.id);
   }
 
-  saveEdit(item: StoredExamItem) {
-    const all: StoredExamItem[] = JSON.parse(
-      localStorage.getItem('examItems') || '[]'
-    );
-    const idx = all.findIndex((i) => i.id === item.id);
-    if (idx !== -1) {
-      all[idx] = item;
-      localStorage.setItem('examItems', JSON.stringify(all));
-      this.items.set(all.filter((i) => i.examId === this.exam()!.id));
-      this.updateExamPoints();
-    }
-    this.editingItemId.set(null);
+  saveEdit(item: Item) {
+    this.saving.set(true);
+    const payload: any = {
+      question: item.question,
+      points: item.points,
+    };
+    if (item.type === 'mcq') payload.options = item.options;
+    if (item.type === 'truefalse') payload.answer = item.answer;
+    if (item.type === 'essay') payload.expected_answer = item.expected_answer;
+    this.examService.updateItem(item.id, payload).subscribe({
+      next: (res) => {
+        this.items.set(
+          this.items().map((i) => (i.id === res.item.id ? res.item : i))
+        );
+        this.editingItemId.set(null);
+        this.saving.set(false);
+      },
+      error: (err) => {
+        this.errorMsg.set(err?.error?.message || 'Failed to update item');
+        this.saving.set(false);
+      },
+    });
   }
 
-  deleteItem(id: string) {
+  deleteItem(id: string | number) {
     if (!confirm('Delete this item?')) return;
-    const all: StoredExamItem[] = JSON.parse(
-      localStorage.getItem('examItems') || '[]'
-    );
-    const filtered = all.filter((i) => i.id !== id);
-    localStorage.setItem('examItems', JSON.stringify(filtered));
-    this.items.set(filtered.filter((i) => i.examId === this.exam()!.id));
-    this.updateExamPoints();
-  }
-
-  private updateExamPoints() {
-    if (!this.exam()) return;
-    const total = this.items().reduce((s, i) => s + (i.points || 0), 0);
-    const exams: StoredExam[] = JSON.parse(
-      localStorage.getItem('exams') || '[]'
-    );
-    const idx = exams.findIndex((e) => e.id === this.exam()!.id);
-    if (idx !== -1) {
-      exams[idx].totalPoints = total;
-      exams[idx].updatedAt = new Date();
-      localStorage.setItem('exams', JSON.stringify(exams));
-      this.exam.set(exams[idx]);
-    }
+    this.saving.set(true);
+    this.examService.deleteItem(id).subscribe({
+      next: () => {
+        this.items.set(this.items().filter((i) => i.id !== id));
+        this.saving.set(false);
+      },
+      error: (err) => {
+        this.errorMsg.set(err?.error?.message || 'Failed to delete item');
+        this.saving.set(false);
+      },
+    });
   }
 }
