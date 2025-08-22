@@ -46,6 +46,8 @@ export class ViewExam implements OnInit {
     () => this.items().filter((i) => i.type === 'essay').length
   );
 
+  isEditable = computed(() => this.exam()?.status === 'draft');
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -85,9 +87,6 @@ export class ViewExam implements OnInit {
   }
 
   // Lifecycle helpers
-  isEditable() {
-    return this.exam()?.status === 'draft';
-  }
 
   allowedNextStatuses(): { value: IExam['status']; label: string }[] {
     const current = this.exam()?.status;
@@ -110,7 +109,7 @@ export class ViewExam implements OnInit {
     this.saving.set(true);
     this.examService.updateExamStatus(current.id, next).subscribe({
       next: (res) => {
-        this.exam.set(res.exam as any);
+        this.exam.set(res.exam);
         this.saving.set(false);
         if (!this.isEditable()) this.editingItemId.set(null);
       },
@@ -121,7 +120,6 @@ export class ViewExam implements OnInit {
     });
   }
 
-  // Item creation
   addMcq() {
     if (!this.exam()) return;
     const q = this.mcq.question.trim();
@@ -228,7 +226,7 @@ export class ViewExam implements OnInit {
     if (item.type === 'mcq') payload.options = item.options;
     if (item.type === 'truefalse') payload.answer = item.answer;
     if (item.type === 'essay') payload.expected_answer = item.expected_answer;
-    this.examService.updateItem(item.id, payload).subscribe({
+    this.examService.updateItem(item.id, payload, this.exam()!.id).subscribe({
       next: (res) => {
         this.items.set(
           this.items().map((i) => (i.id === res.item.id ? res.item : i))

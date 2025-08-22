@@ -114,9 +114,9 @@ export class ExamService {
     );
   }
 
-  updateItem(itemId: number | string, payload: any) {
-    return this.http.patch<{ item: any }>(
-      `http://127.0.0.1:8000/api/teacher/exams/items/${itemId}`,
+  updateItem(itemId: number | string, payload: any, examId: number) {
+    return this.http.patch<{ item: Item }>(
+      `http://127.0.0.1:8000/api/teacher/exams/${examId}/items/${itemId}`,
       payload,
       { headers: this.authHeader() }
     );
