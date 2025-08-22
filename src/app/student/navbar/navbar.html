@@ -113,35 +113,16 @@
 
       <!-- User Menu -->
       <div class="flex items-center space-x-4">
-        <!-- Notifications -->
-        <button
-          class="p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors duration-200"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 17h5l-5 5-5-5h5v-13z"
-            ></path>
-          </svg>
-        </button>
-
         <!-- Profile Menu -->
         <div class="flex items-center space-x-3">
           <div
             class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center"
           >
-            <span class="text-white text-sm font-medium">JS</span>
+            <span class="text-white text-sm font-medium">{{ initials }}</span>
           </div>
-          <div class="hidden md:block">
-            <p class="text-sm font-medium text-gray-700">John Student</p>
-            <p class="text-xs text-gray-500">Student ID: 12345</p>
+          <div class="hidden md:block" *ngIf="user as u">
+            <p class="text-sm font-medium text-gray-700">{{ u.name }}</p>
+            <p class="text-xs text-gray-500">{{ u.email }}</p>
           </div>
           <button
             (click)="logout()"
