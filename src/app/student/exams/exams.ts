@@ -5,11 +5,10 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../auth/services/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { ExamCard } from './exam-card/exam-card';
-import { EmptyState } from '../empty-state/empty-state';
 
 @Component({
   selector: 'app-exams',
-  imports: [ExamCard, EmptyState],
+  imports: [ExamCard],
   templateUrl: './exams.html',
   styleUrl: './exams.css',
 })
