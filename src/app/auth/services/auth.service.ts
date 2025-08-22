@@ -27,6 +27,13 @@ export class AuthService {
 
   currentUser = signal<null | undefined | IAuthUser>(undefined);
 
+  authHeader() {
+    const token = this.currentUser()?.token.substring(2);
+    return {
+      Authorization: `Bearer ${token}`,
+    };
+  }
+
   initLocalCurrentUser() {
     const localCurrentUser = localStorage.getItem('lan-exam-user');
 

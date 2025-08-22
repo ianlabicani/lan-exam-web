@@ -84,17 +84,10 @@ export class ExamService {
     );
   }
 
-  private authHeader() {
-    const token = this.authService.currentUser()?.token.substring(2);
-    return {
-      Authorization: `Bearer ${token}`,
-    };
-  }
-
   getExam(id: number) {
     return this.http.get<IExam>(
       `http://127.0.0.1:8000/api/teacher/exams/${id}`,
-      { headers: this.authHeader() }
+      { headers: this.authService.authHeader() }
     );
   }
 
@@ -102,7 +95,7 @@ export class ExamService {
     return this.http.patch<{ exam: IExam }>(
       `http://127.0.0.1:8000/api/teacher/exams/${id}/status`,
       { status },
-      { headers: this.authHeader() }
+      { headers: this.authService.authHeader() }
     );
   }
 
@@ -110,7 +103,7 @@ export class ExamService {
     return this.http.post<{ item: Item }>(
       `http://127.0.0.1:8000/api/teacher/exams/${examId}/items`,
       payload,
-      { headers: this.authHeader() }
+      { headers: this.authService.authHeader() }
     );
   }
 
@@ -118,14 +111,14 @@ export class ExamService {
     return this.http.patch<{ item: Item }>(
       `http://127.0.0.1:8000/api/teacher/exams/${examId}/items/${itemId}`,
       payload,
-      { headers: this.authHeader() }
+      { headers: this.authService.authHeader() }
     );
   }
 
   deleteItem(itemId: number | string) {
     return this.http.delete<{ success: boolean }>(
       `http://127.0.0.1:8000/api/teacher/exams/items/${itemId}`,
-      { headers: this.authHeader() }
+      { headers: this.authService.authHeader() }
     );
   }
 }

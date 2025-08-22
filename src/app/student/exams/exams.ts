@@ -3,6 +3,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../auth/services/auth.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-exams',
@@ -11,17 +12,22 @@ import { AuthService } from '../../auth/services/auth.service';
   styleUrl: './exams.css',
 })
 export class Exams implements OnInit {
+  http = inject(HttpClient);
   examService = inject(ExamService);
   exams = signal<IExam[]>([]);
   auth = inject(AuthService);
   private router = inject(Router);
 
   ngOnInit() {
-    this.examService.getAllExams().subscribe(({ exams }) => {
-      console.log(exams);
-      this.exams.set(exams);
-      console.log('here');
-    });
+    this.http
+      .get<{ exams: IExam[] }>('http://127.0.0.1:8000/api/student/exams', {
+        headers: this.auth.authHeader(),
+      })
+      .subscribe(({ exams }) => {
+        console.log(exams);
+        this.exams.set(exams);
+        console.log('here');
+      });
   }
 
   statusBadgeClass(status: IExam['status']): string {
