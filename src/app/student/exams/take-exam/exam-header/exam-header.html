@@ -1,0 +1,13 @@
+<div class="flex items-start justify-between gap-4 flex-wrap">
+  <div>
+    <h2 class="text-2xl font-semibold tracking-tight text-slate-800">
+      Exam #{{ exam?.id }}
+    </h2>
+    @if (exam?.started_at) {
+    <p class="text-sm text-slate-500 mt-1">
+      Started: {{ exam?.started_at | date : 'short' }}
+    </p>
+    }
+  </div>
+  <ng-content />
+</div>

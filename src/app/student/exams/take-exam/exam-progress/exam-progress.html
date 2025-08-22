@@ -1,0 +1,16 @@
+@if (total > 0) {
+<div class="w-full sm:w-64">
+  <div class="h-2 rounded bg-slate-200 overflow-hidden">
+    <div
+      class="h-full bg-indigo-500 transition-all duration-300"
+      [style.width.%]="percent"
+    ></div>
+  </div>
+  <div
+    class="mt-1 flex justify-between text-[11px] uppercase tracking-wide text-slate-500 font-medium"
+  >
+    <span>{{ answered }} / {{ total }} answered</span>
+    <span>{{ percent | number : '1.0-0' }}%</span>
+  </div>
+</div>
+}

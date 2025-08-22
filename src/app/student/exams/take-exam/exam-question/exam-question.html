@@ -1,0 +1,81 @@
+<div
+  class="rounded-lg border border-slate-200 bg-white shadow-sm hover:shadow transition-shadow"
+>
+  <div class="p-5">
+    <div class="flex items-baseline gap-2 mb-2">
+      <span
+        class="inline-flex size-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-sm font-semibold"
+        >{{ index + 1 }}</span
+      >
+      <span
+        class="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded"
+        >{{ item.points }} pts</span
+      >
+      <span
+        class="text-[10px] uppercase tracking-wide font-semibold text-slate-400"
+        >{{ item.type }}</span
+      >
+    </div>
+    <h3 class="font-medium text-slate-800 leading-snug mb-4">
+      {{ item.question }}
+    </h3>
+    @switch (item.type) { @case ('mcq') {
+    <div class="space-y-2">
+      @for (opt of item.options; let oIdx = $index; track oIdx) {
+      <button
+        type="button"
+        (click)="setMcq(oIdx)"
+        class="w-full text-left group rounded-lg border px-4 py-3 flex items-start gap-3 transition-colors"
+        [ngClass]="{
+              'border-indigo-500 bg-indigo-50/70': currentAnswer === oIdx,
+              'border-slate-200 hover:border-slate-300': currentAnswer !== oIdx
+            }"
+      >
+        <span
+          class="font-semibold text-indigo-600 group-hover:scale-110 origin-center transition-transform"
+          >{{ letters[oIdx] }}</span
+        >
+        <span class="text-slate-700">{{ opt.text }}</span>
+      </button>
+      }
+    </div>
+    } @case ('truefalse') {
+    <div class="flex gap-4">
+      <button
+        type="button"
+        (click)="setTrueFalse(true)"
+        class="flex-1 rounded-lg border px-4 py-3 font-medium transition"
+        [ngClass]="{
+              'bg-green-50 border-green-500 text-green-700':
+                currentAnswer === true,
+              'border-slate-200 hover:border-slate-300 text-slate-600':
+                currentAnswer !== true
+            }"
+      >
+        True
+      </button>
+      <button
+        type="button"
+        (click)="setTrueFalse(false)"
+        class="flex-1 rounded-lg border px-4 py-3 font-medium transition"
+        [ngClass]="{
+              'bg-rose-50 border-rose-500 text-rose-700':
+                currentAnswer === false,
+              'border-slate-200 hover:border-slate-300 text-slate-600':
+                currentAnswer !== false
+            }"
+      >
+        False
+      </button>
+    </div>
+    } @case ('essay') {
+    <textarea
+      rows="5"
+      class="w-full resize-y rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/60 outline-none px-4 py-3 text-slate-700 placeholder:text-slate-400 text-sm"
+      [value]="currentAnswer || ''"
+      (input)="onEssay($any($event.target).value)"
+      placeholder="Type your answer here..."
+    ></textarea>
+    } }
+  </div>
+</div>

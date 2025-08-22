@@ -1,9 +1,12 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
+import {} from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../auth/services/auth.service';
 import { forkJoin, of } from 'rxjs';
+import { ExamQuestion } from './exam-question/exam-question';
+import { ExamProgress } from './exam-progress/exam-progress';
+import { ExamHeader } from './exam-header/exam-header';
 
 export interface ITakenExam {
   id: number; // attempt id
@@ -44,7 +47,7 @@ export interface ITakenExamAnswer {
 @Component({
   selector: 'app-take-exam',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, NgClass],
+  imports: [ExamHeader, ExamProgress, ExamQuestion],
   templateUrl: './take-exam.html',
   styleUrl: './take-exam.css',
 })
@@ -126,25 +129,9 @@ export class TakeExam implements OnInit {
       });
   }
 
-  // Answer helpers
-  setMcqAnswer(item: IExamItem, optionIndex: number) {
-    this.answers.set({ ...this.answers(), [item.id]: optionIndex });
-    this.upsertAnswer(item, optionIndex);
-  }
-
-  setTrueFalse(item: IExamItem, value: boolean) {
+  onAnswerChange(item: IExamItem, value: any) {
     this.answers.set({ ...this.answers(), [item.id]: value });
     this.upsertAnswer(item, value);
-  }
-
-  setEssay(item: IExamItem, text: string) {
-    this.answers.set({ ...this.answers(), [item.id]: text });
-    if (this.essayDebounceHandles[item.id])
-      clearTimeout(this.essayDebounceHandles[item.id]);
-    this.essayDebounceHandles[item.id] = setTimeout(() => {
-      this.upsertAnswer(item, this.answers()[item.id]);
-      delete this.essayDebounceHandles[item.id];
-    }, 600);
   }
 
   answeredCount() {

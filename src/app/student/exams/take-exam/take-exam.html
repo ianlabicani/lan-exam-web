@@ -1,145 +1,29 @@
-@let exam = this.takenExam(); @if (exam) {
+@if (this.takenExam(); as exam) {
 <div
   class="mx-auto max-w-4xl p-6 space-y-6 bg-white/70 backdrop-blur rounded-xl shadow-sm border border-slate-200"
 >
-  <!-- Header -->
-  <div class="flex items-start justify-between gap-4 flex-wrap">
-    <div>
-      <h2 class="text-2xl font-semibold tracking-tight text-slate-800">
-        Exam #{{ exam.id }}
-      </h2>
-      @if (exam?.started_at) {
-      <p class="text-sm text-slate-500 mt-1">
-        Started: {{ exam?.started_at | date:'short' }}
-      </p>
-      }
-    </div>
+  <app-exam-header [exam]="exam">
+    <app-exam-progress
+      [answered]="answeredCount()"
+      [total]="examItems().length"
+    />
+  </app-exam-header>
 
-    <!-- Progress -->
-    @if (examItems().length) {
-    <div class="w-full sm:w-64">
-      <div class="h-2 rounded bg-slate-200 overflow-hidden">
-        <div
-          class="h-full bg-indigo-500 transition-all duration-300"
-          [style.width.%]="answeredPercent()"
-        ></div>
-      </div>
-      <div
-        class="mt-1 flex justify-between text-[11px] uppercase tracking-wide text-slate-500 font-medium"
-      >
-        <span>{{ answeredCount() }} / {{ examItems().length }} answered</span>
-        <span>{{ answeredPercent() | number:'1.0-0' }}%</span>
-      </div>
-    </div>
-    }
-  </div>
-
-  <!-- Questions -->
   @if (examItems().length) {
   <div class="space-y-6">
     @for (item of examItems(); track item.id; let idx = $index) {
-    <div
-      class="rounded-lg border border-slate-200 bg-white shadow-sm hover:shadow transition-shadow"
-    >
-      <div class="p-5">
-        <!-- Question Header -->
-        <div class="flex items-baseline gap-2 mb-2">
-          <span
-            class="inline-flex size-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-sm font-semibold"
-          >
-            {{ idx + 1 }}
-          </span>
-          <span
-            class="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded"
-          >
-            {{ item.points }} pts
-          </span>
-          <span
-            class="text-[10px] uppercase tracking-wide font-semibold text-slate-400"
-          >
-            {{ item.type }}
-          </span>
-        </div>
-
-        <!-- Question Text -->
-        <h3 class="font-medium text-slate-800 leading-snug mb-4">
-          {{ item.question }}
-        </h3>
-
-        <!-- Question Types -->
-        @switch (item.type) {
-
-        <!-- MCQ -->
-        @case ('mcq') {
-        <div class="space-y-2">
-          @for (opt of item.options; let oIdx = $index; track oIdx) {
-          <button
-            type="button"
-            (click)="setMcqAnswer(item, oIdx)"
-            class="w-full text-left group rounded-lg border px-4 py-3 flex items-start gap-3 transition-colors"
-            [ngClass]="{
-                          'border-indigo-500 bg-indigo-50/70': answers()[item.id] === oIdx,
-                          'border-slate-200 hover:border-slate-300': answers()[item.id] !== oIdx
-                        }"
-          >
-            <span
-              class="font-semibold text-indigo-600 group-hover:scale-110 origin-center transition-transform"
-            >
-              {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[oIdx] }}
-            </span>
-            <span class="text-slate-700">{{ opt.text }}</span>
-          </button>
-          }
-        </div>
-        }
-
-        <!-- True/False -->
-        @case ('truefalse') {
-        <div class="flex gap-4">
-          <button
-            type="button"
-            (click)="setTrueFalse(item, true)"
-            class="flex-1 rounded-lg border px-4 py-3 font-medium transition"
-            [ngClass]="{
-                        'bg-green-50 border-green-500 text-green-700': answers()[item.id] === true,
-                        'border-slate-200 hover:border-slate-300 text-slate-600': answers()[item.id] !== true
-                      }"
-          >
-            True
-          </button>
-          <button
-            type="button"
-            (click)="setTrueFalse(item, false)"
-            class="flex-1 rounded-lg border px-4 py-3 font-medium transition"
-            [ngClass]="{
-                        'bg-rose-50 border-rose-500 text-rose-700': answers()[item.id] === false,
-                        'border-slate-200 hover:border-slate-300 text-slate-600': answers()[item.id] !== false
-                      }"
-          >
-            False
-          </button>
-        </div>
-        }
-
-        <!-- Essay -->
-        @case ('essay') {
-        <textarea
-          rows="5"
-          class="w-full resize-y rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/60 outline-none px-4 py-3 text-slate-700 placeholder:text-slate-400 text-sm"
-          [value]="answers()[item.id] || ''"
-          (input)="setEssay(item, $any($event.target).value)"
-          placeholder="Type your answer here..."
-        ></textarea>
-        } }
-      </div>
-    </div>
+    <app-exam-question
+      [item]="item"
+      [index]="idx"
+      [currentAnswer]="answers()[item.id]"
+      (answerChange)="onAnswerChange(item, $event)"
+    />
     }
   </div>
   } @else {
   <p class="text-slate-500 italic">No items available for this exam.</p>
   }
 
-  <!-- Footer -->
   <div class="flex items-center justify-between pt-2">
     @if (examItems().length) {
     <div class="text-sm text-slate-500">
@@ -151,9 +35,7 @@
       [disabled]="submitting() || !examItems().length"
       class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 text-white text-sm font-medium px-6 py-3 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition"
     >
-      @if (!submitting()) {
-      <span>Submit Exam</span>
-      } @else {
+      @if (!submitting()) { <span>Submit Exam</span> } @else {
       <svg class="size-4 animate-spin" viewBox="0 0 24 24">
         <circle
           class="opacity-25"
@@ -170,12 +52,10 @@
           d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
         />
       </svg>
-      <span>Submitting...</span>
-      }
+      <span>Submitting...</span> }
     </button>
   </div>
 
-  <!-- Error -->
   @if (error()) {
   <div
     class="rounded-md border border-rose-200 bg-rose-50 text-rose-700 px-4 py-2 text-sm"
@@ -185,7 +65,6 @@
   }
 </div>
 } @else {
-<!-- Loading State -->
 <div
   class="max-w-md mx-auto mt-16 flex flex-col items-center gap-4 text-slate-500"
 >
