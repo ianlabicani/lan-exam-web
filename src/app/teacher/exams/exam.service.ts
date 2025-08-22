@@ -49,15 +49,8 @@ export class ExamService {
   authService = inject(AuthService);
 
   getAllExams() {
-    const token = this.authService.currentUser()?.token.substring(2);
-
     return this.http.get<{ exams: IExam[] }>(
-      'http://127.0.0.1:8000/api/teacher/exams',
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+      'http://127.0.0.1:8000/api/teacher/exams'
     );
   }
 
@@ -70,55 +63,45 @@ export class ExamService {
     section: string;
     status: string;
     total_points: number;
-    items: any[]; // refine later
+    items: any[];
   }) {
     const token = this.authService.currentUser()?.token.substring(2);
     return this.http.post<{ exam: IExam }>(
       'http://127.0.0.1:8000/api/teacher/exams',
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+      payload
     );
   }
 
   getExam(id: number) {
     return this.http.get<IExam>(
-      `http://127.0.0.1:8000/api/teacher/exams/${id}`,
-      { headers: this.authService.authHeader() }
+      `http://127.0.0.1:8000/api/teacher/exams/${id}`
     );
   }
 
   updateExamStatus(id: number | string, status: string) {
     return this.http.patch<{ exam: IExam }>(
       `http://127.0.0.1:8000/api/teacher/exams/${id}/status`,
-      { status },
-      { headers: this.authService.authHeader() }
+      { status }
     );
   }
 
   createItem(examId: number, payload: any) {
     return this.http.post<{ item: Item }>(
       `http://127.0.0.1:8000/api/teacher/exams/${examId}/items`,
-      payload,
-      { headers: this.authService.authHeader() }
+      payload
     );
   }
 
   updateItem(itemId: number | string, payload: any, examId: number) {
     return this.http.patch<{ item: Item }>(
       `http://127.0.0.1:8000/api/teacher/exams/${examId}/items/${itemId}`,
-      payload,
-      { headers: this.authService.authHeader() }
+      payload
     );
   }
 
   deleteItem(itemId: number | string) {
     return this.http.delete<{ success: boolean }>(
-      `http://127.0.0.1:8000/api/teacher/exams/items/${itemId}`,
-      { headers: this.authService.authHeader() }
+      `http://127.0.0.1:8000/api/teacher/exams/items/${itemId}`
     );
   }
 }

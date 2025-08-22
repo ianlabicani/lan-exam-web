@@ -1,82 +1,25 @@
-<div class="mb-8">
+<div class="mb-8 container mx-auto">
   <h2 class="text-xl font-semibold text-gray-900 mb-6">Available Exams</h2>
 
-  @if(exams().length === 0){
-  <div
-    class="border border-dashed border-gray-300 rounded-lg p-10 text-center text-gray-500 bg-white"
+  <!-- Empty state -->
+  @if (!exams().length) {
+  <app-empty-state
+    title="No exams available for your year & section yet."
+    subtitle="Please check back later."
   >
-    <p class="mb-2 font-medium">
-      No exams available for your year & section yet.
-    </p>
-    <p class="text-sm">Please check back later.</p>
-  </div>
-  } @if(exams().length > 0){
+  </app-empty-state>
+  }
+
+  <!-- Exam list -->
+  @if (exams().length) {
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    @for(exam of exams(); track exam.id){
-    <div
-      class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+    @for (exam of exams(); track exam.id) {
+    <app-exam-card
+      [exam]="exam"
+      [icon]="cardIcon(exam)"
+      (openExam)="goTo($event)"
     >
-      <div class="p-6 flex flex-col h-full">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center">
-            @let icon = cardIcon(exam);
-            <div
-              class="w-10 h-10 rounded-full flex items-center justify-center {{icon.bg}}"
-            >
-              <svg
-                class="w-6 h-6 {{icon.color}}"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  [attr.d]="icon.icon"
-                ></path>
-              </svg>
-            </div>
-            <span
-              class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{statusBadgeClass(exam.status)}}"
-            >
-              {{ exam.status | titlecase }}
-            </span>
-          </div>
-        </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-          {{ exam.title }}
-        </h3>
-        @if(exam.description){
-        <p class="text-gray-600 text-sm mb-4 line-clamp-3">
-          {{ exam.description }}
-        </p>
-        }
-        <div
-          class="flex items-center justify-between text-sm text-gray-500 mb-4"
-        >
-          <span>
-            @if(exam.ends_at){ 📅 Ends: {{ exam.ends_at | date:'mediumDate' }} }
-            @else if (exam.starts_at){ 📅 Starts: {{ exam.starts_at |
-            date:'mediumDate' }} } @else { 📅 Created: {{ exam.created_at |
-            date:'mediumDate' }} }
-          </span>
-          <span>
-            @if(durationMinutes(exam) !== null){ ⏱️ {{ durationMinutes(exam) }}
-            min }
-          </span>
-        </div>
-        <div class="mt-auto">
-          <button
-            [class]="buttonClass(exam)"
-            [disabled]="actionDisabled(exam)"
-            (click)="goTo(exam)"
-          >
-            {{ actionText(exam) }}
-          </button>
-        </div>
-      </div>
-    </div>
+    </app-exam-card>
     }
   </div>
   }

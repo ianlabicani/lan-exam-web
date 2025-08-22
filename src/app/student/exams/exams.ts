@@ -1,87 +1,38 @@
-import { ExamService, IExam } from './../../teacher/exams/exam.service';
+import { IExam } from './../../teacher/exams/exam.service';
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { DatePipe, TitleCasePipe } from '@angular/common';
+import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../auth/services/auth.service';
 import { HttpClient } from '@angular/common/http';
+import { ExamCard } from './exam-card/exam-card';
+import { EmptyState } from '../empty-state/empty-state';
 
 @Component({
   selector: 'app-exams',
-  imports: [DatePipe, TitleCasePipe],
+  imports: [ExamCard, EmptyState],
   templateUrl: './exams.html',
   styleUrl: './exams.css',
 })
 export class Exams implements OnInit {
   http = inject(HttpClient);
-  examService = inject(ExamService);
   exams = signal<IExam[]>([]);
   auth = inject(AuthService);
   private router = inject(Router);
 
   ngOnInit() {
-    this.http
-      .get<{ exams: IExam[] }>('http://127.0.0.1:8000/api/student/exams', {
-        headers: this.auth.authHeader(),
-      })
-      .subscribe(({ exams }) => {
-        console.log(exams);
-        this.exams.set(exams);
-        console.log('here');
-      });
+    this.getExams().subscribe((response) => {
+      this.exams.set(response.exams);
+    });
   }
 
-  statusBadgeClass(status: IExam['status']): string {
-    const map: Record<IExam['status'], string> = {
-      draft: 'bg-gray-100 text-gray-700',
-      published: 'bg-green-100 text-green-700',
-      archived: 'bg-yellow-100 text-yellow-800',
-      active: 'bg-blue-100 text-blue-700',
-    };
-    return map[status];
-  }
-
-  actionText(exam: IExam): string {
-    // Lifecycle reference:
-    // draft -> published -> active -> archived (terminal)
-    // Students can only take exams during 'active'.
-    switch (exam.status) {
-      case 'draft':
-        return 'Locked';
-      case 'published':
-        return 'Scheduled'; // not yet open for students
-      case 'active':
-        return 'Start Exam'; // could later switch to 'Continue' if attempt stored
-      case 'archived':
-        return 'Review';
-      default:
-        return 'Open';
-    }
-  }
-
-  actionDisabled(exam: IExam): boolean {
-    // disable unless exam is active (only active is actionable)
-    return exam.status !== 'active';
-  }
-
-  buttonClass(exam: IExam): string {
-    const base =
-      'w-full font-medium py-2 px-4 rounded-md transition-colors duration-200 text-white disabled:opacity-60 disabled:cursor-not-allowed';
-    switch (exam.status) {
-      case 'draft':
-        return base + ' bg-gray-400';
-      case 'published':
-        return base + ' bg-indigo-500';
-      case 'active':
-        return base + ' bg-blue-600 hover:bg-blue-700';
-      case 'archived':
-        return base + ' bg-yellow-500 hover:bg-yellow-600';
-      default:
-        return base + ' bg-gray-500';
-    }
+  private getExams() {
+    return this.http.get<{ exams: IExam[] }>(
+      'http://127.0.0.1:8000/api/student/exams'
+    );
   }
 
   goTo(exam: IExam) {
-    if (this.actionDisabled(exam)) return;
+    if (exam.status !== 'active') return;
     this.router.navigate(['/student/take-exam', exam.id]);
   }
 
@@ -107,46 +58,6 @@ export class Exams implements OnInit {
           icon: 'M9 19V6a2 2 0 012-2h2a2 2 0 012 2v13m-6 0a2 2 0 002 2h2a2 2 0 002-2',
           color: 'text-gray-600',
         };
-    }
-  }
-
-  durationMinutes(exam: IExam): number | null {
-    // Remaining minutes based on attempt start; falls back to full window (starts_at -> ends_at)
-    // IExam uses snake_case fields from backend.
-    try {
-      const currentUser = this.auth.currentUser()?.user;
-      if (!currentUser) return null;
-
-      const takenExamsRaw = localStorage.getItem('takenExams') || '[]';
-      const attempts = JSON.parse(takenExamsRaw) as any[];
-      const attempt = attempts.find(
-        (a) =>
-          a.examId === exam.id && a.userId === currentUser.id && !a.submittedAt
-      );
-
-      const endsAt = exam.ends_at ? new Date(exam.ends_at).getTime() : null;
-      const startsAt = exam.starts_at
-        ? new Date(exam.starts_at).getTime()
-        : null;
-      const now = Date.now();
-
-      if (attempt && attempt.startedAt) {
-        // Without an explicit fixed duration, we constrain by ends_at window.
-        if (endsAt) {
-          const remainingMs = endsAt - now;
-          if (remainingMs <= 0) return 0;
-          return Math.ceil(remainingMs / 60000);
-        }
-        return null;
-      }
-
-      // No active attempt: show total scheduled window length if both timestamps exist.
-      if (startsAt && endsAt && endsAt > startsAt) {
-        return Math.round((endsAt - startsAt) / 60000);
-      }
-      return null;
-    } catch {
-      return null;
     }
   }
 }

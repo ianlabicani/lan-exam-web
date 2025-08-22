@@ -1,134 +1,203 @@
-@if(loading()) {
-<div class="p-10 text-center text-gray-500">Loading exam...</div>
-} @else if(error()) {
-<div class="max-w-3xl mx-auto p-8 bg-white border rounded-lg text-center">
-  <p class="text-red-600 font-medium mb-2">{{ error() }}</p>
-  <a routerLink="/student/exams" class="text-blue-600 underline text-sm"
-    >Back to exams</a
-  >
-</div>
-} @else if(exam()) {
-<div class="max-w-5xl mx-auto space-y-8">
-  <div
-    class="flex flex-col md:flex-row md:items-start md:justify-between gap-4"
-  >
+@let exam = this.takenExam(); @if (exam) {
+<div
+  class="mx-auto max-w-4xl p-6 space-y-6 bg-white/70 backdrop-blur rounded-xl shadow-sm border border-slate-200"
+>
+  <!-- Header -->
+  <div class="flex items-start justify-between gap-4 flex-wrap">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">{{ exam()!.title }}</h1>
-      @if(exam()!.description){
-      <p class="text-sm text-gray-600 mt-2 max-w-prose">
-        {{ exam()!.description }}
+      <h2 class="text-2xl font-semibold tracking-tight text-slate-800">
+        Exam #{{ exam.id }}
+      </h2>
+      @if (exam?.started_at) {
+      <p class="text-sm text-slate-500 mt-1">
+        Started: {{ exam?.started_at | date:'short' }}
       </p>
       }
-      <div class="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
-        @if(exam()!.duration){
-        <span>Duration: {{ exam()!.duration }} mins</span> }
-        @if(exam()!.endsAt){
-        <span>Ends: {{ exam()!.endsAt | date:'short' }}</span> }
-        <span>Total Points: {{ totalPoints() }}</span>
-      </div>
     </div>
-    <div class="flex flex-col items-end gap-2">
-      @if(displayTime()){
+
+    <!-- Progress -->
+    @if (examItems().length) {
+    <div class="w-full sm:w-64">
+      <div class="h-2 rounded bg-slate-200 overflow-hidden">
+        <div
+          class="h-full bg-indigo-500 transition-all duration-300"
+          [style.width.%]="answeredPercent()"
+        ></div>
+      </div>
       <div
-        class="text-sm font-semibold px-3 py-2 rounded bg-gray-900 text-white"
+        class="mt-1 flex justify-between text-[11px] uppercase tracking-wide text-slate-500 font-medium"
       >
-        ⏱ {{ displayTime() }}
+        <span>{{ answeredCount() }} / {{ examItems().length }} answered</span>
+        <span>{{ answeredPercent() | number:'1.0-0' }}%</span>
       </div>
-      }
-      <div class="w-48">
-        <div class="flex justify-between text-[10px] text-gray-500 mb-1">
-          <span>Progress</span><span>{{ progressPercent() }}%</span>
-        </div>
-        <div class="h-2 bg-gray-200 rounded overflow-hidden">
-          <div
-            class="h-full bg-blue-600 transition-all"
-            [style.width]="progressPercent() + '%'"
-          ></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="space-y-6">
-    @for(item of items(); track item.id; let idx = $index){
-    <div class="bg-white border rounded-lg p-5 shadow-sm">
-      <div class="flex items-start justify-between mb-2 gap-4">
-        <h2 class="font-medium text-gray-800">
-          Q{{ idx + 1 }}. {{ item.question }}
-        </h2>
-        <span
-          class="text-[10px] uppercase px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"
-          [ngClass]="{
-							'bg-blue-100 text-blue-700': item.type==='mcq',
-							'bg-indigo-100 text-indigo-700': item.type==='truefalse',
-							'bg-emerald-100 text-emerald-700': item.type==='essay'
-						}"
-          >{{ item.type }}</span
-        >
-      </div>
-      <p class="text-xs text-gray-400 mb-3">{{ item.points }} pts</p>
-
-      @if(item.type==='mcq'){
-      <div class="space-y-2">
-        @for(opt of item.options || []; track opt.text; let oi = $index){
-        <label class="flex items-center gap-2 text-sm cursor-pointer">
-          <input
-            type="radio"
-            name="mcq-{{item.id}}"
-            class="text-blue-600"
-            (change)="setMcqAnswer(item, oi)"
-            [checked]="answers()[item.id] === oi"
-          />
-          <span>{{ opt.text }}</span>
-        </label>
-        }
-      </div>
-      } @else if (item.type==='truefalse') {
-      <div class="flex gap-4 text-sm">
-        <label class="flex items-center gap-1 cursor-pointer">
-          <input
-            type="radio"
-            name="tf-{{item.id}}"
-            (change)="toggleTrueFalse(item,true)"
-            [checked]="answers()[item.id] === true"
-          />
-          True
-        </label>
-        <label class="flex items-center gap-1 cursor-pointer">
-          <input
-            type="radio"
-            name="tf-{{item.id}}"
-            (change)="toggleTrueFalse(item,false)"
-            [checked]="answers()[item.id] === false"
-          />
-          False
-        </label>
-      </div>
-      } @else if (item.type==='essay') {
-      <textarea
-        rows="4"
-        class="w-full border rounded px-3 py-2 text-sm"
-        placeholder="Your answer..."
-        (input)="setEssay(item, $any($event.target).value)"
-      >
-{{ answers()[item.id] || '' }}</textarea
-      >
-      }
     </div>
     }
   </div>
 
-  <div class="flex items-center justify-between pt-4">
-    <a routerLink="/student/exams" class="text-sm text-gray-600 hover:underline"
-      >Cancel</a
+  <!-- Questions -->
+  @if (examItems().length) {
+  <div class="space-y-6">
+    @for (item of examItems(); track item.id; let idx = $index) {
+    <div
+      class="rounded-lg border border-slate-200 bg-white shadow-sm hover:shadow transition-shadow"
     >
+      <div class="p-5">
+        <!-- Question Header -->
+        <div class="flex items-baseline gap-2 mb-2">
+          <span
+            class="inline-flex size-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-sm font-semibold"
+          >
+            {{ idx + 1 }}
+          </span>
+          <span
+            class="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded"
+          >
+            {{ item.points }} pts
+          </span>
+          <span
+            class="text-[10px] uppercase tracking-wide font-semibold text-slate-400"
+          >
+            {{ item.type }}
+          </span>
+        </div>
+
+        <!-- Question Text -->
+        <h3 class="font-medium text-slate-800 leading-snug mb-4">
+          {{ item.question }}
+        </h3>
+
+        <!-- Question Types -->
+        @switch (item.type) {
+
+        <!-- MCQ -->
+        @case ('mcq') {
+        <div class="space-y-2">
+          @for (opt of item.options; let oIdx = $index; track oIdx) {
+          <button
+            type="button"
+            (click)="setMcqAnswer(item, oIdx)"
+            class="w-full text-left group rounded-lg border px-4 py-3 flex items-start gap-3 transition-colors"
+            [ngClass]="{
+                          'border-indigo-500 bg-indigo-50/70': answers()[item.id] === oIdx,
+                          'border-slate-200 hover:border-slate-300': answers()[item.id] !== oIdx
+                        }"
+          >
+            <span
+              class="font-semibold text-indigo-600 group-hover:scale-110 origin-center transition-transform"
+            >
+              {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[oIdx] }}
+            </span>
+            <span class="text-slate-700">{{ opt.text }}</span>
+          </button>
+          }
+        </div>
+        }
+
+        <!-- True/False -->
+        @case ('truefalse') {
+        <div class="flex gap-4">
+          <button
+            type="button"
+            (click)="setTrueFalse(item, true)"
+            class="flex-1 rounded-lg border px-4 py-3 font-medium transition"
+            [ngClass]="{
+                        'bg-green-50 border-green-500 text-green-700': answers()[item.id] === true,
+                        'border-slate-200 hover:border-slate-300 text-slate-600': answers()[item.id] !== true
+                      }"
+          >
+            True
+          </button>
+          <button
+            type="button"
+            (click)="setTrueFalse(item, false)"
+            class="flex-1 rounded-lg border px-4 py-3 font-medium transition"
+            [ngClass]="{
+                        'bg-rose-50 border-rose-500 text-rose-700': answers()[item.id] === false,
+                        'border-slate-200 hover:border-slate-300 text-slate-600': answers()[item.id] !== false
+                      }"
+          >
+            False
+          </button>
+        </div>
+        }
+
+        <!-- Essay -->
+        @case ('essay') {
+        <textarea
+          rows="5"
+          class="w-full resize-y rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/60 outline-none px-4 py-3 text-slate-700 placeholder:text-slate-400 text-sm"
+          [value]="answers()[item.id] || ''"
+          (input)="setEssay(item, $any($event.target).value)"
+          placeholder="Type your answer here..."
+        ></textarea>
+        } }
+      </div>
+    </div>
+    }
+  </div>
+  } @else {
+  <p class="text-slate-500 italic">No items available for this exam.</p>
+  }
+
+  <!-- Footer -->
+  <div class="flex items-center justify-between pt-2">
+    @if (examItems().length) {
+    <div class="text-sm text-slate-500">
+      Answered {{ answeredCount() }} of {{ examItems().length }}
+    </div>
+    }
     <button
       (click)="submit()"
-      [disabled]="submitting()"
-      class="px-5 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium disabled:opacity-50"
+      [disabled]="submitting() || !examItems().length"
+      class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 text-white text-sm font-medium px-6 py-3 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition"
     >
-      {{ submitting() ? 'Submitting...' : 'Submit Exam' }}
+      @if (!submitting()) {
+      <span>Submit Exam</span>
+      } @else {
+      <svg class="size-4 animate-spin" viewBox="0 0 24 24">
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+          fill="none"
+        />
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+        />
+      </svg>
+      <span>Submitting...</span>
+      }
     </button>
   </div>
+
+  <!-- Error -->
+  @if (error()) {
+  <div
+    class="rounded-md border border-rose-200 bg-rose-50 text-rose-700 px-4 py-2 text-sm"
+  >
+    {{ error() }}
+  </div>
+  }
+</div>
+} @else {
+<!-- Loading State -->
+<div
+  class="max-w-md mx-auto mt-16 flex flex-col items-center gap-4 text-slate-500"
+>
+  <svg
+    class="size-10 animate-pulse text-slate-400"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+  >
+    <path d="M12 6v6l4 2" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
+  <p>Loading exam...</p>
 </div>
 }
