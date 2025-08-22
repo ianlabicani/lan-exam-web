@@ -1,50 +1,63 @@
-import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable, signal } from '@angular/core';
+import { tap } from 'rxjs';
+
+export interface IAuthUser {
+  token: string;
+  user: IUser;
+  roles: string[];
+}
 
 export interface IUser {
-  id: string;
-  username: string;
-  password: string;
+  id: number;
   name: string;
-  role: string;
-  section: 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g';
-  year: '1' | '2' | '3' | '4';
+  email: string;
+  year: '1' | '2' | '3' | '4' | null;
+  section: 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | null;
+  email_verified_at: null;
+  created_at: Date;
+  updated_at: Date;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  currentUser = signal<null | undefined | IUser>(undefined);
-  database = JSON.parse(localStorage.getItem('database') || '{}');
+  protected http = inject(HttpClient);
+
+  currentUser = signal<null | undefined | IAuthUser>(undefined);
 
   initLocalCurrentUser() {
-    const localCurrentUser = localStorage.getItem('currentUser');
+    const localCurrentUser = localStorage.getItem('lan-exam-user');
 
     if (!localCurrentUser) {
-      this.currentUser.set(null);
+      this.setLanExamUser(null);
       return;
     }
 
-    this.currentUser.set(JSON.parse(localCurrentUser));
+    const parsedUser = JSON.parse(localCurrentUser);
+    this.currentUser.set(parsedUser);
   }
 
-  login(userId: string, password: string): IUser | null {
-    const users = this.database.users as IUser[];
-
-    const user = users.find((u) => u.id === userId && u.password === password);
-
-    if (!user) {
-      this.currentUser.set(null);
-      return null;
-    }
-
-    this.currentUser.set(user);
-    localStorage.setItem('currentUser', JSON.stringify(user));
-    return user;
+  login(email: string, password: string) {
+    return this.http
+      .post<IAuthUser>('http://127.0.0.1:8000/api/login', {
+        email,
+        password,
+      })
+      .pipe(
+        tap((user) => {
+          this.setLanExamUser(user);
+        })
+      );
   }
 
   logout() {
-    this.currentUser.set(null);
-    localStorage.removeItem('currentUser');
+    this.setLanExamUser(null);
+  }
+
+  setLanExamUser(authUser: IAuthUser | null) {
+    this.currentUser.set(authUser);
+    localStorage.setItem('lan-exam-user', JSON.stringify(authUser));
   }
 }

@@ -83,7 +83,7 @@ export class ExamTakers implements OnInit {
   }
 
   userFor(id: string) {
-    return this.users().find((u) => u.id === id) || null;
+    return this.users().find((u) => u.id === Number(id)) || null;
   }
 
   attemptAnswersCount(attemptId: string) {

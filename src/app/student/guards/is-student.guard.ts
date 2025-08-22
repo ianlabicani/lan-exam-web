@@ -8,7 +8,7 @@ export const isStudentGuard: CanActivateFn = (route, state) => {
 
   const currentUser = authService.currentUser();
 
-  if (!currentUser || currentUser.role !== 'student') {
+  if (!currentUser || !currentUser.roles.includes('student')) {
     router.navigate(['/login']);
     return false;
   }

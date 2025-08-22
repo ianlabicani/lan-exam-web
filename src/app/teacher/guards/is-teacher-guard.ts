@@ -8,7 +8,7 @@ export const isTeacherGuard: CanActivateFn = (route, state) => {
 
   const currentUser = authService.currentUser();
 
-  if (!currentUser || currentUser.role !== 'teacher') {
+  if (!currentUser || !currentUser.roles.includes('teacher')) {
     router.navigate(['/login']);
     return false;
   }

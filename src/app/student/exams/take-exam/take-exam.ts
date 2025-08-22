@@ -30,7 +30,7 @@ interface ExamMeta {
 interface TakenExamRecord {
   id: string; // attempt id
   examId: string;
-  userId: string;
+  userId: number;
   startedAt: string;
   submittedAt: string | null; // null while in progress
   score?: number; // computed if auto grading implemented later
@@ -181,7 +181,7 @@ export class TakeExam implements OnInit {
 
   private persistTaken(auto: boolean) {
     this.submitting.set(true);
-    const user = this.auth.currentUser();
+    const user = this.auth.currentUser()?.user;
     if (!user) {
       this.error.set('Not authenticated');
       this.submitting.set(false);
@@ -194,7 +194,7 @@ export class TakeExam implements OnInit {
       localStorage.getItem('takenExamAnswers') || '[]'
     );
     const existingIdx = existing.findIndex(
-      (r) => r.examId === this.exam()!.id && r.userId === user.id
+      (r) => r.examId === this.exam()!.id && r.userId === Number(user.id)
     );
     const nowIso = new Date().toISOString();
     if (existingIdx === -1) {
@@ -249,7 +249,7 @@ export class TakeExam implements OnInit {
   }
 
   private ensureDraftRecord() {
-    const user = this.auth.currentUser();
+    const user = this.auth.currentUser()?.user;
     if (!user || !this.exam()) return;
     const key = 'takenExams';
     const list: (TakenExamRecord & { answers?: any })[] = JSON.parse(
@@ -301,7 +301,7 @@ export class TakeExam implements OnInit {
       );
     }
     const idx = list.findIndex(
-      (r) => r.examId === this.exam()!.id && r.userId === user.id
+      (r) => r.examId === this.exam()!.id && r.userId === Number(user.id)
     );
     if (idx !== -1) {
       const rec = list[idx];
@@ -337,7 +337,7 @@ export class TakeExam implements OnInit {
   }
 
   private saveProgress() {
-    const user = this.auth.currentUser();
+    const user = this.auth.currentUser()?.user;
     if (!user || !this.exam()) return;
     const key = 'takenExams';
     const list: TakenExamRecord[] = JSON.parse(
@@ -347,7 +347,7 @@ export class TakeExam implements OnInit {
       localStorage.getItem('takenExamAnswers') || '[]'
     );
     const idx = list.findIndex(
-      (r) => r.examId === this.exam()!.id && r.userId === user.id
+      (r) => r.examId === this.exam()!.id && r.userId === Number(user.id)
     );
     if (idx === -1) return; // draft not present (shouldn't happen)
     if (list[idx].submittedAt) return; // already submitted

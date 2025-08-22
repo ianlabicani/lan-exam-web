@@ -17,15 +17,23 @@ export class Exams implements OnInit {
 
   ngOnInit() {
     const exams = localStorage.getItem('exams');
+    const allExams = JSON.parse(exams || '[]');
+    console.log(allExams);
+
     if (!exams) {
       this.exams.set([]);
     } else {
-      const currentUser = this.auth.currentUser();
-      const userExams = JSON.parse(exams).filter(
-        (exam: IExam) =>
-          exam.year === currentUser?.year &&
-          exam.section === currentUser?.section
-      );
+      const currentUser = this.auth.currentUser()?.user;
+      const userExams = JSON.parse(exams).filter((exam: IExam) => {
+        const isSameYear = String(exam.year) === String(currentUser?.year);
+        const isSameSection =
+          String(exam.section) === String(currentUser?.section);
+
+        console.log({ isSameYear, isSameSection });
+
+        return isSameYear && isSameSection;
+      });
+
       this.exams.set(userExams);
     }
   }
@@ -111,12 +119,53 @@ export class Exams implements OnInit {
   }
 
   durationMinutes(exam: IExam): number | null {
-    if (exam.duration) return exam.duration;
-    if (exam.startsAt && exam.endsAt) {
-      const start = new Date(exam.startsAt).getTime();
-      const end = new Date(exam.endsAt).getTime();
-      if (end > start) return Math.round((end - start) / 60000);
+    // We now base the shown duration off the student's session start (attempt.startedAt)
+    // rather than just the static exam window. This makes the value reflect the
+    // remaining time (in whole minutes) for an in‑progress attempt.
+
+    try {
+      const currentUser = this.auth.currentUser()?.user;
+      if (!currentUser) return null;
+      const takenExamsRaw = localStorage.getItem('takenExams') || '[]';
+      const attempts = JSON.parse(takenExamsRaw) as any[];
+      const attempt = attempts.find(
+        (a) =>
+          a.examId === exam.id && a.userId === currentUser.id && !a.submittedAt
+      );
+
+      const now = Date.now();
+
+      // If we have an active attempt, compute remaining time.
+      if (attempt && attempt.startedAt) {
+        const startedAtMs = new Date(attempt.startedAt).getTime();
+
+        // Case 1: Fixed duration exams (exam.duration in minutes)
+        if (exam.duration && exam.duration > 0) {
+          const endByDuration = startedAtMs + exam.duration * 60000;
+          const remainingMs = endByDuration - now;
+          if (remainingMs <= 0) return 0;
+          return Math.max(0, Math.ceil(remainingMs / 60000));
+        }
+
+        // Case 2: Window-based (startsAt / endsAt). Remaining is until endsAt.
+        if (exam.endsAt) {
+          const endWindowMs = new Date(exam.endsAt).getTime();
+          const remainingMs = endWindowMs - now;
+          if (remainingMs <= 0) return 0;
+          return Math.max(0, Math.ceil(remainingMs / 60000));
+        }
+      }
+
+      // If no active attempt yet: show the total potential duration.
+      if (exam.duration) return exam.duration;
+      if (exam.startsAt && exam.endsAt) {
+        const start = new Date(exam.startsAt).getTime();
+        const end = new Date(exam.endsAt).getTime();
+        if (end > start) return Math.round((end - start) / 60000);
+      }
+      return null;
+    } catch {
+      return null;
     }
-    return null;
   }
 }

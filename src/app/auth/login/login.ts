@@ -15,7 +15,7 @@ export class Login {
   protected router = inject(Router);
 
   protected loginForm = this.formBuilder.nonNullable.group({
-    userId: ['', [Validators.required]],
+    email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
@@ -25,18 +25,21 @@ export class Login {
       return;
     }
 
-    const { userId, password } = this.loginForm.getRawValue();
+    const { email, password } = this.loginForm.getRawValue();
+    this.authService.login(email, password).subscribe({
+      next: (authUser) => {
+        this.authService.setLanExamUser(authUser);
+        this.router.navigate(['/student/dashboard']);
 
-    const user = this.authService.login(userId, password);
-    if (!user) {
-      this.loginForm.setErrors({ invalidLogin: true });
-      return;
-    }
-
-    if (user.role === 'teacher') {
-      this.router.navigate(['/teacher/dashboard']);
-    } else if (user.role === 'student') {
-      this.router.navigate(['/student/dashboard']);
-    }
+        if (authUser.roles.includes('teacher')) {
+          this.router.navigate(['/teacher/dashboard']);
+        } else if (authUser.roles.includes('s udent')) {
+          this.router.navigate(['/student/dashboard']);
+        }
+      },
+      error: () => {
+        this.loginForm.setErrors({ invalidLogin: true });
+      },
+    });
   }
 }
