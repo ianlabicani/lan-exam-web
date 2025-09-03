@@ -14,9 +14,6 @@ import { ITakenExam } from './take-exam/take-exam';
   styleUrl: './exams.css',
 })
 export class Exams implements OnInit {
-  takeExam(_t8: IExam & { taken_exams: ITakenExam[] }) {
-    throw new Error('Method not implemented.');
-  }
   http = inject(HttpClient);
   examsSig = signal<(IExam & { taken_exams: ITakenExam[] })[]>([]);
   auth = inject(AuthService);
