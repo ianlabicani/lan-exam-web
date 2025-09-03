@@ -1,4 +1,4 @@
-@if (!loading()) {
+@let items = this.viewExamItemsService.itemsSig(); @if (!loading()) {
 <div class="space-y-6 container mx-auto mt-10">
   @if(!exam()){
   <div class="p-10 border border-dashed rounded-lg text-center bg-white">
@@ -126,39 +126,12 @@
       <div class="bg-white border rounded-lg p-4 shadow-sm">
         <h3 class="text-sm font-semibold mb-3">Add MCQ</h3>
       </div>
-      <!-- True/False -->
+      <!-- True/False (Reusable Form Component) -->
       <div class="bg-white border rounded-lg p-4 shadow-sm">
         <h3 class="text-sm font-semibold mb-3">Add True / False</h3>
-        <div class="space-y-2">
-          <input
-            type="text"
-            [(ngModel)]="tf.question"
-            placeholder="Statement"
-            class="w-full border rounded px-2 py-1 text-sm"
-          />
-          <select
-            [(ngModel)]="tf.answer"
-            class="w-full border rounded px-2 py-1 text-sm"
-          >
-            <option value="true">True</option>
-            <option value="false">False</option>
-          </select>
-          <div class="flex items-center gap-2">
-            <input
-              type="number"
-              min="1"
-              [(ngModel)]="tf.points"
-              class="w-20 border rounded px-2 py-1 text-sm"
-            />
-            <button
-              (click)="addTrueFalse()"
-              [disabled]="!isEditable()"
-              class="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white text-xs font-medium px-3 py-1.5 rounded"
-            >
-              Add
-            </button>
-          </div>
-        </div>
+        <app-true-or-false-form
+          [examIdSig]="exam()?.id!"
+        ></app-true-or-false-form>
       </div>
       <!-- Essay -->
       <div class="bg-white border rounded-lg p-4 shadow-sm">
@@ -197,9 +170,9 @@
 
     <div class="space-y-4">
       <h2 class="text-lg font-semibold text-gray-900">
-        Items ({{ items().length }})
+        Items ({{ items.length }})
       </h2>
-      @if(items().length === 0){
+      @if(items.length === 0){
       <div
         class="p-6 text-center border border-dashed rounded-lg bg-white text-gray-500 text-sm"
       >
@@ -207,7 +180,7 @@
       </div>
       } @else {
       <div class="space-y-3">
-        @for(item of items(); track item.id){
+        @for(item of items; track item.id){
         <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
           @if(editingItemId() === item.id){
           <div class="space-y-2">
