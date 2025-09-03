@@ -1,12 +1,5 @@
-import {
-  Component,
-  Input,
-  output,
-  signal,
-  inject,
-  input,
-  OnInit,
-} from '@angular/core';
+import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { Component, signal, inject, input, OnInit } from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -16,7 +9,10 @@ import {
   Validators,
   FormsModule,
 } from '@angular/forms';
-import { ExamService, IItem } from '../../exam.service';
+import { ExamService, IItem } from '../../../exam.service';
+import { ViewExamItemsService } from '../../view-exam-items.service';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { NgClass } from '@angular/common';
 
 export interface McqOptionFormValue {
   text: string;
@@ -31,16 +27,20 @@ export interface McqFormValue {
 
 @Component({
   selector: 'app-mcq-form',
-  imports: [ReactiveFormsModule, FormsModule],
+  imports: [ReactiveFormsModule, FormsModule, FaIconComponent, NgClass],
   templateUrl: './mcq-form.html',
   styleUrl: './mcq-form.css',
 })
 export class McqForm implements OnInit {
   fb = inject(FormBuilder);
   private examService = inject(ExamService);
+  protected viewExamItemsService = inject(ViewExamItemsService);
 
-  examId = input.required<number>();
-  itemCreated = output<IItem>();
+  // icons
+  faPlus = faPlus;
+  faTrash = faTrash;
+
+  examIdSig = input.required<number>();
 
   mcqForm = this.fb.nonNullable.group({
     question: ['', [Validators.required, Validators.minLength(3)]],
@@ -98,7 +98,7 @@ export class McqForm implements OnInit {
       return;
     }
 
-    const examId = this.examId();
+    const examId = this.examIdSig();
     const mcqFormRawVal = this.mcqForm.getRawValue() as McqFormValue;
     const opts = mcqFormRawVal.options.filter((o) => o.text.trim().length > 0);
 
@@ -119,7 +119,7 @@ export class McqForm implements OnInit {
       })
       .subscribe({
         next: (res) => {
-          this.itemCreated.emit(res.item);
+          this.viewExamItemsService.addItem(res.item);
           // reset form
           console.log(res);
 
@@ -128,7 +128,7 @@ export class McqForm implements OnInit {
           this.addOption();
           this.addOption();
           this.mcqForm.markAsPristine();
-          this.saving.set(false)
+          this.saving.set(false);
         },
         error: (err) => {
           this.errorMsg.set(err?.error?.message || 'Failed to add MCQ');

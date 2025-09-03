@@ -1,0 +1,21 @@
+@let item = itemSig();
+
+<ul class="text-xs space-y-0.5">
+  @for(opt of item.options || []; track $index){
+  <li
+    [class.text-green-600.font-medium]="opt.correct"
+    class="flex items-center gap-1"
+  >
+    <span
+      class="w-1.5 h-1.5 rounded-full"
+      [class.bg-green-500]="opt.correct"
+      [class.bg-gray-300]="!opt.correct"
+    ></span>
+    <span>{{ opt.text }}</span>
+    @if(opt.correct){<span
+      class="ml-1 text-[9px] px-1 py-px rounded bg-green-100 text-green-700"
+      >✔</span
+    >}
+  </li>
+  }
+</ul>

@@ -16,33 +16,5 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     this.authService.initLocalCurrentUser();
-
-    const database = localStorage.getItem('database');
-
-    if (!database) {
-      localStorage.setItem(
-        'database',
-        JSON.stringify({
-          users: [
-            {
-              id: '111',
-              name: 'John Doe',
-              role: 'student',
-              email: 'john.doe@example.com',
-              password: 'password',
-              section: 'f',
-              year: '1',
-            },
-            {
-              id: '222',
-              name: 'Jane Smith',
-              role: 'teacher',
-              email: 'jane.smith@example.com',
-              password: 'password',
-            },
-          ],
-        })
-      );
-    }
   }
 }

@@ -1,0 +1,20 @@
+@let items = itemsSig();
+
+<div class="space-y-4">
+  <h2 class="text-lg font-semibold text-gray-900">
+    Items ({{ items.length }})
+  </h2>
+  @if(items.length === 0){
+  <div
+    class="p-6 text-center border border-dashed rounded-lg bg-white text-gray-500 text-sm"
+  >
+    No items added yet.
+  </div>
+  } @else {
+  <div class="space-y-3">
+    @for(item of items; track $index){
+    <app-view-exam-item [itemSig]="item"></app-view-exam-item>
+    }
+  </div>
+  }
+</div>

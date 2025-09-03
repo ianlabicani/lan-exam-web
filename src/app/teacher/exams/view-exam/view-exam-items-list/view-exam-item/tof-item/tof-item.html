@@ -1,0 +1,13 @@
+@let item = itemSig();
+
+<p class="text-xs text-gray-600">
+  Answer:
+  <span
+    [ngClass]="{
+      'text-green-600': item.answer,
+      'text-red-600': !item.answer
+    }"
+    class="font-semibold"
+    >{{ item.answer ? 'True' : 'False' }}</span
+  >
+</p>

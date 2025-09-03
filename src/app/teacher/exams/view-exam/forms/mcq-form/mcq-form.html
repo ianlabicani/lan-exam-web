@@ -14,7 +14,7 @@
   </div>
 
   <!-- Points -->
-  <div class="space-y-1 w-40">
+  <div class="space-y-1">
     <label class="block text-sm font-medium text-gray-700"
       >Points<span class="text-red-500">*</span></label
     >
@@ -35,44 +35,54 @@
       <button
         type="button"
         (click)="addOption()"
-        class="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+        class="px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
         [disabled]="options.length >= MAX_OPTIONS"
       >
-        Add
+        <fa-icon [icon]="faPlus"></fa-icon>
       </button>
     </div>
     <div class="space-y-2">
       @for (opt of options.controls; track $index; let i = $index) {
       <div
-        class="flex items-start gap-2 p-2 rounded border border-gray-200 bg-white"
+        class="flex flex-col sm:flex-row sm:items-center gap-2 p-2 rounded border border-gray-200 w-full"
+        [ngClass]="{
+        'bg-green-100': opt.value.correct
+        }"
         [formGroup]="opt"
       >
+        <!-- Input full width -->
         <input
           type="text"
-          class="flex-1 rounded border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="flex-1 rounded border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
           formControlName="text"
           placeholder="Option {{i+1}}"
         />
-        <label
-          class="flex items-center gap-1 text-xs text-gray-600 select-none"
+        <div
+          class="flex items-center gap-3 sm:w-auto w-full justify-between sm:justify-start"
         >
-          <input
-            type="checkbox"
-            formControlName="correct"
-            (change)="toggleCorrect(i, $event)"
-            class="rounded"
-          />
-          Correct
-        </label>
-        <button
-          type="button"
-          (click)="removeOption(i)"
-          class="text-xs text-red-600 hover:underline mt-1"
-          [disabled]="options.length <= MIN_OPTIONS"
-        >
-          Remove
-        </button>
+          <label
+            class="flex items-center gap-1 text-xs text-gray-600 select-none"
+          >
+            <input
+              type="checkbox"
+              formControlName="correct"
+              (change)="toggleCorrect(i, $event)"
+              class="rounded"
+            />
+            Correct
+          </label>
+
+          <button
+            type="button"
+            (click)="removeOption(i)"
+            class="text-red-600 cursor-pointer bg-red-50 hover:bg-red-100 p-1 rounded"
+            [disabled]="options.length <= MIN_OPTIONS"
+          >
+            <fa-icon [icon]="faTrash"></fa-icon>
+          </button>
+        </div>
       </div>
+
       }
       <p class="text-[11px] text-gray-500">
         Min {{MIN_OPTIONS}} options; max {{MAX_OPTIONS}}. Check at least one

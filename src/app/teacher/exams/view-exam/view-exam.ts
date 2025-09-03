@@ -1,60 +1,63 @@
+import { EssayForm } from './forms/essay-form/essay-form';
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe, NgClass, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExamService, IExam, IItem } from '../exam.service';
-import { McqForm } from './mcq-form/mcq-form';
-import { TrueOrFalseForm } from './true-or-false-form/true-or-false-form';
+import { McqForm } from './forms/mcq-form/mcq-form';
+import { TrueOrFalseForm } from './forms/true-or-false-form/true-or-false-form';
 import { ViewExamItemsService } from './view-exam-items.service';
+import { ViewExamItemsList } from './view-exam-items-list/view-exam-items-list';
+import { ViewExamCountCard } from './view-exam-count-card/view-exam-count-card';
 
 @Component({
   selector: 'app-view-exam',
   imports: [
     RouterLink,
     DatePipe,
-    NgClass,
     UpperCasePipe,
     FormsModule,
     McqForm,
     TrueOrFalseForm,
+    EssayForm,
+    ViewExamItemsList,
+    ViewExamCountCard,
   ],
   templateUrl: './view-exam.html',
   styleUrl: './view-exam.css',
 })
 export class ViewExam implements OnInit {
+  onEssayItemCreated(item: IItem) {
+    this.viewExamItemsService.itemsSig.set([
+      item,
+      ...this.viewExamItemsService.itemsSig(),
+    ]);
+  }
   private route = inject(ActivatedRoute);
   protected viewExamItemsService = inject(ViewExamItemsService);
+  private examService = inject(ExamService);
 
   exam = signal<IExam | null>(null);
   editingItemId = signal<number | null>(null);
-  // creation model states
-  // mcq creation handled inside mcq form now
   tf = { question: '', answer: 'true', points: 1 };
   essay = { question: '', expectedAnswer: '', points: 5 };
   loading = signal(true);
   saving = signal(false);
   errorMsg = signal<string | null>(null);
-  private examService = inject(ExamService);
+
+  itemsSig = this.viewExamItemsService.itemsSig;
 
   totalPoints = computed(() =>
-    this.viewExamItemsService
-      .itemsSig()
-      .reduce((s, i) => s + (i.points || 0), 0)
+    this.itemsSig().reduce((s, i) => s + (i.points || 0), 0)
   );
   mcqCount = computed(
-    () =>
-      this.viewExamItemsService.itemsSig().filter((i) => i.type === 'mcq')
-        .length
+    () => this.itemsSig().filter((i) => i.type === 'mcq').length
   );
   tfCount = computed(
-    () =>
-      this.viewExamItemsService.itemsSig().filter((i) => i.type === 'truefalse')
-        .length
+    () => this.itemsSig().filter((i) => i.type === 'truefalse').length
   );
   essayCount = computed(
-    () =>
-      this.viewExamItemsService.itemsSig().filter((i) => i.type === 'essay')
-        .length
+    () => this.itemsSig().filter((i) => i.type === 'essay').length
   );
 
   isEditable = computed(() => this.exam()?.status === 'draft');
