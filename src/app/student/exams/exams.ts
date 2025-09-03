@@ -1,26 +1,35 @@
 import { IExam } from './../../teacher/exams/exam.service';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../auth/services/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { ExamCard } from './exam-card/exam-card';
+import { ITakenExam } from './take-exam/take-exam';
 
 @Component({
   selector: 'app-exams',
-  imports: [ExamCard],
+  imports: [NgClass, DatePipe, TitleCasePipe, RouterLink],
   templateUrl: './exams.html',
   styleUrl: './exams.css',
 })
 export class Exams implements OnInit {
+  takeExam(_t8: IExam & { taken_exams: ITakenExam[] }) {
+    throw new Error('Method not implemented.');
+  }
   http = inject(HttpClient);
-  exams = signal<IExam[]>([]);
+  examsSig = signal<(IExam & { taken_exams: ITakenExam[] })[]>([]);
   auth = inject(AuthService);
   private router = inject(Router);
 
   ngOnInit() {
     this.getExams().subscribe((response) => {
-      this.exams.set(response.exams);
+      this.examsSig.set(
+        response.exams as (IExam & {
+          taken_exams: ITakenExam[];
+        })[]
+      );
+      console.log(this.examsSig());
     });
   }
 

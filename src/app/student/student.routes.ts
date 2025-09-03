@@ -11,8 +11,15 @@ export const routes: Routes = [
     loadComponent: () => import('./exams/exams').then((c) => c.Exams),
   },
   {
-    path: 'take-exam/:id',
+    path: 'take-exam/:examId',
     loadComponent: () =>
       import('./exams/take-exam/take-exam').then((c) => c.TakeExam),
+  },
+  {
+    path: 'taken-exam/:takenExamId',
+    loadComponent: () =>
+      import('./taken-exams/taken-exam-detail/taken-exam-detail').then(
+        (c) => c.TakenExamDetail
+      ),
   },
 ];

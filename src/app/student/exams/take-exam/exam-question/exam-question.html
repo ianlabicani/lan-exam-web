@@ -1,3 +1,7 @@
+@let isReadonly = isReadonlySig();
+
+<!-- signals -->
+
 <div
   class="rounded-lg border border-slate-200 bg-white shadow-sm hover:shadow transition-shadow mb-2"
 >
@@ -25,11 +29,13 @@
       <button
         type="button"
         (click)="setMcq(oIdx)"
+        [disabled]="isReadonly"
         class="w-full text-left group rounded-lg border px-4 py-3 flex items-start gap-3 transition-colors"
         [ngClass]="{
-              'border-indigo-500 bg-indigo-50/70': currentAnswer === oIdx,
-              'border-slate-200 hover:border-slate-300': currentAnswer !== oIdx
-            }"
+      'border-indigo-500 bg-indigo-50/70': currentAnswer === oIdx,
+      'border-slate-200 hover:border-slate-300': currentAnswer !== oIdx,
+      'opacity-50 cursor-not-allowed': isReadonly
+    }"
       >
         <span
           class="font-semibold text-indigo-600 group-hover:scale-110 origin-center transition-transform"
@@ -44,12 +50,14 @@
       <button
         type="button"
         (click)="setTrueFalse(true)"
+        [disabled]="isReadonly"
         class="flex-1 rounded-lg border px-4 py-3 font-medium transition"
         [ngClass]="{
               'bg-green-50 border-green-500 text-green-700':
                 currentAnswer === true,
               'border-slate-200 hover:border-slate-300 text-slate-600':
-                currentAnswer !== true
+                currentAnswer !== true,
+              'opacity-50 cursor-not-allowed': isReadonly
             }"
       >
         True
@@ -57,12 +65,14 @@
       <button
         type="button"
         (click)="setTrueFalse(false)"
+        [disabled]="isReadonly"
         class="flex-1 rounded-lg border px-4 py-3 font-medium transition"
         [ngClass]="{
               'bg-rose-50 border-rose-500 text-rose-700':
                 currentAnswer === false,
               'border-slate-200 hover:border-slate-300 text-slate-600':
-                currentAnswer !== false
+                currentAnswer !== false,
+              'opacity-50 cursor-not-allowed': isReadonly
             }"
       >
         False
@@ -74,6 +84,8 @@
       class="w-full resize-y rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/60 outline-none px-4 py-3 text-slate-700 placeholder:text-slate-400 text-sm"
       [value]="currentAnswer || ''"
       (input)="onEssay($any($event.target).value)"
+      [disabled]="isReadonly"
+      [ngClass]="{ 'opacity-50 cursor-not-allowed': isReadonly }"
       placeholder="Type your answer here..."
     ></textarea>
     } }

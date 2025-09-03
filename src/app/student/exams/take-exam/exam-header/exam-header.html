@@ -1,13 +1,74 @@
-<div class="flex items-start justify-between gap-4 flex-wrap">
+@let takenExam = takenExamSig();
+
+<div
+  class="mb-4 flex items-start justify-between gap-4 flex-wrap bg-white p-4 rounded-lg shadow"
+>
+  <!-- Exam info -->
   <div>
     <h2 class="text-2xl font-semibold tracking-tight text-slate-800">
-      Exam #{{ exam?.id }}
+      {{ takenExam?.exam?.title }}
+      <span class="text-sm text-slate-500">
+        (Exam #{{ takenExam?.exam?.id }})</span
+      >
     </h2>
-    @if (exam?.started_at) {
-    <p class="text-sm text-slate-500 mt-1">
-      Started: {{ exam?.started_at | date : 'short' }}
+
+    <p class="text-sm text-slate-600 mt-1 italic">
+      {{ takenExam?.exam?.description }}
     </p>
-    }
+
+    <div class="mt-2 space-y-1 text-sm text-slate-600">
+      <p>
+        📚 Year & Section:
+        <span class="font-medium"
+          >{{ takenExam?.exam?.year }}{{ takenExam?.exam?.section }}</span
+        >
+      </p>
+      <p>
+        🕒 Schedule:
+        <span class="font-medium"
+          >{{ takenExam?.exam?.starts_at | date:'short' }}</span
+        >
+        →
+        <span class="font-medium"
+          >{{ takenExam?.exam?.ends_at | date:'short' }}</span
+        >
+      </p>
+      <p>
+        🎯 Exam Points:
+        <span class="font-medium">{{ takenExam?.exam?.total_points }}</span>
+      </p>
+      <p>
+        Status:
+        <span
+          [ngClass]="{
+          'text-green-600 font-medium': takenExam?.exam?.status === 'active',
+          'text-gray-500 italic': takenExam?.exam?.status !== 'active'
+        }"
+        >
+          {{ takenExam?.exam?.status | titlecase }}
+        </span>
+      </p>
+    </div>
+
+    <!-- Session details -->
+    <div class="mt-3 border-t pt-2 text-sm text-slate-500">
+      <p>Started: {{ takenExam?.started_at | date:'short' }}</p>
+
+      @if (takenExam?.submitted_at) {
+      <p class="text-green-600">
+        ✅ Submitted: {{ takenExam?.submitted_at | date:'short' }}
+      </p>
+      } @else {
+      <p class="text-red-500">⏳ In Progress</p>
+      }
+
+      <p>
+        Answers Submitted:
+        <span class="font-medium">{{ takenExam?.answers?.length || 0 }}</span>
+      </p>
+    </div>
   </div>
+
+  <!-- Slot for actions (like buttons) -->
   <ng-content />
 </div>

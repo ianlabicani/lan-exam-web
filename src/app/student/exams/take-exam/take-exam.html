@@ -1,8 +1,12 @@
-@if (this.takenExam(); as exam) {
+@let takenExam = takenExamSig();
+
+<!-- signals  -->
+
+@if (takenExam) {
 <div
   class="mx-auto max-w-4xl p-6 space-y-6 bg-white/70 backdrop-blur rounded-xl shadow-sm border border-slate-200"
 >
-  <app-exam-header [exam]="exam">
+  <app-exam-header [takenExamSig]="takenExam">
     <app-exam-progress
       [answered]="answeredCount()"
       [total]="examItems().length"
@@ -17,6 +21,7 @@
       [index]="idx"
       [currentAnswer]="answers()[item.id]"
       (answerChange)="onAnswerChange(item, $event)"
+      [isReadonlySig]="wasSubmitted()"
     />
     }
   </div>
@@ -29,7 +34,8 @@
     <div class="text-sm text-slate-500">
       Answered {{ answeredCount() }} of {{ examItems().length }}
     </div>
-    }
+    } @if (!wasSubmitted()) {
+
     <button
       (click)="submit()"
       [disabled]="submitting() || !examItems().length"
@@ -54,6 +60,7 @@
       </svg>
       <span>Submitting...</span> }
     </button>
+    }
   </div>
 
   @if (error()) {

@@ -1,8 +1,10 @@
+@let exams= examsSig();
+
 <div class="mb-8 container mx-auto">
   <h2 class="text-xl font-semibold text-gray-900 mb-6">Available Exams</h2>
 
   <!-- Empty state -->
-  @if (!exams().length) {
+  @if (!exams.length) {
   <div
     class="border border-dashed border-gray-300 rounded-lg p-10 text-center text-gray-500 bg-white"
   >
@@ -15,16 +17,73 @@
   }
 
   <!-- Exam list -->
-  @if (exams().length) {
+  @if (exams.length) {
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    @for (exam of exams(); track exam.id) {
-    <app-exam-card
-      [exam]="exam"
-      [icon]="cardIcon(exam)"
-      (openExam)="goTo($event)"
+    @for (exam of exams; track exam.id) {
+    <div
+      class="p-5 rounded-lg border border-slate-200 bg-white shadow-sm flex flex-col justify-between"
     >
-    </app-exam-card>
+      <!-- Exam Info -->
+      <div>
+        <h3 class="text-lg font-semibold text-slate-800">{{ exam.title }}</h3>
+        <p class="text-sm text-slate-600 mb-2">{{ exam.description }}</p>
+
+        <div class="space-y-1 text-xs text-slate-500">
+          <p>
+            📚 Year & Section:
+            <span class="font-medium">{{ exam.year }}{{ exam.section }}</span>
+          </p>
+          <p>
+            🕒 {{ exam.starts_at | date:'short' }} → {{ exam.ends_at |
+            date:'short' }}
+          </p>
+          <p>
+            Status:
+            <span
+              [ngClass]="{
+                'text-green-600 font-medium': exam.status === 'active',
+                'text-gray-500 italic': exam.status !== 'active'
+              }"
+            >
+              {{ exam.status | titlecase }}
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-4">
+        @if (exam.taken_exams.length) { @if (exam.taken_exams[0].submitted_at) {
+        <button
+          class="w-full rounded-lg bg-green-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-green-500 transition"
+          (click)="goTo(exam)"
+        >
+          ✅ Submitted
+        </button>
+
+        } @else {
+        <a
+          class="w-full rounded-lg bg-orange-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-green-500 transition"
+          [routerLink]="['/student/take-exam', exam.id]"
+        >
+          Continue Exam
+        </a>
+
+        } } @else {
+        <button
+          (click)="goTo(exam)"
+          class="w-full rounded-lg bg-indigo-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-indigo-500 transition"
+        >
+          📝 Take Exam
+        </button>
+        }
+      </div>
+    </div>
     }
+  </div>
+  } @else {
+  <div class="text-center text-slate-500 py-10">
+    <p>No exams available.</p>
   </div>
   }
 </div>

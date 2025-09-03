@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {} from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -7,6 +14,7 @@ import { forkJoin, of } from 'rxjs';
 import { ExamQuestion } from './exam-question/exam-question';
 import { ExamProgress } from './exam-progress/exam-progress';
 import { ExamHeader } from './exam-header/exam-header';
+import { IExam } from '../../../teacher/exams/exam.service';
 
 export interface ITakenExam {
   id: number; // attempt id
@@ -18,6 +26,7 @@ export interface ITakenExam {
   updated_at: string;
   created_at: string;
   answers?: ITakenExamAnswer[];
+  exam?: IExam;
 }
 
 export interface IExamItem {
@@ -52,23 +61,26 @@ export interface ITakenExamAnswer {
   styleUrl: './take-exam.css',
 })
 export class TakeExam implements OnInit {
-  private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
 
+  examId = input<string>();
+
+  wasSubmitted = computed(() => this.takenExamSig()?.submitted_at !== null);
+
   submitting = signal(false);
   error = signal<string | null>(null);
-  // No need to track individual answer IDs since backend updateOrCreate handles upsert by (taken_exam_id, exam_item_id)
 
   answers = signal<Record<string, any>>({});
   private essayDebounceHandles: Record<string, any> = {};
 
-  takenExam = signal<ITakenExam | null>(null);
-  private attemptId = computed(() => this.takenExam()?.id || null);
+  takenExamSig = signal<ITakenExam | null>(null);
+  private attemptId = computed(() => this.takenExamSig()?.id || null);
   examItems = signal<IExamItem[]>([]);
 
   ngOnInit(): void {
-    const examId = this.route.snapshot.paramMap.get('id');
+    const examId = this.examId();
+
     if (!examId) {
       this.error.set('Invalid exam id');
       return;
@@ -86,15 +98,13 @@ export class TakeExam implements OnInit {
       )
       .subscribe({
         next: ({ takenExam }) => {
-          this.takenExam.set(takenExam);
-          // Auto-populate answers if present (no PUT needed; already stored)
+          this.takenExamSig.set(takenExam);
           if (takenExam.answers?.length) {
             const restored: Record<string, any> = {};
             takenExam.answers.forEach((ans) => {
               const key = ans.exam_item_id;
               let value: any = ans.answer;
               if (ans.type === 'mcq') {
-                // ensure numeric index
                 const num = Number(value);
                 if (!Number.isNaN(num)) value = num;
               } else if (ans.type === 'truefalse') {

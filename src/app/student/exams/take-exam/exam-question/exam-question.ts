@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, input, Input, Output } from '@angular/core';
 import { IExamItem } from '../take-exam';
 import { NgClass } from '@angular/common';
 
@@ -13,6 +13,7 @@ export class ExamQuestion {
   @Input() index = 0;
   @Input() currentAnswer: any;
   @Output() answerChange = new EventEmitter<any>();
+  isReadonlySig = input<boolean>(false);
 
   letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   private essayTimer: any;
