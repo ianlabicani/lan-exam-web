@@ -109,53 +109,22 @@
 
   <!-- Item authoring & list -->
   <div class="space-y-8">
+    <div class="bg-white border rounded-lg p-4 shadow-sm">
+      <h3 class="text-sm font-semibold mb-3">Add MCQ</h3>
+      <app-mcq-form
+        [examId]="exam()?.id!"
+        (itemCreated)="onMcqItemCreated($event)"
+      ></app-mcq-form>
+    </div>
+
     <div
       class="grid md:grid-cols-3 gap-6"
       [class.opacity-50]="!isEditable()"
       [class.pointer-events-none]="!isEditable()"
     >
-      <!-- MCQ -->
+      <!-- MCQ (Reusable Form Component now creates items) -->
       <div class="bg-white border rounded-lg p-4 shadow-sm">
         <h3 class="text-sm font-semibold mb-3">Add MCQ</h3>
-        <div class="space-y-2">
-          <input
-            type="text"
-            [(ngModel)]="mcq.question"
-            placeholder="Question"
-            class="w-full border rounded px-2 py-1 text-sm"
-          />
-          <div class="space-y-1">
-            @for(opt of mcq.options; track opt.id; let i = $index){
-            <div class="flex items-center gap-2">
-              <input
-                [(ngModel)]="mcq.options[i].text"
-                class="flex-1 border rounded px-2 py-1 text-xs"
-                placeholder="Option"
-              />
-              <input
-                type="checkbox"
-                [(ngModel)]="mcq.options[i].correct"
-                class="scale-90"
-              />
-            </div>
-            }
-          </div>
-          <div class="flex items-center gap-2">
-            <input
-              type="number"
-              min="1"
-              [(ngModel)]="mcq.points"
-              class="w-20 border rounded px-2 py-1 text-sm"
-            />
-            <button
-              (click)="addMcq()"
-              [disabled]="!isEditable()"
-              class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white text-xs font-medium px-3 py-1.5 rounded"
-            >
-              Add MCQ
-            </button>
-          </div>
-        </div>
       </div>
       <!-- True/False -->
       <div class="bg-white border rounded-lg p-4 shadow-sm">

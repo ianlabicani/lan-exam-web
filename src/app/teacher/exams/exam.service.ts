@@ -15,10 +15,10 @@ export interface IExam {
   created_at: Date;
   updated_at: Date;
   pivot: IExam_Teacher;
-  items: Item[];
+  items: IItem[];
 }
 
-export interface Item {
+export interface IItem {
   id: number;
   exam_id: number;
   type: string;
@@ -56,14 +56,13 @@ export class ExamService {
 
   createExam(payload: {
     title: string;
-    description?: string;
-    starts_at?: string | Date | null;
-    ends_at?: string | Date | null;
+    description: string;
+    starts_at: string | Date;
+    ends_at: string | Date;
     year: string | number;
     section: string;
     status: string;
     total_points: number;
-    items: any[];
   }) {
     const token = this.authService.currentUser()?.token.substring(2);
     return this.http.post<{ exam: IExam }>(
@@ -86,14 +85,14 @@ export class ExamService {
   }
 
   createItem(examId: number, payload: any) {
-    return this.http.post<{ item: Item }>(
+    return this.http.post<{ item: IItem }>(
       `http://127.0.0.1:8000/api/teacher/exams/${examId}/items`,
       payload
     );
   }
 
   updateItem(itemId: number | string, payload: any, examId: number) {
-    return this.http.patch<{ item: Item }>(
+    return this.http.patch<{ item: IItem }>(
       `http://127.0.0.1:8000/api/teacher/exams/${examId}/items/${itemId}`,
       payload
     );

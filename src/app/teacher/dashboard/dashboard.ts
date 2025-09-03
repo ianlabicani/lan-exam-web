@@ -1,15 +1,20 @@
 import { Component, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-teacher-dashboard',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, FaIconComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
   // Mock data
+
+  faPlus = faPlus;
+
   exams = signal([
     {
       id: 'e1',

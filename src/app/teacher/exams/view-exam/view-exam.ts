@@ -2,30 +2,22 @@ import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe, NgClass, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ExamService, IExam, Item } from '../exam.service';
+import { ExamService, IExam, IItem } from '../exam.service';
+import { McqForm } from './mcq-form/mcq-form';
 
 @Component({
   selector: 'app-view-exam',
-  imports: [RouterLink, DatePipe, NgClass, UpperCasePipe, FormsModule],
+  imports: [RouterLink, DatePipe, NgClass, UpperCasePipe, FormsModule, McqForm],
   templateUrl: './view-exam.html',
   styleUrl: './view-exam.css',
 })
 export class ViewExam implements OnInit {
   private route = inject(ActivatedRoute);
   exam = signal<IExam | null>(null);
-  items = signal<Item[]>([]);
+  items = signal<IItem[]>([]);
   editingItemId = signal<number | null>(null);
   // creation model states
-  mcq = {
-    question: '',
-    options: [
-      { id: crypto.randomUUID(), text: '', correct: false },
-      { id: crypto.randomUUID(), text: '', correct: false },
-      { id: crypto.randomUUID(), text: '', correct: false },
-      { id: crypto.randomUUID(), text: '', correct: false },
-    ],
-    points: 1,
-  };
+  // mcq creation handled inside mcq form now
   tf = { question: '', answer: 'true', points: 1 };
   essay = { question: '', expectedAnswer: '', points: 5 };
   loading = signal(true);
@@ -120,30 +112,8 @@ export class ViewExam implements OnInit {
     });
   }
 
-  addMcq() {
-    if (!this.exam()) return;
-    const q = this.mcq.question.trim();
-    const opts = this.mcq.options.filter((o) => o.text.trim());
-    if (!q || opts.length < 2 || !opts.some((o) => o.correct)) return;
-    this.saving.set(true);
-    this.examService
-      .createItem(this.exam()!.id, {
-        type: 'mcq',
-        question: q,
-        points: this.mcq.points || 1,
-        options: opts.map((o) => ({ text: o.text, correct: o.correct })),
-      })
-      .subscribe({
-        next: (res) => {
-          this.items.set([res.item, ...this.items()]);
-          this.resetMcq();
-          this.saving.set(false);
-        },
-        error: (err) => {
-          this.errorMsg.set(err?.error?.message || 'Failed to add MCQ');
-          this.saving.set(false);
-        },
-      });
+  onMcqItemCreated(item: IItem) {
+    this.items.set([item, ...this.items()]);
   }
 
   addTrueFalse() {
@@ -196,16 +166,7 @@ export class ViewExam implements OnInit {
       });
   }
 
-  private resetMcq() {
-    this.mcq.question = '';
-    this.mcq.options = [
-      { id: crypto.randomUUID(), text: '', correct: false },
-      { id: crypto.randomUUID(), text: '', correct: false },
-      { id: crypto.randomUUID(), text: '', correct: false },
-      { id: crypto.randomUUID(), text: '', correct: false },
-    ];
-    this.mcq.points = 1;
-  }
+  // no longer needed (mcq form handles its own reset)
 
   startEdit(id: number) {
     this.editingItemId.set(id);
@@ -217,7 +178,7 @@ export class ViewExam implements OnInit {
     if (this.exam()) this.fetchExam(this.exam()!.id);
   }
 
-  saveEdit(item: Item) {
+  saveEdit(item: IItem) {
     this.saving.set(true);
     const payload: any = {
       question: item.question,
