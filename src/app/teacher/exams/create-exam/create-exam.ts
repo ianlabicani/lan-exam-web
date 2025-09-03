@@ -58,7 +58,6 @@ export class CreateExam {
     this.examService.createExam(payload).subscribe({
       next: (res) => {
         this.savingSig.set(false);
-        console.log(res);
 
         this.router.navigate(['/teacher/exams/view-exam/', res.exam.id]);
       },

@@ -107,7 +107,6 @@ export class TakeExam implements OnInit {
             });
             this.answers.set(restored);
           }
-          console.log(takenExam);
         },
         error: (err) => {
           this.error.set(err?.error?.message || 'Failed to start exam');
@@ -151,8 +150,6 @@ export class TakeExam implements OnInit {
       this.persistSubmit();
       return;
     }
-
-    console.log('here');
 
     const ops = pendingIds.map((id) => {
       const handle = this.essayDebounceHandles[id];

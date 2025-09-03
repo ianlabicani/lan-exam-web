@@ -48,7 +48,6 @@ export class TrueOrFalseForm {
           this.tofForm.reset({ question: '', answer: 'true', points: 1 });
           this.saving.set(false);
           this.viewExamItemsService.addItem(res.item);
-          console.log(res);
         },
         error: (err) => {
           this.errorMsg.set(err?.error?.message || 'Failed to add True/False');

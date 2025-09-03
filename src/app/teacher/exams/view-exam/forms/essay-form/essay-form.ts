@@ -34,7 +34,6 @@ export class EssayForm {
     }
 
     const newItem = this.essayForm.getRawValue();
-    console.log(newItem);
 
     this.examService
       .createItem(this.examIdSig() ?? 0, {

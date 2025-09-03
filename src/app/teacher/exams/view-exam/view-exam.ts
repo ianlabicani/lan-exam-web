@@ -75,7 +75,6 @@ export class ViewExam implements OnInit {
     this.loading.set(true);
     this.examService.getExam(id).subscribe({
       next: (exam) => {
-        console.log(exam);
         this.exam.set(exam);
         const items = exam.items || [];
         this.viewExamItemsService.itemsSig.set(items);

@@ -92,8 +92,6 @@ export class McqForm implements OnInit {
 
   createItem() {
     if (this.mcqForm.invalid) {
-      console.log('invalid');
-
       this.mcqForm.markAllAsTouched();
       return;
     }
@@ -102,10 +100,7 @@ export class McqForm implements OnInit {
     const mcqFormRawVal = this.mcqForm.getRawValue() as McqFormValue;
     const opts = mcqFormRawVal.options.filter((o) => o.text.trim().length > 0);
 
-    console.log('here1');
-
     if (opts.length < this.MIN_OPTIONS || !opts.some((o) => o.correct)) return;
-    console.log('here2');
 
     this.saving.set(true);
     this.errorMsg.set(null);
@@ -121,7 +116,6 @@ export class McqForm implements OnInit {
         next: (res) => {
           this.viewExamItemsService.addItem(res.item);
           // reset form
-          console.log(res);
 
           this.mcqForm.reset({ question: '', points: 1 });
           while (this.options.length) this.options.removeAt(0);
