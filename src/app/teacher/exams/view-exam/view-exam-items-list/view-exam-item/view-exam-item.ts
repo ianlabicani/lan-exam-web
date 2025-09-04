@@ -6,7 +6,7 @@ import { EssayItem } from './essay-item/essay-item';
 
 @Component({
   selector: 'app-view-exam-item',
-  imports: [NgClass, McqItem, TofItem, EssayItem],
+  imports: [McqItem, TofItem, EssayItem],
   templateUrl: './view-exam-item.html',
   styleUrl: './view-exam-item.css',
 })
