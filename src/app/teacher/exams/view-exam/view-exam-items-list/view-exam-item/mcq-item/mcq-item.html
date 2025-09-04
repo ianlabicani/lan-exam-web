@@ -1,4 +1,5 @@
 @let isEditing = isEditingSig();
+@let item = itemSig();
 
 <div class="rounded-lg border border-gray-200 bg-white shadow-sm p-4 space-y-4">
   <!-- Header -->
@@ -9,7 +10,7 @@
     >
        MCQ
     </span>
-    <span class="text-xs text-gray-500">{{ mcqItemForm.getRawValue().points }} pts</span>
+    <span class="text-xs text-gray-500">{{ item.points }} pts</span>
 
     <button
       type="button"
@@ -25,12 +26,12 @@
     <div class="space-y-3">
       <!-- Question -->
       <p class="text-sm font-semibold text-gray-800">
-        {{ mcqItemForm.value.question }}
+        {{ item.question }}
       </p>
 
       <!-- Options -->
       <ul class="space-y-2">
-        @for (opt of mcqItemForm.value.options; track $index) {
+        @for (opt of item.options; track $index) {
           <li
             class="flex items-center gap-2 px-3 py-2 rounded-md border"
             [ngClass]="{
