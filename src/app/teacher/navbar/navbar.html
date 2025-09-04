@@ -2,52 +2,24 @@
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between h-16 items-center">
       <div class="flex items-center gap-6">
-        <a
-          routerLink="/teacher/dashboard"
-          class="text-lg font-semibold text-gray-900"
-          >LAN Exam</a
-        >
+        <a routerLink="/teacher/dashboard" class="text-lg font-semibold text-gray-900">LAN Exam</a>
 
         <div class="hidden md:flex items-center space-x-2">
-          <a
-            routerLink="/teacher/dashboard"
-            class="px-3 py-2 text-sm text-gray-700 hover:text-gray-900 rounded-md"
-            >Dashboard</a
-          >
-          <a
-            routerLink="/teacher/exams"
-            class="px-3 py-2 text-sm text-gray-700 hover:text-gray-900 rounded-md"
-            >Exams</a
-          >
+          <a routerLink="/teacher/dashboard"
+            class="px-3 py-2 text-sm text-gray-700 hover:text-gray-900 rounded-md">Dashboard</a>
+          <a routerLink="/teacher/exams"
+            class="px-3 py-2 text-sm text-gray-700 hover:text-gray-900 rounded-md">Exams</a>
         </div>
       </div>
 
       <div class="flex items-center gap-3">
-        <button
-          (click)="logout()"
-          class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded-md"
-        >
-          Logout
-        </button>
-
+        <app-logout-button></app-logout-button>
         <div class="md:hidden">
-          <button
-            class="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="Open menu"
-          >
-            <svg
-              class="h-6 w-6 text-gray-700"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
+          <button class="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Open menu">
+            <svg class="h-6 w-6 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
         </div>

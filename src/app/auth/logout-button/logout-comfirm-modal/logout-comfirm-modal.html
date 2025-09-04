@@ -1,0 +1,28 @@
+@let isOpen = isOpenSig();
+@let isConfirmed = isConfirmedSig();
+<!-- signals -->
+@if(isOpen) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+      <h2 class="text-lg font-semibold mb-4 text-gray-800">Confirm Logout</h2>
+      <p class="mb-6 text-gray-600">Are you sure you want to logout?</p>
+      <div class="flex gap-3 justify-end">
+        <button type="button" class="px-4 py-2 rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
+          (click)="close.emit()">
+          Cancel
+        </button>
+        <button type="button"
+          class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 cursor-pointer disabled:opacity-50"
+          [disabled]="isConfirmed" (click)="confirm.emit()">
+          @if (isConfirmed) {
+            <fa-icon [icon]="faSpinner" class="fa-spin text-white inline-block ml-2" />
+            Logging out...
+          } @else {
+            <fa-icon [icon]="faRightFromBracket" />
+            Logout
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

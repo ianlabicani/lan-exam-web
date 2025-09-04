@@ -26,7 +26,6 @@ export class Exams implements OnInit {
           taken_exams: ITakenExam[];
         })[]
       );
-      console.log(this.examsSig());
     });
   }
 

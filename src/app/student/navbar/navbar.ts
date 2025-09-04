@@ -1,11 +1,11 @@
-import { Component, inject } from '@angular/core';
-import { NgIf } from '@angular/common';
+import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../auth/services/auth.service';
+import { LogoutButton } from '../../auth/logout-button/logout-button';
 
 @Component({
   selector: 'app-student-navbar',
-  imports: [RouterLink, NgIf],
+  imports: [RouterLink, LogoutButton],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
@@ -13,22 +13,19 @@ export class Navbar {
   authService = inject(AuthService);
   router = inject(Router);
 
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
-
-  get user() {
-    return this.authService.currentUser()?.user || null;
-  }
-
-  get initials(): string {
-    const u = this.user;
+  userSig = this.authService.currentUser;
+  initials = computed(() => {
+    const u = this.userSig()?.user;
     if (!u || !u.name) return 'NA';
     const parts = u.name.trim().split(/\s+/);
     return parts
       .slice(0, 2)
       .map((p) => p[0]?.toUpperCase() || '')
       .join('');
+  });
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }
