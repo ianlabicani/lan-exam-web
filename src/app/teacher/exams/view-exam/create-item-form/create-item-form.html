@@ -1,0 +1,21 @@
+    <div class="grid md:grid-cols-3 gap-6">
+      <!-- MCQ (Reusable Form Component now creates items) -->
+      <div class="bg-white border rounded-lg p-4 shadow-sm">
+        <h3 class="text-sm font-semibold mb-3">Add MCQ</h3>
+        <app-mcq-form [examIdSig]="examIdSig()"></app-mcq-form>
+      </div>
+      <!-- True/False (Reusable Form Component) -->
+      <div class="bg-white border rounded-lg p-4 shadow-sm">
+        <h3 class="text-sm font-semibold mb-3">Add True / False</h3>
+        <app-true-or-false-form
+          [examIdSig]="examIdSig()"
+        ></app-true-or-false-form>
+      </div>
+      <!-- Essay -->
+      <div class="bg-white border rounded-lg p-4 shadow-sm">
+        <h3 class="text-sm font-semibold mb-3">Add Essay</h3>
+        <app-essay-form
+          [examIdSig]="examIdSig()"
+        ></app-essay-form>
+      </div>
+    </div>

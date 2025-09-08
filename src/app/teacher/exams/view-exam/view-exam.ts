@@ -1,5 +1,4 @@
 import { ViewExamService } from './view-exam.service';
-import { EssayForm } from './forms/essay-form/essay-form';
 import {
   Component,
   OnInit,
@@ -9,12 +8,11 @@ import {
   input,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DatePipe, NgClass, UpperCasePipe } from '@angular/common';
+import { DatePipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExamService, IExam } from '../exam.service';
-import { McqForm } from './forms/mcq-form/mcq-form';
-import { TrueOrFalseForm } from './forms/true-or-false-form/true-or-false-form';
 import { ViewExamItemList } from './view-exam-item-list/view-exam-item-list';
+import { CreateItemForm } from './create-item-form/create-item-form';
 
 @Component({
   selector: 'app-view-exam',
@@ -23,10 +21,8 @@ import { ViewExamItemList } from './view-exam-item-list/view-exam-item-list';
     DatePipe,
     UpperCasePipe,
     FormsModule,
-    McqForm,
-    TrueOrFalseForm,
-    EssayForm,
     ViewExamItemList,
+    CreateItemForm,
   ],
   templateUrl: './view-exam.html',
   styleUrl: './view-exam.css',
