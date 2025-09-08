@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { examsRoute } from './exams/exams.routes';
 
 export const routes: Routes = [
   {
@@ -6,25 +7,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./dashboard/dashboard').then((c) => c.Dashboard),
   },
+  ...examsRoute,
+
   {
-    path: 'exams',
-    loadComponent: () => import('./exams/exams').then((c) => c.Exams),
-  },
-  {
-    path: 'exams/create-exam',
+    path: 'exams/:examId/takers',
     loadComponent: () =>
-      import('./exams/create-exam/create-exam').then((c) => c.CreateExam),
-  },
-  {
-    path: 'exams/view-exam/:id',
-    loadComponent: () =>
-      import('./exams/view-exam/view-exam').then((c) => c.ViewExam),
-  },
-  {
-    path: 'exams/view-exam/:id/takers',
-    loadComponent: () =>
-      import('./exams/view-exam/exam-takers/exam-takers').then(
-        (c) => c.ExamTakers
+      import('./exams/view-exam/view-exam-takers/view-exam-takers').then(
+        (c) => c.ViewExamTakers
       ),
   },
 ];

@@ -8,6 +8,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { CommonModule, NgClass } from '@angular/common';
+import { ExamService, IExam } from '../../../exam.service';
+import { IExamItem } from '../../../../../student/exams/take-exam/take-exam';
 
 @Component({
   selector: 'app-mcq-item',
@@ -16,8 +18,9 @@ import { CommonModule, NgClass } from '@angular/common';
   styleUrls: ['./mcq-item.css'],
 })
 export class McqItem implements OnInit {
-  itemSig = input<any>();
+  itemSig = input.required<IExam['items'][number]>();
   fb = inject(FormBuilder);
+  examService = inject(ExamService);
 
   isEditingSig = signal(false);
 
@@ -70,6 +73,11 @@ export class McqItem implements OnInit {
     }
     const value = this.mcqItemForm.getRawValue();
     console.log('Submitting MCQ item:', value);
+    // this.examService.updateItem(this.itemSig().id, {
+    //   question: value.question,
+    //   points: value.points,
+    //   options: value.options,
+    // });
 
     this.isEditingSig.set(false);
   }

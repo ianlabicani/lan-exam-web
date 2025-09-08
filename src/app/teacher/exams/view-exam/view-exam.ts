@@ -1,14 +1,20 @@
+import { ViewExamService } from './view-exam.service';
 import { EssayForm } from './forms/essay-form/essay-form';
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  signal,
+  computed,
+  inject,
+  input,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe, NgClass, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ExamService, IExam, IItem } from '../exam.service';
+import { ExamService, IExam } from '../exam.service';
 import { McqForm } from './forms/mcq-form/mcq-form';
 import { TrueOrFalseForm } from './forms/true-or-false-form/true-or-false-form';
-import { ViewExamItemsService } from './view-exam-items.service';
-import { ViewExamItemsList } from './view-exam-items-list/view-exam-items-list';
-import { ViewExamCountCard } from './view-exam-count-card/view-exam-count-card';
+import { ViewExamItemList } from './view-exam-item-list/view-exam-item-list';
 
 @Component({
   selector: 'app-view-exam',
@@ -20,21 +26,16 @@ import { ViewExamCountCard } from './view-exam-count-card/view-exam-count-card';
     McqForm,
     TrueOrFalseForm,
     EssayForm,
-    ViewExamItemsList,
-    ViewExamCountCard,
+    ViewExamItemList,
   ],
   templateUrl: './view-exam.html',
   styleUrl: './view-exam.css',
 })
 export class ViewExam implements OnInit {
-  onEssayItemCreated(item: IItem) {
-    this.viewExamItemsService.itemsSig.set([
-      item,
-      ...this.viewExamItemsService.itemsSig(),
-    ]);
-  }
+  examId = input.required<number>();
+
+  viewExamService = inject(ViewExamService);
   private route = inject(ActivatedRoute);
-  protected viewExamItemsService = inject(ViewExamItemsService);
   private examService = inject(ExamService);
 
   exam = signal<IExam | null>(null);
@@ -45,39 +46,19 @@ export class ViewExam implements OnInit {
   saving = signal(false);
   errorMsg = signal<string | null>(null);
 
-  itemsSig = this.viewExamItemsService.itemsSig;
-
-  totalPoints = computed(() =>
-    this.itemsSig().reduce((s, i) => s + (i.points || 0), 0)
-  );
-  mcqCount = computed(
-    () => this.itemsSig().filter((i) => i.type === 'mcq').length
-  );
-  tfCount = computed(
-    () => this.itemsSig().filter((i) => i.type === 'truefalse').length
-  );
-  essayCount = computed(
-    () => this.itemsSig().filter((i) => i.type === 'essay').length
-  );
-
   isEditable = computed(() => this.exam()?.status === 'draft');
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
-      this.loading.set(false);
-      return;
-    }
-    this.fetchExam(+id);
+    this.fetchExam(this.examId());
   }
 
   private fetchExam(id: number) {
     this.loading.set(true);
-    this.examService.getExam(id).subscribe({
+    this.viewExamService.getExam(id).subscribe({
       next: (exam) => {
         this.exam.set(exam);
-        const items = exam.items || [];
-        this.viewExamItemsService.itemsSig.set(items);
+        console.log(exam);
+
         this.loading.set(false);
       },
       error: (err) => {
@@ -86,6 +67,8 @@ export class ViewExam implements OnInit {
       },
     });
   }
+
+  onEssayItemCreated(item: IExam['items'][number]) {}
 
   statusBadge(status?: string) {
     const map: Record<string, string> = {
@@ -133,18 +116,18 @@ export class ViewExam implements OnInit {
     });
   }
 
-  onMcqItemCreated(item: IItem) {
-    this.viewExamItemsService.itemsSig.set([
-      item,
-      ...this.viewExamItemsService.itemsSig(),
-    ]);
+  onMcqItemCreated(item: IExam['items'][number]) {
+    // this.viewExamItemsService.examItemsSig.set([
+    //   item,
+    //   ...this.viewExamItemsService.examItemsSig(),
+    // ]);
   }
 
-  onTfItemCreated(item: IItem) {
-    this.viewExamItemsService.itemsSig.set([
-      item,
-      ...this.viewExamItemsService.itemsSig(),
-    ]);
+  onTfItemCreated(item: IExam['items'][number]) {
+    // this.viewExamItemsService.examItemsSig.set([
+    //   item,
+    //   ...this.viewExamItemsService.examItemsSig(),
+    // ]);
   }
 
   addTrueFalse() {
@@ -161,10 +144,10 @@ export class ViewExam implements OnInit {
       })
       .subscribe({
         next: (res) => {
-          this.viewExamItemsService.itemsSig.set([
-            res.item,
-            ...this.viewExamItemsService.itemsSig(),
-          ]);
+          // this.viewExamItemsService.examItemsSig.set([
+          //   res.item,
+          //   ...this.viewExamItemsService.examItemsSig(),
+          // ]);
           this.tf = { question: '', answer: 'true', points: 1 };
           this.saving.set(false);
         },
@@ -189,10 +172,10 @@ export class ViewExam implements OnInit {
       })
       .subscribe({
         next: (res) => {
-          this.viewExamItemsService.itemsSig.set([
-            res.item,
-            ...this.viewExamItemsService.itemsSig(),
-          ]);
+          // this.viewExamItemsService.examItemsSig.set([
+          //   res.item,
+          //   ...this.viewExamItemsService.examItemsSig(),
+          // ]);
           this.essay = { question: '', expectedAnswer: '', points: 5 };
           this.saving.set(false);
         },
@@ -215,7 +198,7 @@ export class ViewExam implements OnInit {
     if (this.exam()) this.fetchExam(this.exam()!.id);
   }
 
-  saveEdit(item: IItem) {
+  saveEdit(item: IExam['items'][number]) {
     this.saving.set(true);
     const payload: any = {
       question: item.question,
@@ -226,11 +209,11 @@ export class ViewExam implements OnInit {
     if (item.type === 'essay') payload.expected_answer = item.expected_answer;
     this.examService.updateItem(item.id, payload, this.exam()!.id).subscribe({
       next: (res) => {
-        this.viewExamItemsService.itemsSig.set(
-          this.viewExamItemsService
-            .itemsSig()
-            .map((i) => (i.id === res.item.id ? res.item : i))
-        );
+        // this.viewExamItemsService.examItemsSig.set(
+        //   this.viewExamItemsService
+        //     .examItemsSig()
+        //     .map((i) => (i.id === res.item.id ? res.item : i))
+        // );
         this.editingItemId.set(null);
         this.saving.set(false);
       },
@@ -246,9 +229,9 @@ export class ViewExam implements OnInit {
     this.saving.set(true);
     this.examService.deleteItem(id).subscribe({
       next: () => {
-        this.viewExamItemsService.itemsSig.set(
-          this.viewExamItemsService.itemsSig().filter((i) => i.id !== id)
-        );
+        // this.viewExamItemsService.examItemsSig.set(
+        //   this.viewExamItemsService.examItemsSig().filter((i) => i.id !== id)
+        // );
         this.saving.set(false);
       },
       error: (err) => {

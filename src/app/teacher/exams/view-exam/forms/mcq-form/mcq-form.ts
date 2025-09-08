@@ -9,8 +9,8 @@ import {
   Validators,
   FormsModule,
 } from '@angular/forms';
-import { ExamService, IItem } from '../../../exam.service';
-import { ViewExamItemsService } from '../../view-exam-items.service';
+import { ExamService } from '../../../exam.service';
+// import { ViewExamItemsService } from '../../view-exam-items.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { NgClass } from '@angular/common';
 
@@ -34,7 +34,7 @@ export interface McqFormValue {
 export class McqForm implements OnInit {
   fb = inject(FormBuilder);
   private examService = inject(ExamService);
-  protected viewExamItemsService = inject(ViewExamItemsService);
+  // protected viewExamItemsService = inject(ViewExamItemsService);
 
   // icons
   faPlus = faPlus;
@@ -114,7 +114,7 @@ export class McqForm implements OnInit {
       })
       .subscribe({
         next: (res) => {
-          this.viewExamItemsService.addItem(res.item);
+          // this.viewExamItemsService.addItem(res.item);
           // reset form
 
           this.mcqForm.reset({ question: '', points: 1 });

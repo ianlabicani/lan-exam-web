@@ -1,7 +1,7 @@
 import { Component, inject, input, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { ViewExamItemsService } from '../../view-exam-items.service';
+// import { ViewExamItemsService } from '../../view-exam-items.service';
 import { ExamService } from '../../../exam.service';
 
 @Component({
@@ -12,7 +12,7 @@ import { ExamService } from '../../../exam.service';
 })
 export class EssayForm {
   itemCreated = output<any>();
-  protected viewExamItemsService = inject(ViewExamItemsService);
+  // protected viewExamItemsService = inject(ViewExamItemsService);
   protected examService = inject(ExamService);
   private fb = inject(FormBuilder);
 
@@ -43,7 +43,7 @@ export class EssayForm {
       .subscribe({
         next: (res) => {
           this.essayForm.reset();
-          this.viewExamItemsService.addItem(res.item);
+          // this.viewExamItemsService.addItem(res.item);
           this.itemCreated.emit(res.item);
           this.isSavingSig.set(false);
         },

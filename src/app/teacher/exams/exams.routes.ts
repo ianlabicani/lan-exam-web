@@ -1,0 +1,19 @@
+import { Routes } from '@angular/router';
+
+export const examsRoute: Routes = [
+  {
+    path: 'exams',
+    loadComponent: () =>
+      import('./list-exam/list-exam').then((c) => c.ListExam),
+  },
+  {
+    path: 'exams/create',
+    loadComponent: () =>
+      import('./create-exam/create-exam').then((c) => c.CreateExam),
+  },
+  {
+    path: 'exams/:examId',
+    loadComponent: () =>
+      import('./view-exam/view-exam').then((c) => c.ViewExam),
+  },
+];

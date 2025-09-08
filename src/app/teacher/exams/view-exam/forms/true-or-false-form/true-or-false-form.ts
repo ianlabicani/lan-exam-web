@@ -6,7 +6,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { ExamService } from '../../../exam.service';
-import { ViewExamItemsService } from '../../view-exam-items.service';
 
 @Component({
   selector: 'app-true-or-false-form',
@@ -17,7 +16,7 @@ import { ViewExamItemsService } from '../../view-exam-items.service';
 export class TrueOrFalseForm {
   private fb = inject(FormBuilder);
   private examService = inject(ExamService);
-  protected viewExamItemsService = inject(ViewExamItemsService);
+  // protected viewExamItemsService = inject(ViewExamItemsService);
 
   examIdSig = input<number | null>(null);
   saving = signal(false);
@@ -47,7 +46,7 @@ export class TrueOrFalseForm {
         next: (res) => {
           this.tofForm.reset({ question: '', answer: 'true', points: 1 });
           this.saving.set(false);
-          this.viewExamItemsService.addItem(res.item);
+          // this.viewExamItemsService.addItem(res.item);
         },
         error: (err) => {
           this.errorMsg.set(err?.error?.message || 'Failed to add True/False');

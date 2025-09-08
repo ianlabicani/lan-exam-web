@@ -91,7 +91,7 @@ export class ExamService {
     );
   }
 
-  updateItem(itemId: number | string, payload: any, examId: number) {
+  updateItem(examId: number, itemId: number | string, payload: any) {
     return this.http.patch<{ item: IItem }>(
       `http://127.0.0.1:8000/api/teacher/exams/${examId}/items/${itemId}`,
       payload

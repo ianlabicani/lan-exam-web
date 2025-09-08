@@ -1,0 +1,35 @@
+@let examItems = examItemsSig();
+
+<div class="space-y-4">
+  <h2 class="text-lg font-semibold text-gray-900">
+    Exam Items ({{ examItems.length }})
+  </h2>
+
+  <div class="space-y-3">
+    @for(item of examItems; track $index) {
+      @if(item.type==='mcq') {
+        <app-mcq-item [itemSig]="item"></app-mcq-item>
+      } @else if (item.type==='truefalse') {
+        <p class="text-xs text-gray-600">
+          Answer:
+          <span
+            [ngClass]="{
+              'text-green-600': item.answer,
+              'text-red-600': !item.answer
+            }"
+            class="font-semibold"
+            >{{ item.answer ? 'True' : 'False' }}</span
+          >
+        </p>
+      } @else if (item.type==='essay') {
+        <p class="text-xs text-gray-600">
+          Expected: <span class="italic">{{ item.expected_answer }}</span>
+        </p>
+      }
+    } @empty {
+      <div class="p-6 text-center border border-dashed rounded-lg bg-white text-gray-500 text-sm">
+        No items added yet.
+      </div>
+    }
+  </div>
+</div>

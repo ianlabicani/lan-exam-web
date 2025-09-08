@@ -47,7 +47,7 @@
 
       @if(exam(); as exam) { @if (exam.status == "active") {
       <a
-        [routerLink]="['/teacher/exams/view-exam', exam!.id, 'takers']"
+        [routerLink]="['/teacher/exams', exam.id, 'takers']"
         class="px-3 py-2 rounded-md bg-purple-100 hover:bg-purple-200 text-sm font-medium"
         >Exam Takers</a
       >
@@ -75,36 +75,43 @@
 
   <!-- Stats -->
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-    <app-view-exam-count-card
-      [totalPointsSig]="totalPoints()"
-      [titleSig]="'Total Points'"
-      [colorSig]="'text-blue-700'"
-    ></app-view-exam-count-card>
-    <app-view-exam-count-card
-      [totalPointsSig]="mcqCount()"
-      [titleSig]="'MCQ'"
-      [colorSig]="'text-blue-600'"
-    ></app-view-exam-count-card>
-
-    <app-view-exam-count-card
-      [totalPointsSig]="tfCount()"
-      [titleSig]="'True/False'"
-      [colorSig]="'text-indigo-600'"
-    ></app-view-exam-count-card>
-    <app-view-exam-count-card
-      [totalPointsSig]="essayCount()"
-      [titleSig]="'Essay'"
-      [colorSig]="'text-emerald-600'"
-    ></app-view-exam-count-card>
+    <div class="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+      <p class="text-[11px] uppercase tracking-wide font-medium text-gray-500 mb-1">
+        Total Points
+      </p>
+      <p class="text-xl font-semibold text-blue-700">
+        {{ this.viewExamService.totalPointsSig() }}
+      </p>
+    </div>
+    <div class="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+      <p class="text-[11px] uppercase tracking-wide font-medium text-gray-500 mb-1">
+        MCQ
+      </p>
+      <p class="text-xl font-semibold text-blue-600">
+        {{ this.viewExamService.mcqCountSig() }}
+      </p>
+    </div>
+    <div class="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+      <p class="text-[11px] uppercase tracking-wide font-medium text-gray-500 mb-1">
+        TRUE/FALSE
+      </p>
+      <p class="text-xl font-semibold text-indigo-600">
+        {{ this.viewExamService.tfCountSig() }}
+      </p>
+    </div>
+    <div class="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+      <p class="text-[11px] uppercase tracking-wide font-medium text-gray-500 mb-1">
+        ESSAY
+      </p>
+      <p class="text-xl font-semibold text-emerald-600">
+        {{ this.viewExamService.essayCountSig() }}
+      </p>
+    </div>
   </div>
 
   <!-- Item authoring & list -->
   <div class="space-y-8">
-    <div
-      class="grid md:grid-cols-3 gap-6"
-      [class.opacity-50]="!isEditable()"
-      [class.pointer-events-none]="!isEditable()"
-    >
+    <div class="grid md:grid-cols-3 gap-6" [class.opacity-50]="!isEditable()" [class.pointer-events-none]="!isEditable()">
       <!-- MCQ (Reusable Form Component now creates items) -->
       <div class="bg-white border rounded-lg p-4 shadow-sm">
         <h3 class="text-sm font-semibold mb-3">Add MCQ</h3>
@@ -127,7 +134,8 @@
       </div>
     </div>
 
-    <app-teacher-view-exam-items-list></app-teacher-view-exam-items-list>
+    <app-teacher-view-exam-item-list [examIdSig]="examId()"/>
+
   </div>
   }
 </div>
