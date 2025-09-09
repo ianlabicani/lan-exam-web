@@ -14,4 +14,10 @@ export class ExamItemsService {
       payload
     );
   }
+
+  delete(examId: number, itemId: number) {
+    return this.http.delete<{ success: boolean }>(
+      `http://127.0.0.1:8000/api/teacher/exams/${examId}/items/${itemId}`
+    );
+  }
 }

@@ -1,0 +1,20 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+	<div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+		<div class="flex items-start justify-between">
+			<h3 class="text-lg font-semibold">Delete Item</h3>
+			<button (click)="onClose()" class="text-gray-600">✕</button>
+		</div>
+
+		<p class="mt-4 text-sm text-gray-700">Are you sure you want to delete this item?</p>
+		<p class="mt-2 text-sm font-medium">"{{ itemInput().question }}"</p>
+
+		<div *ngIf="error" class="mt-3 text-sm text-red-600">{{ error }}</div>
+
+		<div class="mt-6 flex justify-end gap-2">
+			<button (click)="onClose()" class="px-3 py-1 rounded border">Cancel</button>
+			<button (click)="confirmDelete()" [disabled]="deleting" class="px-3 py-1 rounded bg-red-600 text-white">
+				{{ deleting ? 'Deleting...' : 'Delete' }}
+			</button>
+		</div>
+	</div>
+</div>

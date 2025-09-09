@@ -9,6 +9,7 @@ import { TrueOrFalseForm } from './create-item/true-or-false-form/true-or-false-
 import { TrueFalseItem } from './true-false-item/true-false-item';
 import { EssayItem } from './essay-item/essay-item';
 import { UpdateItem } from './update-item/update-item';
+import { DeleteItem } from './delete-item/delete-item';
 import { environment } from '../../../../../environments/environment.development';
 
 @Component({
@@ -21,6 +22,7 @@ import { environment } from '../../../../../environments/environment.development
     TrueFalseItem,
     EssayItem,
     UpdateItem,
+    DeleteItem,
   ],
   templateUrl: './list-exam-items.html',
   styleUrl: './list-exam-items.css',
@@ -36,6 +38,7 @@ export class ListExamItems implements OnInit {
   isFormVisibleSig = signal(false);
   isUpdateModalOpenSig = signal(false);
   selectedForUpdateSig = signal<IExamItem | null>(null);
+  isDeleteModalOpenSig = signal(false);
 
   ngOnInit(): void {
     this.activatedRoute.parent?.params.subscribe((params) => {
@@ -76,6 +79,21 @@ export class ListExamItems implements OnInit {
   closeUpdateModal() {
     this.selectedForUpdateSig.set(null);
     this.isUpdateModalOpenSig.set(false);
+  }
+
+  openDeleteModal(item: IExamItem) {
+    this.selectedForUpdateSig.set(item);
+    this.isDeleteModalOpenSig.set(true);
+  }
+
+  closeDeleteModal() {
+    this.selectedForUpdateSig.set(null);
+    this.isDeleteModalOpenSig.set(false);
+  }
+
+  onItemDeleted(item: IExamItem) {
+    this.removeItem(item);
+    this.closeDeleteModal();
   }
 
   onItemSaved(updated: IExamItem) {
