@@ -2,13 +2,11 @@ import { Component, inject, input, OnInit, signal } from '@angular/core';
 import {
   FormBuilder,
   FormArray,
-  FormGroup,
   ReactiveFormsModule,
-  FormsModule,
   Validators,
 } from '@angular/forms';
-import { CommonModule, NgClass } from '@angular/common';
-import { ExamsService, IExam } from '../../../exams.service';
+import { NgClass } from '@angular/common';
+import { ExamsService } from '../../../exams.service';
 import { IExamItem } from '../list-exam-items';
 
 @Component({

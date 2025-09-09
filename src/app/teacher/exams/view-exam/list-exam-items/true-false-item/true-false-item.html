@@ -1,0 +1,32 @@
+@let item = itemSig();
+
+<div class="rounded-lg border border-gray-200 bg-white shadow-sm p-4 space-y-4">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <span
+      class="bg-indigo-100 text-indigo-700 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
+    >
+      TRUE/FALSE
+    </span>
+    <span class="text-xs text-gray-500">{{ item.points }} pts</span>
+  </div>
+
+  <!-- Question -->
+  <p class="text-sm font-semibold text-gray-800">
+    {{ item.question }}
+  </p>
+
+  <!-- Answer -->
+  <div class="flex items-center gap-2">
+    <span class="text-sm text-gray-600">Answer:</span>
+    <span
+      class="px-3 py-1 rounded-full text-sm font-medium"
+      [ngClass]="{
+        'bg-green-100 text-green-700': item.answer,
+        'bg-red-100 text-red-700': !item.answer
+      }"
+    >
+      {{ item.answer ? 'True' : 'False' }}
+    </span>
+  </div>
+</div>

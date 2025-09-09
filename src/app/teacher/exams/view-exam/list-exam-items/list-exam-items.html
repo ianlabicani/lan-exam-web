@@ -1,8 +1,14 @@
 @let examItems = examItemsSig();
 @let exam = examSig();
 @let examId = examIdSig();
+@let isFormVisible = isFormVisibleSig();
 
-@if (exam?.status == 'draft') {
+<button (click)="isFormVisibleSig.set(!isFormVisible)"
+class="mt-4 mb-6 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+ {{isFormVisible ? 'Show' : 'Hide'}} Form
+</button>
+
+@if (exam?.status == 'draft' && !isFormVisible) {
   <div class="grid md:grid-cols-3 gap-6">
     <!-- MCQ (Reusable Form Component now creates items) -->
     <div class="bg-white border rounded-lg p-4 shadow-sm">
@@ -28,6 +34,7 @@
   </div>
 }
 
+
 <div class="space-y-4">
   <h2 class="text-lg font-semibold text-gray-900">
     Exam Items ({{ examItems.length }})
@@ -35,27 +42,20 @@
 
   <div class="space-y-3">
     @for(item of examItems; track $index) {
-      @if(item.type==='mcq') {
-        <app-mcq-item [itemSig]="item"></app-mcq-item>
-      } @else if (item.type==='truefalse') {
-        <p class="text-xs text-gray-600">
-          Answer:
-          <span
-            [ngClass]="{
-              'text-green-600': item.answer,
-              'text-red-600': !item.answer
-            }"
-            class="font-semibold">
-            {{ item.answer ? 'True' : 'False' }}
-            </span>
-        </p>
-      } @else if (item.type==='essay') {
-        <p class="text-xs text-gray-600">
-          Expected: <span class="italic">{{ item.expected_answer }}</span>
-        </p>
-      }
+      <div class="flex gap-1 flex-col">
+        @if(item.type === 'mcq') {
+          <app-mcq-item [itemSig]="item"></app-mcq-item>
+        } @else if(item.type === 'truefalse') {
+          <app-true-false-item [itemSig]="item"></app-true-false-item>
+        } @else if(item.type === 'essay') {
+          <app-essay-item [itemSig]="item"></app-essay-item>
+        }
+      </div>
     } @empty {
-      <div class="p-6 text-center border border-dashed rounded-lg bg-white text-gray-500 text-sm">
+      <div class="p-8 text-center border border-dashed rounded-lg bg-gray-50 text-gray-500 text-sm">
+        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
         No items added yet.
       </div>
     }

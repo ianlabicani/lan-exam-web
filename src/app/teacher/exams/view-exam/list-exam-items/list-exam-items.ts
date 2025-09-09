@@ -1,17 +1,25 @@
 import { ActivatedRoute } from '@angular/router';
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { NgClass } from '@angular/common';
 import { McqItem } from './mcq-item/mcq-item';
 import { HttpClient } from '@angular/common/http';
 import { ExamsService, IExam } from '../../exams.service';
 import { EssayForm } from './create-item/essay-form/essay-form';
 import { McqForm } from './create-item/mcq-form/mcq-form';
 import { TrueOrFalseForm } from './create-item/true-or-false-form/true-or-false-form';
+import { TrueFalseItem } from './true-false-item/true-false-item';
+import { EssayItem } from './essay-item/essay-item';
 import { environment } from '../../../../../environments/environment.development';
 
 @Component({
   selector: 'app-teacher-list-exam-items',
-  imports: [NgClass, McqItem, McqForm, TrueOrFalseForm, EssayForm],
+  imports: [
+    McqItem,
+    McqForm,
+    TrueOrFalseForm,
+    EssayForm,
+    TrueFalseItem,
+    EssayItem,
+  ],
   templateUrl: './list-exam-items.html',
   styleUrl: './list-exam-items.css',
 })
@@ -23,6 +31,7 @@ export class ListExamItems implements OnInit {
   examIdSig = signal<number>(0);
   examItemsSig = signal<IExamItem[]>([]);
   examSig = signal<IExam | null>(null);
+  isFormVisibleSig = signal(false);
 
   ngOnInit(): void {
     this.activatedRoute.parent?.params.subscribe((params) => {
@@ -38,11 +47,12 @@ export class ListExamItems implements OnInit {
   getExamItems(examId: number) {
     this.http
       .get<{ items: IExamItem[] }>(
-        `http://${environment.apiBaseUrl}/teacher/exams/${examId}/items`
+        `${environment.apiBaseUrl}/teacher/exams/${examId}/items`
       )
       .subscribe({
         next: (res) => {
           this.examItemsSig.set(res.items);
+          console.log(res.items);
         },
         error: (err) => {
           console.error('Error fetching exam items:', err);

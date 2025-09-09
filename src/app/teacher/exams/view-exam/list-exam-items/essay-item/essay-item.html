@@ -1,0 +1,24 @@
+@let item = itemSig();
+
+<div class="rounded-lg border border-gray-200 bg-white shadow-sm p-4 space-y-4">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <span
+      class="bg-emerald-100 text-emerald-700 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
+    >
+      ESSAY
+    </span>
+    <span class="text-xs text-gray-500">{{ item.points }} pts</span>
+  </div>
+
+  <!-- Question -->
+  <p class="text-sm font-semibold text-gray-800">
+    {{ item.question }}
+  </p>
+
+  <!-- Expected Answer -->
+  <div class="bg-gray-50 rounded p-3">
+    <span class="text-sm text-gray-600">Expected Answer:</span>
+    <p class="text-sm text-gray-800 mt-1 italic">{{ item.expected_answer || 'No expected answer provided.' }}</p>
+  </div>
+</div>
