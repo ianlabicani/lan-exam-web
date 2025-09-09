@@ -12,7 +12,7 @@
           type="button"
           class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 text-sm font-medium disabled:opacity-50"
           [disabled]="loading"
-          (click)="activateExam(exam.id)"
+          (click)="updateStatus(exam.id, 'active')"
         >
           Activate Exam
         </button>
@@ -25,7 +25,7 @@
           type="button"
           class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 text-sm font-medium disabled:opacity-50"
           [disabled]="loading"
-          (click)="publishExam(exam.id)"
+          (click)="updateStatus(exam.id, 'published')"
         >
           Publish Exam
         </button>
@@ -38,7 +38,7 @@
           type="button"
           class="px-4 py-2 rounded bg-red-600 text-white hover:bg-green-700 text-sm font-medium disabled:opacity-50"
           [disabled]="loading"
-          (click)="archiveExam(exam.id)"
+          (click)="updateStatus(exam.id, 'archived')"
         >
           Archive Exam
         </button>

@@ -1,7 +1,7 @@
 import { Component, input, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ExamItemsService } from '../exam-items.service';
-import { IExamItem } from '../list-exam-items';
+import { ExamItem } from '../../../../services/exam-item.service';
 
 @Component({
   selector: 'app-delete-item',
@@ -10,8 +10,8 @@ import { IExamItem } from '../list-exam-items';
   styleUrl: './delete-item.css',
 })
 export class DeleteItem {
-  itemInput = input.required<IExamItem>();
-  deleted = output<IExamItem>();
+  itemInput = input.required<ExamItem>();
+  deleted = output<ExamItem>();
   close = output<void>();
 
   examItemsService = inject(ExamItemsService);

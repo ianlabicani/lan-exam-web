@@ -7,7 +7,7 @@ import {
 } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { ExamsService } from '../../../exams.service';
-import { IExamItem } from '../list-exam-items';
+import { ExamItem } from '../../../../services/exam-item.service';
 
 @Component({
   selector: 'app-mcq-item',
@@ -16,7 +16,7 @@ import { IExamItem } from '../list-exam-items';
   styleUrls: ['./mcq-item.css'],
 })
 export class McqItem implements OnInit {
-  itemSig = input.required<IExamItem>();
+  itemSig = input.required<ExamItem>();
   fb = inject(FormBuilder);
   examService = inject(ExamsService);
 
@@ -70,7 +70,7 @@ export class McqItem implements OnInit {
       return;
     }
     const value = this.mcqItemForm.getRawValue();
-    console.log('Submitting MCQ item:', value);
+    // console.log('Submitting MCQ item:', value);
     // this.examService.updateItem(this.itemSig().id, {
     //   question: value.question,
     //   points: value.points,

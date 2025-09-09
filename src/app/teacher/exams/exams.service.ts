@@ -11,11 +11,11 @@ export class ExamsService {
   http = inject(HttpClient);
   authService = inject(AuthService);
 
-  exams = signal<IExam[]>([]);
+  exams = signal<Exam[]>([]);
 
   getAll() {
     return this.http
-      .get<{ exams: IExam[] }>(`${environment.apiBaseUrl}/teacher/exams`)
+      .get<{ exams: Exam[] }>(`${environment.apiBaseUrl}/teacher/exams`)
       .pipe(
         map((res) => {
           this.exams.set(res.exams);
@@ -25,9 +25,7 @@ export class ExamsService {
   }
 
   getOne(id: number) {
-    return this.http
-      .get<IExam>(`${environment.apiBaseUrl}/teacher/exams/${id}`)
-      .pipe();
+    return this.http.get<any>(`${environment.apiBaseUrl}/teacher/exams/${id}`);
   }
 
   createExam(payload: {
@@ -41,20 +39,18 @@ export class ExamsService {
     total_points: number;
   }) {
     const token = this.authService.currentUser()?.token.substring(2);
-    return this.http.post<{ exam: IExam }>(
+    return this.http.post<{ exam: Exam }>(
       'http://127.0.0.1:8000/api/teacher/exams',
       payload
     );
   }
 
   getExam(id: number) {
-    return this.http.get<IExam>(
-      `http://127.0.0.1:8000/api/teacher/exams/${id}`
-    );
+    return this.http.get<any>(`http://127.0.0.1:8000/api/teacher/exams/${id}`);
   }
 
   updateExamStatus(id: number | string, status: string) {
-    return this.http.patch<{ exam: IExam }>(
+    return this.http.patch<{ exam: Exam }>(
       `http://127.0.0.1:8000/api/teacher/exams/${id}/status`,
       { status }
     );
@@ -81,22 +77,6 @@ export class ExamsService {
   }
 }
 
-export interface IExam {
-  id: number;
-  title: string;
-  description: string;
-  starts_at: Date;
-  ends_at: Date;
-  year: string;
-  section: string;
-  status: string;
-  total_points: number;
-  created_at: Date;
-  updated_at: Date;
-  pivot: IExam_Teacher;
-  items: IItem[];
-}
-
 export interface IItem {
   id: number;
   exam_id: number;
@@ -118,4 +98,18 @@ export interface Option {
 export interface IExam_Teacher {
   teacher_id: number;
   exam_id: number;
+}
+
+export interface Exam {
+  id: number;
+  title: string;
+  description: string;
+  starts_at: Date;
+  ends_at: Date;
+  year: string;
+  section: string;
+  status: string;
+  total_points: number;
+  created_at: Date;
+  updated_at: Date;
 }

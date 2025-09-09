@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { IExamItem } from '../list-exam-items';
+import { ExamItem } from '../../../../services/exam-item.service';
 
 @Component({
   selector: 'app-true-false-item',
@@ -9,5 +9,5 @@ import { IExamItem } from '../list-exam-items';
   styleUrls: ['./true-false-item.css'],
 })
 export class TrueFalseItem {
-  itemSig = input.required<IExamItem>();
+  itemSig = input.required<ExamItem>();
 }

@@ -1,15 +1,9 @@
-import { Component, Input, output, signal, inject, input } from '@angular/core';
-import {
-  ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
-import { ExamsService } from '../../../../exams.service';
-import { IExamItem } from '../../list-exam-items';
+import { Component, output, signal, inject, input } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ExamItemsService } from '../../exam-items.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../../environments/environment.development';
+import { ExamItem } from '../../../../../services/exam-item.service';
 
 @Component({
   selector: 'app-true-or-false-form',
@@ -21,7 +15,7 @@ export class TrueOrFalseForm {
   private fb = inject(FormBuilder);
   examItemsService = inject(ExamItemsService);
   http = inject(HttpClient);
-  addItemOutput = output<IExamItem>();
+  addItemOutput = output<ExamItem>();
 
   examIdSig = input<number | null>(null);
   saving = signal(false);
@@ -48,7 +42,7 @@ export class TrueOrFalseForm {
     };
 
     this.http
-      .post<{ item: IExamItem }>(
+      .post<{ item: ExamItem }>(
         `${environment.apiBaseUrl}/teacher/exams/${examId}/items`,
         payload
       )

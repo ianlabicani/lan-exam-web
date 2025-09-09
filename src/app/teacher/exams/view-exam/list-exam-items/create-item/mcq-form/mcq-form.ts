@@ -20,8 +20,8 @@ import {
 } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { NgClass } from '@angular/common';
-import { IExamItem } from '../../list-exam-items';
 import { environment } from '../../../../../../../environments/environment.development';
+import { ExamItem } from '../../../../../services/exam-item.service';
 
 @Component({
   selector: 'app-mcq-form',
@@ -34,7 +34,7 @@ export class McqForm implements OnInit {
   examItemsService = inject(ExamItemsService);
   http = inject(HttpClient);
 
-  addItemOutput = output<IExamItem>();
+  addItemOutput = output<ExamItem>();
 
   // icons
   faPlus = faPlus;
@@ -112,7 +112,7 @@ export class McqForm implements OnInit {
     };
 
     this.http
-      .post<{ item: IExamItem }>(
+      .post<{ item: ExamItem }>(
         `${environment.apiBaseUrl}/teacher/exams/${examId}/items`,
         payload
       )

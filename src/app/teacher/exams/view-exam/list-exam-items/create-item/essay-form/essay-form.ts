@@ -2,9 +2,9 @@ import { Component, inject, input, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ExamItemsService } from '../../exam-items.service';
-import { IExamItem } from '../../list-exam-items';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../../environments/environment.development';
+import { ExamItem } from '../../../../../services/exam-item.service';
 
 @Component({
   selector: 'app-essay-form',
@@ -17,7 +17,7 @@ export class EssayForm {
   private fb = inject(FormBuilder);
   http = inject(HttpClient);
 
-  addItemOutput = output<IExamItem>();
+  addItemOutput = output<ExamItem>();
 
   examIdSig = input<number | null>();
   isSavingSig = signal(false);
@@ -43,7 +43,7 @@ export class EssayForm {
     };
 
     this.http
-      .post<{ item: IExamItem }>(
+      .post<{ item: ExamItem }>(
         `${environment.apiBaseUrl}/teacher/exams/${this.examIdSig()}/items`,
         payload
       )

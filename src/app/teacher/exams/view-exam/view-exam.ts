@@ -1,17 +1,9 @@
-import {
-  Component,
-  OnInit,
-  signal,
-  computed,
-  inject,
-  input,
-} from '@angular/core';
-import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { RouterLink, RouterOutlet, ActivatedRoute } from '@angular/router';
 import { DatePipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ExamsService, IExam } from '../exams.service';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment.development';
+import { ExamsService } from '../exams.service';
+import { ExamService } from '../../services/exam.service';
 
 @Component({
   selector: 'app-view-exam',
@@ -20,89 +12,47 @@ import { environment } from '../../../../environments/environment.development';
   styleUrl: './view-exam.css',
 })
 export class ViewExam implements OnInit {
-  examId = input.required<number>(); // from route param
+  examsService = inject(ExamsService);
+  examService = inject(ExamService);
+  route = inject(ActivatedRoute);
 
-  private http = inject(HttpClient);
-
-  examSig = signal<IExam | null | undefined>(undefined);
+  examSig = this.examService.viewingExamSig;
   loadingSig = signal(true);
   errorMsg = signal<string | null>(null);
   isEditable = computed(() => this.examSig()?.status === 'draft');
 
   ngOnInit(): void {
-    this.getExam(this.examId());
+    const examId: number = this.route.snapshot.params['examId'];
+    this.getExam(examId);
   }
 
-  activateExam(examId: number) {
-    this.http
-      .patch<{ exam: IExam }>(
-        `http://127.0.0.1:8000/api/teacher/exams/${examId}/status`,
-        { status: 'active' }
-      )
-      .subscribe({
-        next: (response) => {
-          this.examSig.set(response.exam);
-        },
-        error: (err) => {
-          this.errorMsg.set(err?.error?.message || 'Failed to activate exam');
-        },
-      });
+  updateStatus(
+    examId: number,
+    status: 'active' | 'published' | 'archived' | 'draft'
+  ) {
+    this.examService.updateStatus(examId, status).subscribe({
+      next: (exam) => {
+        this.examSig.set(exam);
+      },
+      error: (err) => {
+        this.errorMsg.set(err?.error?.message || 'Failed to activate exam');
+      },
+    });
   }
 
-  publishExam(examId: number) {
-    this.http
-      .patch<{ exam: IExam }>(
-        `http://127.0.0.1:8000/api/teacher/exams/${examId}/status`,
-        { status: 'published' }
-      )
-      .subscribe({
-        next: (response) => {
-          this.examSig.set(response.exam);
-        },
-        error: (err) => {
-          this.errorMsg.set(err?.error?.message || 'Failed to publish exam');
-        },
-      });
-  }
-
-  archiveExam(examId: number) {
-    this.http
-      .patch<{ exam: IExam }>(
-        `http://127.0.0.1:8000/api/teacher/exams/${examId}/status`,
-        { status: 'archived' }
-      )
-      .subscribe({
-        next: (response) => {
-          this.examSig.set(response.exam);
-        },
-        error: (err) => {
-          this.errorMsg.set(err?.error?.message || 'Failed to archive exam');
-        },
-      });
-  }
-
-  private getExam(id: number) {
+  getExam(id: number) {
     this.loadingSig.set(true);
-    this.http
-      .get<IExam | null>(`${environment.apiBaseUrl}/teacher/exams/${id}`)
-      .subscribe({
-        next: (exam) => {
-          this.loadingSig.set(false);
-
-          if (!exam) {
-            this.errorMsg.set('Exam not found');
-            this.examSig.set(undefined);
-            return;
-          }
-
-          this.examSig.set(exam);
-        },
-        error: (err) => {
-          this.errorMsg.set(err?.error?.message || 'Failed to load exam');
-          this.loadingSig.set(false);
-          this.examSig.set(undefined);
-        },
-      });
+    this.examService.show(id).subscribe({
+      next: (exam) => {
+        this.loadingSig.set(false);
+        this.examSig.set(exam);
+        this.examService.viewingExamSig.set(exam);
+      },
+      error: (err) => {
+        this.errorMsg.set(err?.error?.message || 'Failed to load exam');
+        this.loadingSig.set(false);
+      },
+    });
   }
 
   statusBadge(status?: string) {

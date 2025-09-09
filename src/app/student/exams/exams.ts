@@ -1,4 +1,4 @@
-import { IExam } from '../../teacher/exams/exams.service';
+import { Exam } from '../../teacher/exams/exams.service';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -15,14 +15,14 @@ import { ITakenExam } from './take-exam/take-exam';
 })
 export class Exams implements OnInit {
   http = inject(HttpClient);
-  examsSig = signal<(IExam & { taken_exams: ITakenExam[] })[]>([]);
+  examsSig = signal<(Exam & { taken_exams: ITakenExam[] })[]>([]);
   auth = inject(AuthService);
   private router = inject(Router);
 
   ngOnInit() {
     this.getExams().subscribe((response) => {
       this.examsSig.set(
-        response.exams as (IExam & {
+        response.exams as (Exam & {
           taken_exams: ITakenExam[];
         })[]
       );
@@ -30,17 +30,17 @@ export class Exams implements OnInit {
   }
 
   private getExams() {
-    return this.http.get<{ exams: IExam[] }>(
+    return this.http.get<{ exams: Exam[] }>(
       'http://127.0.0.1:8000/api/student/exams'
     );
   }
 
-  goTo(exam: IExam) {
+  goTo(exam: Exam) {
     if (exam.status !== 'active') return;
     this.router.navigate(['/student/take-exam', exam.id]);
   }
 
-  cardIcon(exam: IExam): { bg: string; icon: string; color: string } {
+  cardIcon(exam: Exam): { bg: string; icon: string; color: string } {
     switch (exam.status) {
       case 'published':
       case 'active':

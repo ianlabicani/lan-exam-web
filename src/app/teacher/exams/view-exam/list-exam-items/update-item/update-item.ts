@@ -6,7 +6,7 @@ import {
   Validators,
   FormArray,
 } from '@angular/forms';
-import { IExamItem, Option } from '../list-exam-items';
+import { ExamItem } from '../../../../services/exam-item.service';
 
 @Component({
   selector: 'app-update-item',
@@ -15,8 +15,8 @@ import { IExamItem, Option } from '../list-exam-items';
   styleUrl: './update-item.css',
 })
 export class UpdateItem implements OnInit {
-  itemInput = input.required<IExamItem>();
-  itemSaved = output<IExamItem>();
+  itemInput = input.required<ExamItem>();
+  itemSaved = output<ExamItem>();
   close = output<void>();
 
   fb = inject(FormBuilder);
@@ -47,7 +47,7 @@ export class UpdateItem implements OnInit {
     while (this.options.length) this.options.removeAt(0);
 
     if (it.type === 'mcq' && it.options?.length) {
-      it.options.forEach((o: Option) =>
+      it.options.forEach((o: ExamItem['options'][number]) =>
         this.options.push(this.createOption(o))
       );
     }
@@ -57,7 +57,7 @@ export class UpdateItem implements OnInit {
     return this.form.get('options') as FormArray;
   }
 
-  createOption(opt?: Option) {
+  createOption(opt?: ExamItem['options'][number]) {
     return this.fb.group({
       text: [opt?.text || '', Validators.required],
       correct: [opt?.correct || false],
@@ -93,7 +93,7 @@ export class UpdateItem implements OnInit {
       expected_answer: raw.expected_answer || null,
       answer: raw.answer ?? null,
       options: raw.options || [],
-    } as unknown as IExamItem;
+    } as unknown as ExamItem;
 
     this.itemSaved.emit(updated);
   }

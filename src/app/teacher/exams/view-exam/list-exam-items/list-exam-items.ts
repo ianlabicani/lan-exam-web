@@ -1,8 +1,12 @@
+import {
+  ExamItem,
+  ExamItemService,
+} from './../../../services/exam-item.service';
 import { ActivatedRoute } from '@angular/router';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { McqItem } from './mcq-item/mcq-item';
 import { HttpClient } from '@angular/common/http';
-import { ExamsService, IExam } from '../../exams.service';
+import { ExamsService, Exam } from '../../exams.service';
 import { EssayForm } from './create-item/essay-form/essay-form';
 import { McqForm } from './create-item/mcq-form/mcq-form';
 import { TrueOrFalseForm } from './create-item/true-or-false-form/true-or-false-form';
@@ -11,6 +15,7 @@ import { EssayItem } from './essay-item/essay-item';
 import { UpdateItem } from './update-item/update-item';
 import { DeleteItem } from './delete-item/delete-item';
 import { environment } from '../../../../../environments/environment.development';
+import { ExamService } from '../../../services/exam.service';
 
 @Component({
   selector: 'app-teacher-list-exam-items',
@@ -31,47 +36,40 @@ export class ListExamItems implements OnInit {
   http = inject(HttpClient);
   activatedRoute = inject(ActivatedRoute);
   examsService = inject(ExamsService);
+  examService = inject(ExamService);
+  examItemService = inject(ExamItemService);
 
   examIdSig = signal<number>(0);
-  examItemsSig = signal<IExamItem[]>([]);
-  examSig = signal<IExam | null>(null);
+  examItemsSig = signal<ExamItem[]>([]);
+  examSig = this.examService.viewingExamSig;
   isFormVisibleSig = signal(false);
   isUpdateModalOpenSig = signal(false);
-  selectedForUpdateSig = signal<IExamItem | null>(null);
+  selectedForUpdateSig = signal<ExamItem | null>(null);
   isDeleteModalOpenSig = signal(false);
 
   ngOnInit(): void {
-    this.activatedRoute.parent?.params.subscribe((params) => {
-      const examIdParam = params['examId'];
-      this.examIdSig.set(+examIdParam);
-    });
-    this.getExamItems(this.examIdSig());
-    this.examsService.getExam(this.examIdSig()).subscribe((exam) => {
-      this.examSig.set(exam);
-    });
+    const examId: number =
+      this.activatedRoute.parent?.snapshot.params['examId'];
+
+    this.getExamItems(examId);
   }
 
   getExamItems(examId: number) {
-    this.http
-      .get<{ items: IExamItem[] }>(
-        `${environment.apiBaseUrl}/teacher/exams/${examId}/items`
-      )
-      .subscribe({
-        next: (res) => {
-          this.examItemsSig.set(res.items);
-          console.log(res.items);
-        },
-        error: (err) => {
-          console.error('Error fetching exam items:', err);
-        },
-      });
+    this.examItemService.index(examId).subscribe({
+      next: (items) => {
+        this.examItemsSig.set(items);
+      },
+      error: (err) => {
+        console.error('Error fetching exam items:', err);
+      },
+    });
   }
 
-  addItem(item: IExamItem) {
+  addItem(item: ExamItem) {
     this.examItemsSig.update((items) => [...items, item]);
   }
 
-  openUpdateModal(item: IExamItem) {
+  openUpdateModal(item: ExamItem) {
     this.selectedForUpdateSig.set(item);
     this.isUpdateModalOpenSig.set(true);
   }
@@ -81,7 +79,7 @@ export class ListExamItems implements OnInit {
     this.isUpdateModalOpenSig.set(false);
   }
 
-  openDeleteModal(item: IExamItem) {
+  openDeleteModal(item: ExamItem) {
     this.selectedForUpdateSig.set(item);
     this.isDeleteModalOpenSig.set(true);
   }
@@ -91,17 +89,17 @@ export class ListExamItems implements OnInit {
     this.isDeleteModalOpenSig.set(false);
   }
 
-  onItemDeleted(item: IExamItem) {
+  onItemDeleted(item: ExamItem) {
     this.removeItem(item);
     this.closeDeleteModal();
   }
 
-  onItemSaved(updated: IExamItem) {
+  onItemSaved(updated: ExamItem) {
     const examId = this.examIdSig();
     const itemId = updated.id;
 
     this.http
-      .patch<{ item: IExamItem }>(
+      .patch<{ item: ExamItem }>(
         `${environment.apiBaseUrl}/teacher/exams/${examId}/items/${itemId}`,
         updated
       )
@@ -115,25 +113,7 @@ export class ListExamItems implements OnInit {
       });
   }
 
-  removeItem(item: IExamItem) {
+  removeItem(item: ExamItem) {
     this.examItemsSig.update((items) => items.filter((i) => i.id !== item.id));
   }
-}
-
-export interface IExamItem {
-  id: number;
-  exam_id: number;
-  type: string;
-  question: string;
-  points: number;
-  expected_answer: null;
-  answer: null;
-  options: Option[];
-  created_at: Date;
-  updated_at: Date;
-}
-
-export interface Option {
-  text: string;
-  correct: boolean;
 }

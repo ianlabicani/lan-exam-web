@@ -30,8 +30,6 @@ export class ListExamTakers implements OnInit {
         next: (res) => {
           this.exam.set(res);
           this.takers.set(res.takenExams || []);
-          console.log(res);
-
           this.loading.set(false);
         },
         error: () => {
