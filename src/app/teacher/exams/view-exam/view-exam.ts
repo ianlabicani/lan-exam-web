@@ -10,9 +10,12 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ExamService, IExam } from '../exam.service';
+import { ExamsService, IExam } from '../exams.service';
 import { ViewExamItemList } from './view-exam-item-list/view-exam-item-list';
 import { CreateItemForm } from './create-item-form/create-item-form';
+import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs';
+import { environment } from '../../../../environments/environment.development';
 
 @Component({
   selector: 'app-view-exam',
@@ -28,13 +31,14 @@ import { CreateItemForm } from './create-item-form/create-item-form';
   styleUrl: './view-exam.css',
 })
 export class ViewExam implements OnInit {
-  examId = input.required<number>();
+  examId = input.required<number>(); // from route param
 
   viewExamService = inject(ViewExamService);
   private route = inject(ActivatedRoute);
-  private examService = inject(ExamService);
+  private examService = inject(ExamsService);
+  private http = inject(HttpClient);
 
-  exam = signal<IExam | null>(null);
+  exam = signal<IExam | null | undefined>(undefined);
   editingItemId = signal<number | null>(null);
   tf = { question: '', answer: 'true', points: 1 };
   essay = { question: '', expectedAnswer: '', points: 5 };
@@ -45,23 +49,31 @@ export class ViewExam implements OnInit {
   isEditable = computed(() => this.exam()?.status === 'draft');
 
   ngOnInit(): void {
-    this.fetchExam(this.examId());
+    this.getExam(this.examId());
   }
 
-  private fetchExam(id: number) {
+  private getExam(id: number) {
     this.loading.set(true);
-    this.viewExamService.getExam(id).subscribe({
-      next: (exam) => {
-        this.exam.set(exam);
-        console.log(exam);
+    this.http
+      .get<IExam | null>(`${environment.apiBaseUrl}/teacher/exams/${id}`)
+      .subscribe({
+        next: (exam) => {
+          this.loading.set(false);
 
-        this.loading.set(false);
-      },
-      error: (err) => {
-        this.errorMsg.set(err?.error?.message || 'Failed to load exam');
-        this.loading.set(false);
-      },
-    });
+          if (!exam) {
+            this.errorMsg.set('Exam not found');
+            this.exam.set(undefined);
+            return;
+          }
+
+          this.exam.set(exam);
+        },
+        error: (err) => {
+          this.errorMsg.set(err?.error?.message || 'Failed to load exam');
+          this.loading.set(false);
+          this.exam.set(undefined);
+        },
+      });
   }
 
   onEssayItemCreated(item: IExam['items'][number]) {}
@@ -191,7 +203,7 @@ export class ViewExam implements OnInit {
   cancelEdit() {
     this.editingItemId.set(null);
     // reload from API for consistency
-    if (this.exam()) this.fetchExam(this.exam()!.id);
+    if (this.exam()) this.getExam(this.exam()!.id);
   }
 
   saveEdit(item: IExam['items'][number]) {

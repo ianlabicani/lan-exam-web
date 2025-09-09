@@ -1,5 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { IExam } from '../exam.service';
+import { IExam } from '../exams.service';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs';
 

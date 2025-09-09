@@ -2,7 +2,7 @@ import { Component, inject, input, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 // import { ViewExamItemsService } from '../../view-exam-items.service';
-import { ExamService } from '../../../exam.service';
+import { ExamsService } from '../../../exams.service';
 
 @Component({
   selector: 'app-essay-form',
@@ -13,7 +13,7 @@ import { ExamService } from '../../../exam.service';
 export class EssayForm {
   itemCreated = output<any>();
   // protected viewExamItemsService = inject(ViewExamItemsService);
-  protected examService = inject(ExamService);
+  protected examService = inject(ExamsService);
   private fb = inject(FormBuilder);
 
   examIdSig = input<number | null>();

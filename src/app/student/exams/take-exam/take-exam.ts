@@ -14,7 +14,7 @@ import { forkJoin, of } from 'rxjs';
 import { ExamQuestion } from './exam-question/exam-question';
 import { ExamProgress } from './exam-progress/exam-progress';
 import { ExamHeader } from './exam-header/exam-header';
-import { IExam } from '../../../teacher/exams/exam.service';
+import { IExam } from '../../../teacher/exams/exams.service';
 
 export interface ITakenExam {
   id: number; // attempt id

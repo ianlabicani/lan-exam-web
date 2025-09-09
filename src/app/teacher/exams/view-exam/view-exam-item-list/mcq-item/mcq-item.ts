@@ -8,7 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { CommonModule, NgClass } from '@angular/common';
-import { ExamService, IExam } from '../../../exam.service';
+import { ExamsService, IExam } from '../../../exams.service';
 import { IExamItem } from '../../../../../student/exams/take-exam/take-exam';
 
 @Component({
@@ -20,7 +20,7 @@ import { IExamItem } from '../../../../../student/exams/take-exam/take-exam';
 export class McqItem implements OnInit {
   itemSig = input.required<IExam['items'][number]>();
   fb = inject(FormBuilder);
-  examService = inject(ExamService);
+  examService = inject(ExamsService);
 
   isEditingSig = signal(false);
 

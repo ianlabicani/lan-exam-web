@@ -1,4 +1,4 @@
-import { AuthService } from './../../auth/services/auth.service';
+import { AuthService } from '../../auth/services/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
@@ -44,7 +44,7 @@ export interface IExam_Teacher {
 @Injectable({
   providedIn: 'root',
 })
-export class ExamService {
+export class ExamsService {
   http = inject(HttpClient);
   authService = inject(AuthService);
 

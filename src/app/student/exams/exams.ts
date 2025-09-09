@@ -1,4 +1,4 @@
-import { IExam } from './../../teacher/exams/exam.service';
+import { IExam } from '../../teacher/exams/exams.service';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';

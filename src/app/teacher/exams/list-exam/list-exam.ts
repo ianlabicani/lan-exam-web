@@ -6,7 +6,7 @@ import {
 } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ExamService, IExam } from '../exam.service';
+import { ExamsService, IExam } from '../exams.service';
 
 @Component({
   selector: 'app-exam-list',
@@ -15,7 +15,7 @@ import { ExamService, IExam } from '../exam.service';
   styleUrl: './list-exam.css',
 })
 export class ListExam implements OnInit {
-  examService = inject(ExamService);
+  examService = inject(ExamsService);
 
   exams = signal<IExam[]>([]);
 

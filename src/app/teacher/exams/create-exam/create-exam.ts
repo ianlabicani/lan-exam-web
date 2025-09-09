@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ExamService } from '../exam.service';
+import { ExamsService } from '../exams.service';
 import { Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCircle, faPlus, faSpinner } from '@fortawesome/free-solid-svg-icons';
@@ -13,7 +13,7 @@ import { faCircle, faPlus, faSpinner } from '@fortawesome/free-solid-svg-icons';
 })
 export class CreateExam {
   private fb = inject(FormBuilder);
-  private examService = inject(ExamService);
+  private examService = inject(ExamsService);
   private router = inject(Router);
 
   faCircle = faCircle;

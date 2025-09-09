@@ -1,6 +1,6 @@
 import { inject, Injectable, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { IExam } from '../../exam.service';
+import { IExam } from '../../exams.service';
 import { map } from 'rxjs';
 
 @Injectable({

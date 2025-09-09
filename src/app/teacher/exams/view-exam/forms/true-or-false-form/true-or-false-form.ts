@@ -5,7 +5,7 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { ExamService } from '../../../exam.service';
+import { ExamsService } from '../../../exams.service';
 
 @Component({
   selector: 'app-true-or-false-form',
@@ -15,7 +15,7 @@ import { ExamService } from '../../../exam.service';
 })
 export class TrueOrFalseForm {
   private fb = inject(FormBuilder);
-  private examService = inject(ExamService);
+  private examService = inject(ExamsService);
   // protected viewExamItemsService = inject(ViewExamItemsService);
 
   examIdSig = input<number | null>(null);
