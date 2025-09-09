@@ -10,74 +10,45 @@
     </a>
   </div>
   } @if(exam){
-  <div
-    class="flex flex-col md:flex-row md:items-start md:justify-between gap-4"
-  >
+  <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
     <div>
       <div class="flex items-center gap-3 mb-2">
         <h1 class="text-2xl font-bold text-gray-900">{{ exam?.title }}</h1>
-        <span
-          class="px-2 py-0.5 text-xs font-semibold rounded-full tracking-wide uppercase {{ statusBadge(exam?.status) }}"
-          >{{ exam?.status }}</span
-        >
+        <span class="px-2 py-0.5 text-xs font-semibold rounded-full tracking-wide uppercase {{ statusBadge(exam?.status) }}">
+          {{ exam?.status }}
+        </span>
       </div>
       @if(exam?.description) {
       <p class="text-sm text-gray-600 max-w-prose">{{ exam?.description }}</p>
       }
       <div class="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
-        @if(exam?.starts_at){<span
-          >Starts: {{ exam?.starts_at | date:'medium' }}</span
-        >} @if(exam?.ends_at){<span
-          >Ends: {{ exam?.ends_at | date:'medium' }}</span
-        >}
+        @if(exam?.starts_at) {
+        <span>Starts: {{ exam?.starts_at | date:'medium' }}</span>
+        } @if(exam?.ends_at) {
+        <span>Ends: {{ exam?.ends_at | date:'medium' }}</span>
+        }
         <span>Created: {{ exam?.created_at | date:'short' }}</span>
         <span>Updated: {{ exam?.updated_at | date:'short' }}</span>
-        <span
-          >Year {{ exam?.year }} • Section {{ exam?.section | uppercase
-          }}</span
-        >
+        <span>Year {{ exam?.year }} • Section {{ exam?.section | uppercase }}</span>
       </div>
     </div>
     <div class="flex items-center gap-2 self-start">
-      <a
-        routerLink="/teacher/exams"
-        class="px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium"
-        >Back</a
-      >
-
-      @if(exam;) { @if (exam.status == "active") {
-      <a
-        [routerLink]="['/teacher/exams', exam.id, 'takers']"
-        class="px-3 py-2 rounded-md bg-purple-100 hover:bg-purple-200 text-sm font-medium"
-        >Exam Takers</a
-      >
-      } } @if(isEditable()) {
-      <span class="text-xs px-2 py-1 bg-gray-100 rounded font-medium"
-        >Draft (editable)</span
-      >
-      } @else {
-      <span class="text-xs px-2 py-1 bg-gray-100 rounded font-medium"
-        >Read Only</span
-      >
-      } @if(allowedNextStatuses().length){
-      <select
-        (change)="updateStatus($any($event.target).value)"
-        class="text-sm border rounded px-2 py-2 bg-white"
-      >
-        <option value="">Change Status...</option>
-        @for(opt of allowedNextStatuses(); track opt.value){
-        <option [value]="opt.value">→ {{ opt.label }}</option>
+      <a routerLink="/teacher/exams" class="px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium">Back</a>
+      @if(exam;) {
+        @if (exam.status == "active") {
+        <a [routerLink]="['/teacher/exams', exam.id, 'takers']" class="px-3 py-2 rounded-md bg-purple-100 hover:bg-purple-200 text-sm font-medium">Exam Takers</a>
         }
-      </select>
+      }
+      @if(isEditable()) {
+      <span class="text-xs px-2 py-1 bg-gray-100 rounded font-medium">Draft (editable)</span>
+      } @else {
+      <span class="text-xs px-2 py-1 bg-gray-100 rounded font-medium">Read Only</span>
       }
     </div>
   </div>
 
   <div class="flex gap-4 mt-6">
-    <a
-      [routerLink]="['./takers']"
-      class="px-4 py-2 rounded bg-blue-100 hover:bg-blue-200 text-sm font-medium"
-    >
+    <a [routerLink]="['./takers']" class="px-4 py-2 rounded bg-blue-100 hover:bg-blue-200 text-sm font-medium" >
       View Takers
     </a>
     <a [routerLink]="['./items']" class="px-4 py-2 rounded bg-green-100 hover:bg-green-200 text-sm font-medium">
@@ -85,15 +56,11 @@
     </a>
   </div>
 
-  <!-- Item authoring & list -->
   <div class="space-y-8">
-
     <router-outlet/>
-
-
   </div>
   }
 </div>
 } @else {
-<div class="p-10 text-center text-gray-500">Loading exam...</div>
+<span class="p-10 text-center text-gray-500">Loading exam...</span>
 }

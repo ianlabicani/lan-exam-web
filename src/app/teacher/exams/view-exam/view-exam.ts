@@ -22,7 +22,6 @@ import { environment } from '../../../../environments/environment.development';
 export class ViewExam implements OnInit {
   examId = input.required<number>(); // from route param
 
-  private route = inject(ActivatedRoute);
   private examService = inject(ExamsService);
   private http = inject(HttpClient);
 
@@ -64,8 +63,6 @@ export class ViewExam implements OnInit {
       });
   }
 
-  onEssayItemCreated(item: IExam['items'][number]) {}
-
   statusBadge(status?: string) {
     const map: Record<string, string> = {
       active: 'bg-blue-100 text-blue-700',
@@ -76,166 +73,5 @@ export class ViewExam implements OnInit {
     return status
       ? map[status] || 'bg-gray-100 text-gray-700'
       : 'bg-gray-100 text-gray-700';
-  }
-
-  // Lifecycle helpers
-
-  allowedNextStatuses(): { value: IExam['status']; label: string }[] {
-    const current = this.examSig()?.status;
-    if (!current) return [];
-    const map: Record<IExam['status'], IExam['status'][]> = {
-      draft: ['published', 'archived'],
-      published: ['active', 'archived'],
-      active: ['archived'],
-      archived: [],
-    };
-    return (map[current] || []).map((s) => ({ value: s, label: s }));
-  }
-
-  updateStatus(next: IExam['status']) {
-    if (!this.examSig()) return;
-    const current = this.examSig()!;
-    if (current.status === next) return;
-    const valid = this.allowedNextStatuses().some((s) => s.value === next);
-    if (!valid) return;
-    this.saving.set(true);
-    this.examService.updateExamStatus(current.id, next).subscribe({
-      next: (res) => {
-        this.examSig.set(res.exam);
-        this.saving.set(false);
-        if (!this.isEditable()) this.editingItemId.set(null);
-      },
-      error: (err) => {
-        this.errorMsg.set(err?.error?.message || 'Failed to update status');
-        this.saving.set(false);
-      },
-    });
-  }
-
-  onMcqItemCreated(item: IExam['items'][number]) {
-    // this.viewExamItemsService.examItemsSig.set([
-    //   item,
-    //   ...this.viewExamItemsService.examItemsSig(),
-    // ]);
-  }
-
-  onTfItemCreated(item: IExam['items'][number]) {
-    // this.viewExamItemsService.examItemsSig.set([
-    //   item,
-    //   ...this.viewExamItemsService.examItemsSig(),
-    // ]);
-  }
-
-  addTrueFalse() {
-    if (!this.examSig()) return;
-    const q = this.tf.question.trim();
-    if (!q) return;
-    this.saving.set(true);
-    this.examService
-      .createItem(this.examSig()!.id, {
-        type: 'truefalse',
-        question: q,
-        points: this.tf.points || 1,
-        answer: this.tf.answer === 'true',
-      })
-      .subscribe({
-        next: (res) => {
-          // this.viewExamItemsService.examItemsSig.set([
-          //   res.item,
-          //   ...this.viewExamItemsService.examItemsSig(),
-          // ]);
-          this.tf = { question: '', answer: 'true', points: 1 };
-          this.saving.set(false);
-        },
-        error: (err) => {
-          this.errorMsg.set(err?.error?.message || 'Failed to add item');
-          this.saving.set(false);
-        },
-      });
-  }
-
-  addEssay() {
-    if (!this.examSig()) return;
-    const q = this.essay.question.trim();
-    if (!q) return;
-    this.saving.set(true);
-    this.examService
-      .createItem(this.examSig()!.id, {
-        type: 'essay',
-        question: q,
-        points: this.essay.points || 5,
-        expected_answer: this.essay.expectedAnswer.trim() || null,
-      })
-      .subscribe({
-        next: (res) => {
-          // this.viewExamItemsService.examItemsSig.set([
-          //   res.item,
-          //   ...this.viewExamItemsService.examItemsSig(),
-          // ]);
-          this.essay = { question: '', expectedAnswer: '', points: 5 };
-          this.saving.set(false);
-        },
-        error: (err) => {
-          this.errorMsg.set(err?.error?.message || 'Failed to add essay');
-          this.saving.set(false);
-        },
-      });
-  }
-
-  // no longer needed (mcq form handles its own reset)
-
-  startEdit(id: number) {
-    this.editingItemId.set(id);
-  }
-
-  cancelEdit() {
-    this.editingItemId.set(null);
-    // reload from API for consistency
-    if (this.examSig()) this.getExam(this.examSig()!.id);
-  }
-
-  saveEdit(item: IExam['items'][number]) {
-    this.saving.set(true);
-    const payload: any = {
-      question: item.question,
-      points: item.points,
-    };
-    if (item.type === 'mcq') payload.options = item.options;
-    if (item.type === 'truefalse') payload.answer = item.answer;
-    if (item.type === 'essay') payload.expected_answer = item.expected_answer;
-    this.examService
-      .updateItem(item.id, payload, this.examSig()!.id)
-      .subscribe({
-        next: (res) => {
-          // this.viewExamItemsService.examItemsSig.set(
-          //   this.viewExamItemsService
-          //     .examItemsSig()
-          //     .map((i) => (i.id === res.item.id ? res.item : i))
-          // );
-          this.editingItemId.set(null);
-          this.saving.set(false);
-        },
-        error: (err) => {
-          this.errorMsg.set(err?.error?.message || 'Failed to update item');
-          this.saving.set(false);
-        },
-      });
-  }
-
-  deleteItem(id: string | number) {
-    if (!confirm('Delete this item?')) return;
-    this.saving.set(true);
-    this.examService.deleteItem(id).subscribe({
-      next: () => {
-        // this.viewExamItemsService.examItemsSig.set(
-        //   this.viewExamItemsService.examItemsSig().filter((i) => i.id !== id)
-        // );
-        this.saving.set(false);
-      },
-      error: (err) => {
-        this.errorMsg.set(err?.error?.message || 'Failed to delete item');
-        this.saving.set(false);
-      },
-    });
   }
 }
