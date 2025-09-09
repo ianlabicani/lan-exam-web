@@ -1,0 +1,65 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+	<div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
+		<div class="flex items-center justify-between mb-4">
+			<h3 class="text-lg font-semibold">Edit Item</h3>
+			<button (click)="onClose()" class="text-gray-600">✕</button>
+		</div>
+
+		<form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+			<!-- type is fixed; we use the input item's type for conditional fields -->
+			<div>
+				<label class="block text-sm text-gray-700 mb-1">Question</label>
+				<textarea formControlName="question" rows="3" class="w-full border rounded p-2"></textarea>
+			</div>
+
+			<div>
+				<label class="block text-sm text-gray-700 mb-1">Points</label>
+				<input type="number" formControlName="points" class="w-24 border rounded p-1" />
+			</div>
+
+			<!-- MCQ options -->
+			@if (itemInput().type === 'mcq') {
+				<div formArrayName="options">
+					<label class="block text-sm text-gray-700 mb-1">Options</label>
+					@for (opt of options.controls; track $index) {
+						<div [formGroupName]="$index" class="flex items-center gap-2 mb-2">
+              <button
+              type="button"
+              (click)="setCorrectOption($index)"
+              class="w-5 h-5 rounded-full inline-flex items-center justify-center text-center leading-none" [class.bg-green-500]="options.at($index).get('correct')?.value"
+              [ngClass]="{'text-white': options.at($index).get('correct')?.value}">
+                {{ 'ABCDEF'[$index] }}
+              </button>
+							<input formControlName="text" class="flex-1 border rounded p-1" />
+							<button type="button" (click)="removeOption($index)" class="text-red-600">Remove</button>
+						</div>
+					}
+					<button type="button" (click)="addOption()" class="text-xs px-2 py-1 bg-blue-500 text-white rounded">+ Add Option</button>
+				</div>
+			}
+
+			<!-- True/False -->
+			@if (itemInput().type === 'truefalse') {
+				<div>
+					<label class="block text-sm text-gray-700 mb-1">Correct Answer</label>
+					<select formControlName="answer" class="border rounded p-1">
+						<option [ngValue]="true">True</option>
+						<option [ngValue]="false">False</option>
+					</select>
+				</div>
+			}
+
+			<!-- Essay -->
+			@if (itemInput().type === 'essay') {
+				<div>
+					<label class="block text-sm text-gray-700 mb-1">Expected Answer</label>
+					<textarea formControlName="expected_answer" rows="3" class="w-full border rounded p-2"></textarea>
+				</div>
+			}
+			<div class="flex justify-end gap-2">
+				<button type="button" (click)="onClose()" class="px-3 py-1 rounded border">Cancel</button>
+				<button type="submit" class="px-3 py-1 rounded bg-blue-600 text-white">Save</button>
+			</div>
+		</form>
+	</div>
+</div>

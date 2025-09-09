@@ -8,6 +8,7 @@ import { McqForm } from './create-item/mcq-form/mcq-form';
 import { TrueOrFalseForm } from './create-item/true-or-false-form/true-or-false-form';
 import { TrueFalseItem } from './true-false-item/true-false-item';
 import { EssayItem } from './essay-item/essay-item';
+import { UpdateItem } from './update-item/update-item';
 import { environment } from '../../../../../environments/environment.development';
 
 @Component({
@@ -19,6 +20,7 @@ import { environment } from '../../../../../environments/environment.development
     EssayForm,
     TrueFalseItem,
     EssayItem,
+    UpdateItem,
   ],
   templateUrl: './list-exam-items.html',
   styleUrl: './list-exam-items.css',
@@ -32,6 +34,8 @@ export class ListExamItems implements OnInit {
   examItemsSig = signal<IExamItem[]>([]);
   examSig = signal<IExam | null>(null);
   isFormVisibleSig = signal(false);
+  isUpdateModalOpenSig = signal(false);
+  selectedForUpdateSig = signal<IExamItem | null>(null);
 
   ngOnInit(): void {
     this.activatedRoute.parent?.params.subscribe((params) => {
@@ -62,6 +66,35 @@ export class ListExamItems implements OnInit {
 
   addItem(item: IExamItem) {
     this.examItemsSig.update((items) => [...items, item]);
+  }
+
+  openUpdateModal(item: IExamItem) {
+    this.selectedForUpdateSig.set(item);
+    this.isUpdateModalOpenSig.set(true);
+  }
+
+  closeUpdateModal() {
+    this.selectedForUpdateSig.set(null);
+    this.isUpdateModalOpenSig.set(false);
+  }
+
+  onItemSaved(updated: IExamItem) {
+    const examId = this.examIdSig();
+    const itemId = updated.id;
+
+    this.http
+      .patch<{ item: IExamItem }>(
+        `${environment.apiBaseUrl}/teacher/exams/${examId}/items/${itemId}`,
+        updated
+      )
+      .subscribe({
+        next: (res) => {
+          this.examItemsSig.update((items) =>
+            items.map((it) => (it.id === res.item.id ? res.item : it))
+          );
+          this.closeUpdateModal();
+        },
+      });
   }
 
   removeItem(item: IExamItem) {
