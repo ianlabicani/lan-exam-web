@@ -1,8 +1,10 @@
 import { Component, inject, input, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-// import { ViewExamItemsService } from '../../view-exam-items.service';
-import { ExamsService } from '../../../../exams.service';
+import { ExamItemsService } from '../../exam-items.service';
+import { IExamItem } from '../../list-exam-items';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../../../environments/environment.development';
 
 @Component({
   selector: 'app-essay-form',
@@ -11,10 +13,11 @@ import { ExamsService } from '../../../../exams.service';
   styleUrl: './essay-form.css',
 })
 export class EssayForm {
-  itemCreated = output<any>();
-  // protected viewExamItemsService = inject(ViewExamItemsService);
-  protected examService = inject(ExamsService);
+  protected examItemsService = inject(ExamItemsService);
   private fb = inject(FormBuilder);
+  http = inject(HttpClient);
+
+  addItemOutput = output<IExamItem>();
 
   examIdSig = input<number | null>();
   isSavingSig = signal(false);
@@ -34,17 +37,20 @@ export class EssayForm {
     }
 
     const newItem = this.essayForm.getRawValue();
+    const payload = {
+      ...newItem,
+      type: 'essay',
+    };
 
-    this.examService
-      .createItem(this.examIdSig() ?? 0, {
-        ...newItem,
-        type: 'essay',
-      })
+    this.http
+      .post<{ item: IExamItem }>(
+        `${environment.apiBaseUrl}/teacher/exams/${this.examIdSig()}/items`,
+        payload
+      )
       .subscribe({
         next: (res) => {
           this.essayForm.reset();
-          // this.viewExamItemsService.addItem(res.item);
-          this.itemCreated.emit(res.item);
+          this.addItemOutput.emit(res.item);
           this.isSavingSig.set(false);
         },
         error: (error) => {

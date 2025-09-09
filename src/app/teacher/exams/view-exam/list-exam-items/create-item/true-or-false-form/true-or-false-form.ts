@@ -6,6 +6,10 @@ import {
   Validators,
 } from '@angular/forms';
 import { ExamsService } from '../../../../exams.service';
+import { IExamItem } from '../../list-exam-items';
+import { ExamItemsService } from '../../exam-items.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../../../environments/environment.development';
 
 @Component({
   selector: 'app-true-or-false-form',
@@ -15,8 +19,9 @@ import { ExamsService } from '../../../../exams.service';
 })
 export class TrueOrFalseForm {
   private fb = inject(FormBuilder);
-  private examService = inject(ExamsService);
-  // protected viewExamItemsService = inject(ViewExamItemsService);
+  examItemsService = inject(ExamItemsService);
+  http = inject(HttpClient);
+  addItemOutput = output<IExamItem>();
 
   examIdSig = input<number | null>(null);
   saving = signal(false);
@@ -35,18 +40,23 @@ export class TrueOrFalseForm {
     this.saving.set(true);
     this.errorMsg.set(null);
     const tofFormVal = this.tofForm.getRawValue();
-    this.examService
-      .createItem(examId, {
-        type: 'truefalse',
-        question: tofFormVal.question.trim(),
-        points: tofFormVal.points || 1,
-        answer: tofFormVal.answer === 'true',
-      })
+    const payload = {
+      type: 'truefalse',
+      question: tofFormVal.question.trim(),
+      points: tofFormVal.points || 1,
+      answer: tofFormVal.answer === 'true',
+    };
+
+    this.http
+      .post<{ item: IExamItem }>(
+        `${environment.apiBaseUrl}/teacher/exams/${examId}/items`,
+        payload
+      )
       .subscribe({
         next: (res) => {
           this.tofForm.reset({ question: '', answer: 'true', points: 1 });
           this.saving.set(false);
-          // this.viewExamItemsService.addItem(res.item);
+          this.addItemOutput.emit(res.item);
         },
         error: (err) => {
           this.errorMsg.set(err?.error?.message || 'Failed to add True/False');

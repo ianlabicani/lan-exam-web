@@ -1,5 +1,14 @@
+import { HttpClient } from '@angular/common/http';
+import { ExamItemsService } from './../../exam-items.service';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { Component, signal, inject, input, OnInit } from '@angular/core';
+import {
+  Component,
+  signal,
+  inject,
+  input,
+  OnInit,
+  output,
+} from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -9,21 +18,10 @@ import {
   Validators,
   FormsModule,
 } from '@angular/forms';
-import { ExamsService } from '../../../../exams.service';
-// import { ViewExamItemsService } from '../../view-exam-items.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { NgClass } from '@angular/common';
-
-export interface McqOptionFormValue {
-  text: string;
-  correct: boolean;
-}
-
-export interface McqFormValue {
-  question: string;
-  points: number;
-  options: McqOptionFormValue[];
-}
+import { IExamItem } from '../../list-exam-items';
+import { environment } from '../../../../../../../environments/environment.development';
 
 @Component({
   selector: 'app-mcq-form',
@@ -33,8 +31,10 @@ export interface McqFormValue {
 })
 export class McqForm implements OnInit {
   fb = inject(FormBuilder);
-  private examService = inject(ExamsService);
-  // protected viewExamItemsService = inject(ViewExamItemsService);
+  examItemsService = inject(ExamItemsService);
+  http = inject(HttpClient);
+
+  addItemOutput = output<IExamItem>();
 
   // icons
   faPlus = faPlus;
@@ -57,7 +57,6 @@ export class McqForm implements OnInit {
   readonly MIN_OPTIONS = 2;
   readonly MAX_OPTIONS = 6;
 
-  // expose validity & dirty signals for template convenience
   isDirty = signal(false);
   saving = signal(false);
   errorMsg = signal<string | null>(null);
@@ -105,18 +104,21 @@ export class McqForm implements OnInit {
     this.saving.set(true);
     this.errorMsg.set(null);
 
-    this.examService
-      .createItem(examId, {
-        type: 'mcq',
-        question: mcqFormRawVal.question.trim(),
-        points: mcqFormRawVal.points || 1,
-        options: opts.map((o) => ({ text: o.text, correct: o.correct })),
-      })
+    const payload = {
+      type: 'mcq',
+      question: mcqFormRawVal.question.trim(),
+      points: mcqFormRawVal.points || 1,
+      options: opts.map((o) => ({ text: o.text, correct: o.correct })),
+    };
+
+    this.http
+      .post<{ item: IExamItem }>(
+        `${environment.apiBaseUrl}/teacher/exams/${examId}/items`,
+        payload
+      )
       .subscribe({
         next: (res) => {
-          // this.viewExamItemsService.addItem(res.item);
-          // reset form
-
+          this.addItemOutput.emit(res.item);
           this.mcqForm.reset({ question: '', points: 1 });
           while (this.options.length) this.options.removeAt(0);
           this.addOption();
@@ -146,4 +148,15 @@ export class McqForm implements OnInit {
       msgs.push('Mark at least one correct option.');
     return msgs;
   }
+}
+
+export interface McqOptionFormValue {
+  text: string;
+  correct: boolean;
+}
+
+export interface McqFormValue {
+  question: string;
+  points: number;
+  options: McqOptionFormValue[];
 }

@@ -1,21 +1,17 @@
 import { ActivatedRoute } from '@angular/router';
-import {
-  Component,
-  computed,
-  inject,
-  input,
-  OnInit,
-  signal,
-} from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { McqItem } from './mcq-item/mcq-item';
 import { HttpClient } from '@angular/common/http';
-import { CreateItem } from './create-item/create-item';
 import { ExamsService, IExam } from '../../exams.service';
+import { EssayForm } from './create-item/essay-form/essay-form';
+import { McqForm } from './create-item/mcq-form/mcq-form';
+import { TrueOrFalseForm } from './create-item/true-or-false-form/true-or-false-form';
+import { environment } from '../../../../../environments/environment.development';
 
 @Component({
   selector: 'app-teacher-list-exam-items',
-  imports: [NgClass, McqItem, CreateItem],
+  imports: [NgClass, McqItem, McqForm, TrueOrFalseForm, EssayForm],
   templateUrl: './list-exam-items.html',
   styleUrl: './list-exam-items.css',
 })
@@ -42,12 +38,11 @@ export class ListExamItems implements OnInit {
   getExamItems(examId: number) {
     this.http
       .get<{ items: IExamItem[] }>(
-        `http://127.0.0.1:8000/api/teacher/exams/${examId}/items`
+        `http://${environment.apiBaseUrl}/teacher/exams/${examId}/items`
       )
       .subscribe({
         next: (res) => {
           this.examItemsSig.set(res.items);
-          console.log(res);
         },
         error: (err) => {
           console.error('Error fetching exam items:', err);
