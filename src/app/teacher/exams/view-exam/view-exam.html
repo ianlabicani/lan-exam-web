@@ -77,9 +77,12 @@
   </div>
 
   <div class="flex gap-4 mt-6">
+    @if (exam.status === 'published') {
     <a [routerLink]="['./items']" class="px-4 py-2 rounded bg-green-100 hover:bg-green-200 text-sm font-medium">
       View Items
     </a>
+
+    }
 
     @if (exam.status === 'published') {
     <a [routerLink]="['./takers']" class="px-4 py-2 rounded bg-blue-100 hover:bg-blue-200 text-sm font-medium" >

@@ -3,10 +3,13 @@
 @let examId = examIdSig();
 @let isFormVisible = isFormVisibleSig();
 
-<button (click)="isFormVisibleSig.set(!isFormVisible)"
+@if (exam?.status === 'draft') {
+  <button (click)="isFormVisibleSig.set(!isFormVisible)"
 class="mt-4 mb-6 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
- {{isFormVisible ? 'Show' : 'Hide'}} Form
+ {{isFormVisible ? 'Hide' : 'Show'}} Form
 </button>
+}
+
 
 @if (exam?.status == 'draft' && isFormVisible) {
   <div class="grid md:grid-cols-3 gap-6">
