@@ -2,7 +2,6 @@ import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { RouterLink, RouterOutlet, ActivatedRoute } from '@angular/router';
 import { DatePipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ExamsService } from '../exams.service';
 import { ExamService } from '../../services/exam.service';
 
 @Component({
@@ -12,7 +11,6 @@ import { ExamService } from '../../services/exam.service';
   styleUrl: './view-exam.css',
 })
 export class ViewExam implements OnInit {
-  examsService = inject(ExamsService);
   examService = inject(ExamService);
   route = inject(ActivatedRoute);
 

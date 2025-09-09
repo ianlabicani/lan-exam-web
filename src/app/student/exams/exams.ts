@@ -1,4 +1,3 @@
-import { Exam } from '../../teacher/exams/exams.service';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -6,6 +5,7 @@ import { AuthService } from '../../auth/services/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { ExamCard } from './exam-card/exam-card';
 import { ITakenExam } from './take-exam/take-exam';
+import { Exam } from '../../teacher/services/exam.service';
 
 @Component({
   selector: 'app-exams',

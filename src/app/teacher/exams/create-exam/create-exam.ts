@@ -1,9 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ExamsService } from '../exams.service';
 import { Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCircle, faPlus, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { ExamService } from '../../services/exam.service';
 
 @Component({
   selector: 'app-create-exam',
@@ -13,7 +13,7 @@ import { faCircle, faPlus, faSpinner } from '@fortawesome/free-solid-svg-icons';
 })
 export class CreateExam {
   private fb = inject(FormBuilder);
-  private examService = inject(ExamsService);
+  private examService = inject(ExamService);
   private router = inject(Router);
 
   faCircle = faCircle;
@@ -55,7 +55,7 @@ export class CreateExam {
       total_points: 0,
     };
 
-    this.examService.createExam(payload).subscribe({
+    this.examService.store(payload).subscribe({
       next: (res) => {
         this.savingSig.set(false);
 

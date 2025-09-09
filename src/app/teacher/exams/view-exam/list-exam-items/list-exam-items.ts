@@ -6,7 +6,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { McqItem } from './mcq-item/mcq-item';
 import { HttpClient } from '@angular/common/http';
-import { ExamsService, Exam } from '../../exams.service';
 import { EssayForm } from './create-item/essay-form/essay-form';
 import { McqForm } from './create-item/mcq-form/mcq-form';
 import { TrueOrFalseForm } from './create-item/true-or-false-form/true-or-false-form';
@@ -35,7 +34,6 @@ import { ExamService } from '../../../services/exam.service';
 export class ListExamItems implements OnInit {
   http = inject(HttpClient);
   activatedRoute = inject(ActivatedRoute);
-  examsService = inject(ExamsService);
   examService = inject(ExamService);
   examItemService = inject(ExamItemService);
 

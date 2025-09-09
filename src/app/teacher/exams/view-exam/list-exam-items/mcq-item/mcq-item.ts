@@ -6,7 +6,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { NgClass } from '@angular/common';
-import { ExamsService } from '../../../exams.service';
 import { ExamItem } from '../../../../services/exam-item.service';
 
 @Component({
@@ -18,7 +17,6 @@ import { ExamItem } from '../../../../services/exam-item.service';
 export class McqItem implements OnInit {
   itemSig = input.required<ExamItem>();
   fb = inject(FormBuilder);
-  examService = inject(ExamsService);
 
   isEditingSig = signal(false);
 
