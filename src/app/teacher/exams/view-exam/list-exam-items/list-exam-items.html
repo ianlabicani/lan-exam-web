@@ -8,7 +8,7 @@ class="mt-4 mb-6 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 tran
  {{isFormVisible ? 'Show' : 'Hide'}} Form
 </button>
 
-@if (exam?.status == 'draft' && !isFormVisible) {
+@if (exam?.status == 'draft' && isFormVisible) {
   <div class="grid md:grid-cols-3 gap-6">
     <!-- MCQ (Reusable Form Component now creates items) -->
     <div class="bg-white border rounded-lg p-4 shadow-sm">
