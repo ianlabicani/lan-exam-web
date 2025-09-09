@@ -7,7 +7,7 @@
       >Create Exam</a
     >
   </div>
-  @if ( exams().length ) {
+  @if ( examsSig().length ) {
   <div class="overflow-x-auto bg-white shadow rounded-lg">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
@@ -40,7 +40,7 @@
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        @for (exam of exams(); track exam.id) {
+        @for (exam of examsSig(); track exam.id) {
         <tr class="hover:bg-gray-50 transition">
           <td class="px-4 py-2 whitespace-nowrap font-medium text-gray-800">
             {{ exam.title }}

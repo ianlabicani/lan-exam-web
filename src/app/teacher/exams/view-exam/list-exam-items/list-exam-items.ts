@@ -1,9 +1,17 @@
 import { ActivatedRoute } from '@angular/router';
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  input,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { NgClass } from '@angular/common';
 import { McqItem } from './mcq-item/mcq-item';
 import { HttpClient } from '@angular/common/http';
 import { CreateItem } from './create-item/create-item';
+import { ExamsService, IExam } from '../../exams.service';
 
 @Component({
   selector: 'app-teacher-list-exam-items',
@@ -14,9 +22,11 @@ import { CreateItem } from './create-item/create-item';
 export class ListExamItems implements OnInit {
   http = inject(HttpClient);
   activatedRoute = inject(ActivatedRoute);
+  examsService = inject(ExamsService);
 
   examIdSig = signal<number>(0);
   examItemsSig = signal<IExamItem[]>([]);
+  examSig = signal<IExam | null>(null);
 
   ngOnInit(): void {
     this.activatedRoute.parent?.params.subscribe((params) => {
@@ -24,6 +34,9 @@ export class ListExamItems implements OnInit {
       this.examIdSig.set(+examIdParam);
     });
     this.getExamItems(this.examIdSig());
+    this.examsService.getExam(this.examIdSig()).subscribe((exam) => {
+      this.examSig.set(exam);
+    });
   }
 
   getExamItems(examId: number) {

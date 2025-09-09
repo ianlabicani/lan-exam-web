@@ -1,6 +1,9 @@
 @let examItems = examItemsSig();
+@let exam = examSig();
 
-<app-teacher-exam-create-item-form [examIdSig]="examIdSig()"/>
+@if (exam?.status == 'draft') {
+  <app-teacher-exam-create-item-form [examIdSig]="examIdSig()"/>
+}
 
 <div class="space-y-4">
   <h2 class="text-lg font-semibold text-gray-900">
@@ -19,9 +22,9 @@
               'text-green-600': item.answer,
               'text-red-600': !item.answer
             }"
-            class="font-semibold"
-            >{{ item.answer ? 'True' : 'False' }}</span
-          >
+            class="font-semibold">
+            {{ item.answer ? 'True' : 'False' }}
+            </span>
         </p>
       } @else if (item.type==='essay') {
         <p class="text-xs text-gray-600">

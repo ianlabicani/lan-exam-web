@@ -1,35 +1,29 @@
 @let exam = examSig();
+@let loading = loadingSig();
 
-@if (!loading()) {
-<div class="space-y-6 container mx-auto mt-10">
-  @if(!exam){
-  <div class="p-10 border border-dashed rounded-lg text-center bg-white">
-    <p class="text-gray-600 font-medium mb-2">Exam not found</p>
-    <a routerLink="/teacher/exams" class="text-sm text-blue-600 hover:underline">
-      Return to exams list
-    </a>
-  </div>
-  } @if(exam){
+@if (loading) {
+<span class="p-10 text-center text-gray-500">Loading exam...</span>
+} @else {
+  <div class="space-y-6 container mx-auto mt-10">
+  @if(exam) {
   <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
     <div>
       <div class="flex items-center gap-3 mb-2">
-        <h1 class="text-2xl font-bold text-gray-900">{{ exam?.title }}</h1>
+        <h1 class="text-2xl font-bold text-gray-900">{{ exam.title }}</h1>
         <span class="px-2 py-0.5 text-xs font-semibold rounded-full tracking-wide uppercase {{ statusBadge(exam?.status) }}">
-          {{ exam?.status }}
+          {{ exam.status }}
         </span>
       </div>
-      @if(exam?.description) {
-      <p class="text-sm text-gray-600 max-w-prose">{{ exam?.description }}</p>
-      }
+      <p class="text-sm text-gray-600 max-w-prose">{{ exam.description }}</p>
       <div class="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
-        @if(exam?.starts_at) {
-        <span>Starts: {{ exam?.starts_at | date:'medium' }}</span>
-        } @if(exam?.ends_at) {
-        <span>Ends: {{ exam?.ends_at | date:'medium' }}</span>
+        @if(exam.starts_at) {
+        <span>Starts: {{ exam.starts_at | date:'medium' }}</span>
+        } @if(exam.ends_at) {
+        <span>Ends: {{ exam.ends_at | date:'medium' }}</span>
         }
-        <span>Created: {{ exam?.created_at | date:'short' }}</span>
-        <span>Updated: {{ exam?.updated_at | date:'short' }}</span>
-        <span>Year {{ exam?.year }} • Section {{ exam?.section | uppercase }}</span>
+        <span>Created: {{ exam.created_at | date:'short' }}</span>
+        <span>Updated: {{ exam.updated_at | date:'short' }}</span>
+        <span>Year {{ exam.year }} • Section {{ exam.section | uppercase }}</span>
       </div>
     </div>
     <div class="flex items-center gap-2 self-start">
@@ -48,19 +42,30 @@
   </div>
 
   <div class="flex gap-4 mt-6">
-    <a [routerLink]="['./takers']" class="px-4 py-2 rounded bg-blue-100 hover:bg-blue-200 text-sm font-medium" >
-      View Takers
-    </a>
     <a [routerLink]="['./items']" class="px-4 py-2 rounded bg-green-100 hover:bg-green-200 text-sm font-medium">
       View Items
     </a>
+
+    @if (exam.status === 'active') {
+    <a [routerLink]="['./takers']" class="px-4 py-2 rounded bg-blue-100 hover:bg-blue-200 text-sm font-medium" >
+      View Takers
+    </a>
+    }
   </div>
 
   <div class="space-y-8">
     <router-outlet/>
   </div>
   }
+
+  @if(!exam) {
+  <div class="p-10 border border-dashed rounded-lg text-center bg-white">
+    <p class="text-gray-600 font-medium mb-2">Exam not found</p>
+    <a routerLink="/teacher/exams" class="text-sm text-blue-600 hover:underline">
+      Return to exams list
+    </a>
+  </div>
+  }
+
 </div>
-} @else {
-<span class="p-10 text-center text-gray-500">Loading exam...</span>
 }

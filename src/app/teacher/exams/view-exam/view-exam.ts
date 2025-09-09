@@ -22,17 +22,11 @@ import { environment } from '../../../../environments/environment.development';
 export class ViewExam implements OnInit {
   examId = input.required<number>(); // from route param
 
-  private examService = inject(ExamsService);
   private http = inject(HttpClient);
 
   examSig = signal<IExam | null | undefined>(undefined);
-  editingItemId = signal<number | null>(null);
-  tf = { question: '', answer: 'true', points: 1 };
-  essay = { question: '', expectedAnswer: '', points: 5 };
-  loading = signal(true);
-  saving = signal(false);
+  loadingSig = signal(true);
   errorMsg = signal<string | null>(null);
-
   isEditable = computed(() => this.examSig()?.status === 'draft');
 
   ngOnInit(): void {
@@ -40,12 +34,12 @@ export class ViewExam implements OnInit {
   }
 
   private getExam(id: number) {
-    this.loading.set(true);
+    this.loadingSig.set(true);
     this.http
       .get<IExam | null>(`${environment.apiBaseUrl}/teacher/exams/${id}`)
       .subscribe({
         next: (exam) => {
-          this.loading.set(false);
+          this.loadingSig.set(false);
 
           if (!exam) {
             this.errorMsg.set('Exam not found');
@@ -57,7 +51,7 @@ export class ViewExam implements OnInit {
         },
         error: (err) => {
           this.errorMsg.set(err?.error?.message || 'Failed to load exam');
-          this.loading.set(false);
+          this.loadingSig.set(false);
           this.examSig.set(undefined);
         },
       });

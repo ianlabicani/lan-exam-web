@@ -1,45 +1,8 @@
 import { AuthService } from '../../auth/services/auth.service';
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-
-export interface IExam {
-  id: number;
-  title: string;
-  description: string;
-  starts_at: Date;
-  ends_at: Date;
-  year: string;
-  section: string;
-  status: string;
-  total_points: number;
-  created_at: Date;
-  updated_at: Date;
-  pivot: IExam_Teacher;
-  items: IItem[];
-}
-
-export interface IItem {
-  id: number;
-  exam_id: number;
-  type: string;
-  question: string;
-  points: number;
-  expected_answer: null | string;
-  answer: boolean | null;
-  options: Option[] | null;
-  created_at: Date;
-  updated_at: Date;
-}
-
-export interface Option {
-  text: string;
-  correct: boolean;
-}
-
-export interface IExam_Teacher {
-  teacher_id: number;
-  exam_id: number;
-}
+import { inject, Injectable, signal } from '@angular/core';
+import { map } from 'rxjs';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
@@ -48,10 +11,23 @@ export class ExamsService {
   http = inject(HttpClient);
   authService = inject(AuthService);
 
-  getAllExams() {
-    return this.http.get<{ exams: IExam[] }>(
-      'http://127.0.0.1:8000/api/teacher/exams'
-    );
+  exams = signal<IExam[]>([]);
+
+  getAll() {
+    return this.http
+      .get<{ exams: IExam[] }>(`${environment.apiBaseUrl}/teacher/exams`)
+      .pipe(
+        map((res) => {
+          this.exams.set(res.exams);
+          return res;
+        })
+      );
+  }
+
+  getOne(id: number) {
+    return this.http
+      .get<IExam>(`${environment.apiBaseUrl}/teacher/exams/${id}`)
+      .pipe();
   }
 
   createExam(payload: {
@@ -103,4 +79,43 @@ export class ExamsService {
       `http://127.0.0.1:8000/api/teacher/exams/items/${itemId}`
     );
   }
+}
+
+export interface IExam {
+  id: number;
+  title: string;
+  description: string;
+  starts_at: Date;
+  ends_at: Date;
+  year: string;
+  section: string;
+  status: string;
+  total_points: number;
+  created_at: Date;
+  updated_at: Date;
+  pivot: IExam_Teacher;
+  items: IItem[];
+}
+
+export interface IItem {
+  id: number;
+  exam_id: number;
+  type: string;
+  question: string;
+  points: number;
+  expected_answer: null | string;
+  answer: boolean | null;
+  options: Option[] | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Option {
+  text: string;
+  correct: boolean;
+}
+
+export interface IExam_Teacher {
+  teacher_id: number;
+  exam_id: number;
 }

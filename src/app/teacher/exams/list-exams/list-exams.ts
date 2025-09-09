@@ -15,14 +15,12 @@ import { ExamsService, IExam } from '../exams.service';
   styleUrl: './list-exams.css',
 })
 export class ListExams implements OnInit {
-  examService = inject(ExamsService);
+  ExamsService = inject(ExamsService);
 
-  exams = signal<IExam[]>([]);
+  examsSig = this.ExamsService.exams;
 
   ngOnInit(): void {
-    this.examService.getAllExams().subscribe(({ exams }) => {
-      this.exams.set(exams);
-    });
+    this.ExamsService.getAll().subscribe();
   }
 
   calculateDuration(startsAt: Date, endsAt: Date): number {
@@ -45,7 +43,7 @@ export class ListExams implements OnInit {
   }
 
   remove(id: number) {
-    this.exams.set(this.exams().filter((exam) => exam.id !== id));
-    localStorage.setItem('exams', JSON.stringify(this.exams()));
+    this.examsSig.set(this.examsSig().filter((exam) => exam.id !== id));
+    localStorage.setItem('exams', JSON.stringify(this.examsSig()));
   }
 }
