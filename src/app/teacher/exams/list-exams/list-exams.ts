@@ -11,10 +11,10 @@ import { ExamsService, IExam } from '../exams.service';
 @Component({
   selector: 'app-exam-list',
   imports: [RouterLink, DatePipe, NgClass, TitleCasePipe, UpperCasePipe],
-  templateUrl: './list-exam.html',
-  styleUrl: './list-exam.css',
+  templateUrl: './list-exams.html',
+  styleUrl: './list-exams.css',
 })
-export class ListExam implements OnInit {
+export class ListExams implements OnInit {
   examService = inject(ExamsService);
 
   exams = signal<IExam[]>([]);

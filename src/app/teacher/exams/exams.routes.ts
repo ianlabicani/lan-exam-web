@@ -4,7 +4,7 @@ export const examsRoute: Routes = [
   {
     path: 'exams',
     loadComponent: () =>
-      import('./list-exam/list-exam').then((c) => c.ListExam),
+      import('./list-exams/list-exams').then((c) => c.ListExams),
   },
   {
     path: 'exams/create',
