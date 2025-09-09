@@ -49,6 +49,22 @@ export class ViewExam implements OnInit {
       });
   }
 
+  publishExam(examId: number) {
+    this.http
+      .patch<{ exam: IExam }>(
+        `http://127.0.0.1:8000/api/teacher/exams/${examId}/status`,
+        { status: 'published' }
+      )
+      .subscribe({
+        next: (response) => {
+          this.examSig.set(response.exam);
+        },
+        error: (err) => {
+          this.errorMsg.set(err?.error?.message || 'Failed to publish exam');
+        },
+      });
+  }
+
   private getExam(id: number) {
     this.loadingSig.set(true);
     this.http

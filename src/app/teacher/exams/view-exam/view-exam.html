@@ -5,7 +5,8 @@
 <span class="p-10 text-center text-gray-500">Loading exam...</span>
 } @else {
   <div class="space-y-6 container mx-auto mt-10">
-    @if (exam && exam.status !== 'active') {
+  @if(exam) {
+    @if (exam.status == 'draft') {
       <div>
         <button
           type="button"
@@ -17,7 +18,21 @@
         </button>
       </div>
     }
-  @if(exam) {
+
+    @if (exam.status == 'active') {
+      <div>
+        <button
+          type="button"
+          class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 text-sm font-medium disabled:opacity-50"
+          [disabled]="loading"
+          (click)="publishExam(exam.id)"
+        >
+          Publish Exam
+        </button>
+      </div>
+    }
+
+
   <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
     <div>
       <div class="flex items-center gap-3 mb-2">
