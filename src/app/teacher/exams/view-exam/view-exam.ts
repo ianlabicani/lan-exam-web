@@ -33,6 +33,22 @@ export class ViewExam implements OnInit {
     this.getExam(this.examId());
   }
 
+  activateExam(examId: number) {
+    this.http
+      .patch<{ exam: IExam }>(
+        `http://127.0.0.1:8000/api/teacher/exams/${examId}/status`,
+        { status: 'active' }
+      )
+      .subscribe({
+        next: (response) => {
+          this.examSig.set(response.exam);
+        },
+        error: (err) => {
+          this.errorMsg.set(err?.error?.message || 'Failed to activate exam');
+        },
+      });
+  }
+
   private getExam(id: number) {
     this.loadingSig.set(true);
     this.http

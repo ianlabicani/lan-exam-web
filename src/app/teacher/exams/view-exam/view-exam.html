@@ -5,6 +5,18 @@
 <span class="p-10 text-center text-gray-500">Loading exam...</span>
 } @else {
   <div class="space-y-6 container mx-auto mt-10">
+    @if (exam && exam.status !== 'active') {
+      <div>
+        <button
+          type="button"
+          class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 text-sm font-medium disabled:opacity-50"
+          [disabled]="loading"
+          (click)="activateExam(exam.id)"
+        >
+          Activate Exam
+        </button>
+      </div>
+    }
   @if(exam) {
   <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
     <div>
@@ -28,11 +40,6 @@
     </div>
     <div class="flex items-center gap-2 self-start">
       <a routerLink="/teacher/exams" class="px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium">Back</a>
-      @if(exam;) {
-        @if (exam.status == "active") {
-        <a [routerLink]="['/teacher/exams', exam.id, 'takers']" class="px-3 py-2 rounded-md bg-purple-100 hover:bg-purple-200 text-sm font-medium">Exam Takers</a>
-        }
-      }
       @if(isEditable()) {
       <span class="text-xs px-2 py-1 bg-gray-100 rounded font-medium">Draft (editable)</span>
       } @else {
