@@ -6,7 +6,8 @@ import {
 } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ExamsService, IExam } from '../exams.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment.development';
 
 @Component({
   selector: 'app-exam-list',
@@ -15,12 +16,20 @@ import { ExamsService, IExam } from '../exams.service';
   styleUrl: './list-exams.css',
 })
 export class ListExams implements OnInit {
-  ExamsService = inject(ExamsService);
+  http = inject(HttpClient);
 
-  examsSig = this.ExamsService.exams;
+  examsSig = signal<IGetExamsData[]>([]);
 
   ngOnInit(): void {
-    this.ExamsService.getAll().subscribe();
+    this.getExams().subscribe((res) => {
+      this.examsSig.set(res.exams);
+    });
+  }
+
+  getExams() {
+    return this.http.get<{ exams: IGetExamsData[] }>(
+      `${environment.apiBaseUrl}/teacher/exams`
+    );
   }
 
   calculateDuration(startsAt: Date, endsAt: Date): number {
@@ -46,4 +55,24 @@ export class ListExams implements OnInit {
     this.examsSig.set(this.examsSig().filter((exam) => exam.id !== id));
     localStorage.setItem('exams', JSON.stringify(this.examsSig()));
   }
+}
+
+interface IGetExamsData {
+  id: number;
+  title: string;
+  description: string;
+  starts_at: Date;
+  ends_at: Date;
+  year: string;
+  section: string;
+  status: string;
+  total_points: number;
+  created_at: Date;
+  updated_at: Date;
+  pivot: Pivot;
+}
+
+interface Pivot {
+  teacher_id: number;
+  exam_id: number;
 }
