@@ -2,7 +2,7 @@ import { Component, inject, input, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 // import { ViewExamItemsService } from '../../view-exam-items.service';
-import { ExamsService } from '../../../exams.service';
+import { ExamsService } from '../../../../exams.service';
 
 @Component({
   selector: 'app-essay-form',

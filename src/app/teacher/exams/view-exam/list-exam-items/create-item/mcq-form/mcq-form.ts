@@ -9,7 +9,7 @@ import {
   Validators,
   FormsModule,
 } from '@angular/forms';
-import { ExamsService } from '../../../exams.service';
+import { ExamsService } from '../../../../exams.service';
 // import { ViewExamItemsService } from '../../view-exam-items.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { NgClass } from '@angular/common';

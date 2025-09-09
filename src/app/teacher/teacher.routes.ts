@@ -8,12 +8,11 @@ export const routes: Routes = [
       import('./dashboard/dashboard').then((c) => c.Dashboard),
   },
   ...examsRoute,
-
   {
     path: 'exams/:examId/takers',
     loadComponent: () =>
-      import('./exams/view-exam/view-exam-takers/view-exam-takers').then(
-        (c) => c.ViewExamTakers
+      import('./exams/view-exam/list-exam-takers/list-exam-takers').then(
+        (c) => c.ListExamTakers
       ),
   },
 ];

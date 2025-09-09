@@ -9,7 +9,7 @@ import {
 } from '@angular/forms';
 import { CommonModule, NgClass } from '@angular/common';
 import { ExamsService, IExam } from '../../../exams.service';
-import { IExamItem } from '../../../../../student/exams/take-exam/take-exam';
+import { IExamItem } from '../list-exam-items';
 
 @Component({
   selector: 'app-mcq-item',
@@ -18,7 +18,7 @@ import { IExamItem } from '../../../../../student/exams/take-exam/take-exam';
   styleUrls: ['./mcq-item.css'],
 })
 export class McqItem implements OnInit {
-  itemSig = input.required<IExam['items'][number]>();
+  itemSig = input.required<IExamItem>();
   fb = inject(FormBuilder);
   examService = inject(ExamsService);
 

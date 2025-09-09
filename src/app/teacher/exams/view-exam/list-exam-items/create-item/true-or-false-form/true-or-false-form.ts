@@ -5,7 +5,7 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { ExamsService } from '../../../exams.service';
+import { ExamsService } from '../../../../exams.service';
 
 @Component({
   selector: 'app-true-or-false-form',

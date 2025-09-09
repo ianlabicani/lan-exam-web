@@ -1,23 +1,27 @@
-import { DatePipe, UpperCasePipe } from '@angular/common';
+import { UpperCasePipe, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, input, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'app-view-exam-takers',
+  selector: 'app-list-exam-takers',
   imports: [UpperCasePipe, DatePipe, RouterLink],
-  templateUrl: './view-exam-takers.html',
-  styleUrl: './view-exam-takers.css',
+  templateUrl: './list-exam-takers.html',
+  styleUrl: './list-exam-takers.css',
 })
-export class ViewExamTakers implements OnInit {
-  examId = input.required<number>();
-
+export class ListExamTakers implements OnInit {
+  examId = signal<number>(0);
   loading = signal(true);
   exam = signal<any | null>(null);
   takers = signal<ITakenExam[]>([]);
   http = inject(HttpClient);
 
+  activatedRoute = inject(ActivatedRoute);
+
   ngOnInit(): void {
+    this.examId.set(
+      +this.activatedRoute.parent?.snapshot.paramMap.get('examId')!
+    );
     this.http
       .get<{ takenExams: ITakenExam[] }>(
         `http://127.0.0.1:8000/api/teacher/exams/${this.examId()}/takers`

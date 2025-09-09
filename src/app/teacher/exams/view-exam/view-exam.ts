@@ -1,4 +1,3 @@
-import { ViewExamService } from './view-exam.service';
 import {
   Component,
   OnInit,
@@ -7,38 +6,27 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
 import { DatePipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExamsService, IExam } from '../exams.service';
-import { ViewExamItemList } from './view-exam-item-list/view-exam-item-list';
-import { CreateItemForm } from './create-item-form/create-item-form';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
 
 @Component({
   selector: 'app-view-exam',
-  imports: [
-    RouterLink,
-    DatePipe,
-    UpperCasePipe,
-    FormsModule,
-    ViewExamItemList,
-    CreateItemForm,
-  ],
+  imports: [RouterLink, DatePipe, UpperCasePipe, FormsModule, RouterOutlet],
   templateUrl: './view-exam.html',
   styleUrl: './view-exam.css',
 })
 export class ViewExam implements OnInit {
   examId = input.required<number>(); // from route param
 
-  viewExamService = inject(ViewExamService);
   private route = inject(ActivatedRoute);
   private examService = inject(ExamsService);
   private http = inject(HttpClient);
 
-  exam = signal<IExam | null | undefined>(undefined);
+  examSig = signal<IExam | null | undefined>(undefined);
   editingItemId = signal<number | null>(null);
   tf = { question: '', answer: 'true', points: 1 };
   essay = { question: '', expectedAnswer: '', points: 5 };
@@ -46,7 +34,7 @@ export class ViewExam implements OnInit {
   saving = signal(false);
   errorMsg = signal<string | null>(null);
 
-  isEditable = computed(() => this.exam()?.status === 'draft');
+  isEditable = computed(() => this.examSig()?.status === 'draft');
 
   ngOnInit(): void {
     this.getExam(this.examId());
@@ -62,16 +50,16 @@ export class ViewExam implements OnInit {
 
           if (!exam) {
             this.errorMsg.set('Exam not found');
-            this.exam.set(undefined);
+            this.examSig.set(undefined);
             return;
           }
 
-          this.exam.set(exam);
+          this.examSig.set(exam);
         },
         error: (err) => {
           this.errorMsg.set(err?.error?.message || 'Failed to load exam');
           this.loading.set(false);
-          this.exam.set(undefined);
+          this.examSig.set(undefined);
         },
       });
   }
@@ -93,7 +81,7 @@ export class ViewExam implements OnInit {
   // Lifecycle helpers
 
   allowedNextStatuses(): { value: IExam['status']; label: string }[] {
-    const current = this.exam()?.status;
+    const current = this.examSig()?.status;
     if (!current) return [];
     const map: Record<IExam['status'], IExam['status'][]> = {
       draft: ['published', 'archived'],
@@ -105,15 +93,15 @@ export class ViewExam implements OnInit {
   }
 
   updateStatus(next: IExam['status']) {
-    if (!this.exam()) return;
-    const current = this.exam()!;
+    if (!this.examSig()) return;
+    const current = this.examSig()!;
     if (current.status === next) return;
     const valid = this.allowedNextStatuses().some((s) => s.value === next);
     if (!valid) return;
     this.saving.set(true);
     this.examService.updateExamStatus(current.id, next).subscribe({
       next: (res) => {
-        this.exam.set(res.exam);
+        this.examSig.set(res.exam);
         this.saving.set(false);
         if (!this.isEditable()) this.editingItemId.set(null);
       },
@@ -139,12 +127,12 @@ export class ViewExam implements OnInit {
   }
 
   addTrueFalse() {
-    if (!this.exam()) return;
+    if (!this.examSig()) return;
     const q = this.tf.question.trim();
     if (!q) return;
     this.saving.set(true);
     this.examService
-      .createItem(this.exam()!.id, {
+      .createItem(this.examSig()!.id, {
         type: 'truefalse',
         question: q,
         points: this.tf.points || 1,
@@ -167,12 +155,12 @@ export class ViewExam implements OnInit {
   }
 
   addEssay() {
-    if (!this.exam()) return;
+    if (!this.examSig()) return;
     const q = this.essay.question.trim();
     if (!q) return;
     this.saving.set(true);
     this.examService
-      .createItem(this.exam()!.id, {
+      .createItem(this.examSig()!.id, {
         type: 'essay',
         question: q,
         points: this.essay.points || 5,
@@ -203,7 +191,7 @@ export class ViewExam implements OnInit {
   cancelEdit() {
     this.editingItemId.set(null);
     // reload from API for consistency
-    if (this.exam()) this.getExam(this.exam()!.id);
+    if (this.examSig()) this.getExam(this.examSig()!.id);
   }
 
   saveEdit(item: IExam['items'][number]) {
@@ -215,21 +203,23 @@ export class ViewExam implements OnInit {
     if (item.type === 'mcq') payload.options = item.options;
     if (item.type === 'truefalse') payload.answer = item.answer;
     if (item.type === 'essay') payload.expected_answer = item.expected_answer;
-    this.examService.updateItem(item.id, payload, this.exam()!.id).subscribe({
-      next: (res) => {
-        // this.viewExamItemsService.examItemsSig.set(
-        //   this.viewExamItemsService
-        //     .examItemsSig()
-        //     .map((i) => (i.id === res.item.id ? res.item : i))
-        // );
-        this.editingItemId.set(null);
-        this.saving.set(false);
-      },
-      error: (err) => {
-        this.errorMsg.set(err?.error?.message || 'Failed to update item');
-        this.saving.set(false);
-      },
-    });
+    this.examService
+      .updateItem(item.id, payload, this.examSig()!.id)
+      .subscribe({
+        next: (res) => {
+          // this.viewExamItemsService.examItemsSig.set(
+          //   this.viewExamItemsService
+          //     .examItemsSig()
+          //     .map((i) => (i.id === res.item.id ? res.item : i))
+          // );
+          this.editingItemId.set(null);
+          this.saving.set(false);
+        },
+        error: (err) => {
+          this.errorMsg.set(err?.error?.message || 'Failed to update item');
+          this.saving.set(false);
+        },
+      });
   }
 
   deleteItem(id: string | number) {
