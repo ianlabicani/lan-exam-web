@@ -52,7 +52,7 @@ class="mt-4 mb-6 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 tran
           </div>
         }
         @if(item.type === 'mcq') {
-          <app-mcq-item [itemSig]="item"></app-mcq-item>
+          <app-mcq-item [item]="item"></app-mcq-item>
         } @else if(item.type === 'truefalse') {
           <app-true-false-item [itemSig]="item"></app-true-false-item>
         } @else if(item.type === 'essay') {
