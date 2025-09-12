@@ -3,10 +3,12 @@ import { RouterLink, RouterOutlet, ActivatedRoute } from '@angular/router';
 import { DatePipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExamService } from '../../services/exam.service';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-view-exam',
-  imports: [RouterLink, DatePipe, UpperCasePipe, FormsModule, RouterOutlet],
+  imports: [RouterLink, DatePipe, UpperCasePipe, FormsModule, RouterOutlet, FaIconComponent],
   templateUrl: './view-exam.html',
   styleUrl: './view-exam.css',
 })
@@ -14,10 +16,10 @@ export class ViewExam implements OnInit {
   examService = inject(ExamService);
   route = inject(ActivatedRoute);
 
-  examSig = this.examService.viewingExamSig;
   loadingSig = signal(true);
   errorMsg = signal<string | null>(null);
-  isEditable = computed(() => this.examSig()?.status === 'draft');
+
+  faArrowLeft = faArrowLeft;
 
   ngOnInit(): void {
     const examId: number = this.route.snapshot.params['examId'];
@@ -30,7 +32,7 @@ export class ViewExam implements OnInit {
   ) {
     this.examService.updateStatus(examId, status).subscribe({
       next: (exam) => {
-        this.examSig.set(exam);
+        this.examService.viewingExam.set(exam);
       },
       error: (err) => {
         this.errorMsg.set(err?.error?.message || 'Failed to activate exam');
@@ -43,8 +45,9 @@ export class ViewExam implements OnInit {
     this.examService.show(id).subscribe({
       next: (exam) => {
         this.loadingSig.set(false);
-        this.examSig.set(exam);
-        this.examService.viewingExamSig.set(exam);
+        this.examService.viewingExam.set(exam);
+        console.log(this.examService.viewingExam());
+
       },
       error: (err) => {
         this.errorMsg.set(err?.error?.message || 'Failed to load exam');

@@ -1,5 +1,4 @@
 import { HttpClient } from '@angular/common/http';
-import { ExamItemsService } from './../../exam-items.service';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import {
   Component,
@@ -22,6 +21,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { NgClass } from '@angular/common';
 import { environment } from '../../../../../../../environments/environment.development';
 import { ExamItem } from '../../../../../services/exam-item.service';
+import { Exam, ExamService } from '../../../../../services/exam.service';
 
 @Component({
   selector: 'app-mcq-form',
@@ -31,7 +31,7 @@ import { ExamItem } from '../../../../../services/exam-item.service';
 })
 export class McqForm implements OnInit {
   fb = inject(FormBuilder);
-  examItemsService = inject(ExamItemsService);
+  examService = inject(ExamService);
   http = inject(HttpClient);
 
   addItemOutput = output<ExamItem>();
@@ -125,6 +125,11 @@ export class McqForm implements OnInit {
           this.addOption();
           this.mcqForm.markAsPristine();
           this.saving.set(false);
+          this.examService.viewingExam.update((prev: Exam | null) => {
+            if (!prev) return prev;
+            return { ...prev, total_points: (prev.total_points ?? 0) + res.item.points };
+          });
+
         },
         error: (err) => {
           this.errorMsg.set(err?.error?.message || 'Failed to add MCQ');

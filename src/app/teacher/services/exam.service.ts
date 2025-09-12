@@ -8,7 +8,7 @@ import { environment } from '../../../environments/environment.development';
 })
 export class ExamService {
   private http = inject(HttpClient);
-  viewingExamSig = signal<Exam | null>(null);
+  viewingExam = signal<Exam | null>(null);
 
   index() {
     return this.http.get<Exam[]>(`${environment.apiBaseUrl}/teacher/exams`);

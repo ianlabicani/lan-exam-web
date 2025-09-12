@@ -1,10 +1,10 @@
 import { Component, inject, input, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { ExamItemsService } from '../../exam-items.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../../environments/environment.development';
 import { ExamItem } from '../../../../../services/exam-item.service';
+import { Exam, ExamService } from '../../../../../services/exam.service';
 
 @Component({
   selector: 'app-essay-form',
@@ -13,7 +13,7 @@ import { ExamItem } from '../../../../../services/exam-item.service';
   styleUrl: './essay-form.css',
 })
 export class EssayForm {
-  protected examItemsService = inject(ExamItemsService);
+  protected examService = inject(ExamService);
   private fb = inject(FormBuilder);
   http = inject(HttpClient);
 
@@ -52,6 +52,10 @@ export class EssayForm {
           this.essayForm.reset();
           this.addItemOutput.emit(res.item);
           this.isSavingSig.set(false);
+          this.examService.viewingExam.update((prev: Exam | null) => {
+            if (!prev) return prev;
+            return { ...prev, total_points: (prev.total_points ?? 0) + res.item.points };
+          });
         },
         error: (error) => {
           console.error('Error creating essay item:', error);

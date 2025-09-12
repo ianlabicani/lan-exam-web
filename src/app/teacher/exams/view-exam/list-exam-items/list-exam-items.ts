@@ -37,10 +37,8 @@ export class ListExamItems implements OnInit {
   examService = inject(ExamService);
   examItemService = inject(ExamItemService);
 
-  examIdSig = signal<number>(0);
-  examItemsSig = signal<ExamItem[]>([]);
-  examSig = this.examService.viewingExamSig;
-  isFormVisibleSig = signal(false);
+  examItems = signal<ExamItem[]>([]);
+  isFormVisibleSig = signal(true);
   isUpdateModalOpenSig = signal(false);
   selectedForUpdateSig = signal<ExamItem | null>(null);
   isDeleteModalOpenSig = signal(false);
@@ -55,7 +53,7 @@ export class ListExamItems implements OnInit {
   getExamItems(examId: number) {
     this.examItemService.index(examId).subscribe({
       next: (items) => {
-        this.examItemsSig.set(items);
+        this.examItems.set(items);
       },
       error: (err) => {
         console.error('Error fetching exam items:', err);
@@ -64,7 +62,11 @@ export class ListExamItems implements OnInit {
   }
 
   addItem(item: ExamItem) {
-    this.examItemsSig.update((items) => [...items, item]);
+
+
+
+
+    this.examItems.update((items) => [...items, item]);
   }
 
   openUpdateModal(item: ExamItem) {
@@ -93,17 +95,16 @@ export class ListExamItems implements OnInit {
   }
 
   onItemSaved(updated: ExamItem) {
-    const examId = this.examIdSig();
     const itemId = updated.id;
 
     this.http
       .patch<{ item: ExamItem }>(
-        `${environment.apiBaseUrl}/teacher/exams/${examId}/items/${itemId}`,
+        `${environment.apiBaseUrl}/teacher/exams/${this.examService.viewingExam()?.id}/items/${itemId}`,
         updated
       )
       .subscribe({
         next: (res) => {
-          this.examItemsSig.update((items) =>
+          this.examItems.update((items) =>
             items.map((it) => (it.id === res.item.id ? res.item : it))
           );
           this.closeUpdateModal();
@@ -112,6 +113,6 @@ export class ListExamItems implements OnInit {
   }
 
   removeItem(item: ExamItem) {
-    this.examItemsSig.update((items) => items.filter((i) => i.id !== item.id));
+    this.examItems.update((items) => items.filter((i) => i.id !== item.id));
   }
 }

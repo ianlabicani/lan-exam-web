@@ -1,7 +1,6 @@
 import { Component, input, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ExamItemsService } from '../exam-items.service';
-import { ExamItem } from '../../../../services/exam-item.service';
+import { ExamItem, ExamItemService } from '../../../../services/exam-item.service';
 
 @Component({
   selector: 'app-delete-item',
@@ -14,7 +13,7 @@ export class DeleteItem {
   deleted = output<ExamItem>();
   close = output<void>();
 
-  examItemsService = inject(ExamItemsService);
+  examItemsService = inject(ExamItemService);
 
   deleting = false;
   error: string | null = null;

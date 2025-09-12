@@ -8,13 +8,26 @@ import { Exam } from './exam.service';
 })
 export class ExamItemService {
   private http = inject(HttpClient);
-  viewingExamSig = signal<Exam | null>(null);
 
   index(examId: number) {
     return this.http.get<ExamItem[]>(
       `${environment.apiBaseUrl}/teacher/exams/${examId}/items`
     );
   }
+
+  store(examId: number, payload: any) {
+    return this.http.post<{ item: ExamItem }>(
+      `http://127.0.0.1:8000/api/teacher/exams/${examId}/items`,
+      payload
+    );
+  }
+
+  delete(examId: number, itemId: number) {
+    return this.http.delete<{ success: boolean }>(
+      `http://127.0.0.1:8000/api/teacher/exams/${examId}/items/${itemId}`
+    );
+  }
+
 }
 
 export interface ExamItem {
