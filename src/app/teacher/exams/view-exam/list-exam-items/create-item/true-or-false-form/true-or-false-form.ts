@@ -28,8 +28,6 @@ export class TrueOrFalseForm implements OnInit {
   });
 
   ngOnInit(): void {
-    console.log('here');
-    console.log(this.examItemService.viewingExam());
   }
 
   createItem() {
@@ -58,7 +56,6 @@ export class TrueOrFalseForm implements OnInit {
           this.addItemOutput.emit(res.item);
 
           this.examItemService.viewingExam.update((prev: Exam | null) => {
-            console.log(prev);
 
             if (!prev) return prev;
             return { ...prev, total_points: (prev.total_points ?? 0) + res.item.points };

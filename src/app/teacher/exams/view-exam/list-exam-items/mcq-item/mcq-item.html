@@ -1,4 +1,4 @@
-@let item = itemSig();
+@let itemSig = item();
 
 <div class="rounded-lg border border-gray-200 bg-white shadow-sm p-4 space-y-4">
   <!-- Header -->
@@ -8,17 +8,17 @@
     >
       MCQ
     </span>
-    <span class="text-xs text-gray-500">{{ item.points }} pts</span>
+    <span class="text-xs text-gray-500">{{ itemSig.points }} pts</span>
   </div>
 
   <!-- Question -->
   <p class="text-sm font-semibold text-gray-800">
-    {{ item.question }}
+    {{ itemSig.question }}
   </p>
 
   <!-- Options -->
   <ul class="space-y-2">
-    @for (opt of item.options; track $index) {
+    @for (opt of itemSig.options; track $index) {
       <li
         class="flex items-center gap-2 px-3 py-2 rounded-md border"
         [ngClass]="{
