@@ -38,12 +38,35 @@ export interface Exam {
   id: number;
   title: string;
   description: string;
-  starts_at: Date;
-  ends_at: Date;
+  starts_at: string | Date;
+  ends_at: string | Date;
   year: string;
-  section: string;
+  // New API may return sections as an array; keep old 'section' for compatibility
+  section?: string;
+  sections?: string[];
   status: string;
   total_points: number;
-  created_at: Date;
-  updated_at: Date;
+  // Table of Specifications (optional)
+  tos?: TosTopic[];
+  created_at: string | Date;
+  updated_at: string | Date;
+}
+
+export interface TosTopic {
+  topic: string;
+  outcomes: string[];
+  time_allotment: number;
+  no_of_items: number;
+  distribution: TosDistribution;
+}
+
+export interface TosDistribution {
+  easy: TosDistributionLevel;
+  moderate: TosDistributionLevel;
+  difficult: TosDistributionLevel;
+}
+
+export interface TosDistributionLevel {
+  allocation: number;
+  placement: string[];
 }
