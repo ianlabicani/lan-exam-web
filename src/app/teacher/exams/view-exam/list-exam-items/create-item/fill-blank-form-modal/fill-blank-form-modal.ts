@@ -44,7 +44,7 @@ export class FillBlankFormModal {
 
     const examId = this.examId();
     const payload = {
-      type: 'fill_blank',
+      type: 'fillblank',
       question: this.form.value.question!,
       expected_answer: this.form.value.expected_answer!,
       points: this.form.value.points!,
