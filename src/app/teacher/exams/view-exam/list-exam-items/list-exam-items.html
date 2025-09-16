@@ -3,8 +3,10 @@
 @let isFormVisible = isFormVisibleSig();
 
 @if (exam?.status === 'draft') {
+  <button (click)="mcqFormModalService.openModal()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Add MCQ</button>
   <button (click)="essayFormModalService.openModal()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Add Essay</button>
   <app-essay-form-modal [examId]="exam?.id!"></app-essay-form-modal>
+  <app-mcq-form-modal [examId]="exam?.id!"></app-mcq-form-modal>
 }
 
 

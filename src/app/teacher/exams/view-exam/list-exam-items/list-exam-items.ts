@@ -7,7 +7,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { McqItem } from './mcq-item/mcq-item';
 import { HttpClient } from '@angular/common/http';
-import { McqForm } from './create-item/mcq-form/mcq-form';
 import { TrueOrFalseForm } from './create-item/true-or-false-form/true-or-false-form';
 import { TrueFalseItem } from './true-false-item/true-false-item';
 import { EssayItem } from './essay-item/essay-item';
@@ -16,6 +15,8 @@ import { DeleteItem } from './delete-item/delete-item';
 import { environment } from '../../../../../environments/environment.development';
 import { ExamService } from '../../../services/exam.service';
 import { EssayFormModal } from './create-item/essay-form-modal/essay-form-modal';
+import { McqFormModal } from './create-item/mcq-form-modal/mcq-form-modal';
+import { McqFormModalService } from './create-item/mcq-form-modal/mcq-form-modal.service';
 
 @Component({
   selector: 'app-teacher-list-exam-items',
@@ -27,6 +28,7 @@ import { EssayFormModal } from './create-item/essay-form-modal/essay-form-modal'
     UpdateItem,
     DeleteItem,
     EssayFormModal,
+    McqFormModal,
   ],
   templateUrl: './list-exam-items.html',
   styleUrl: './list-exam-items.css',
@@ -37,6 +39,7 @@ export class ListExamItems implements OnInit {
   examService = inject(ExamService);
   examItemService = inject(ExamItemService);
   essayFormModalService = inject(EssayFormModalService);
+  mcqFormModalService = inject(McqFormModalService);
 
   isFormVisibleSig = signal(true);
   isUpdateModalOpenSig = signal(false);
