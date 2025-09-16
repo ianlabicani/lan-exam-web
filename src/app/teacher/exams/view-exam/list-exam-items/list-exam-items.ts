@@ -7,7 +7,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { McqItem } from './mcq-item/mcq-item';
 import { HttpClient } from '@angular/common/http';
-import { TrueOrFalseForm } from './create-item/true-or-false-form/true-or-false-form';
 import { TrueFalseItem } from './true-false-item/true-false-item';
 import { EssayItem } from './essay-item/essay-item';
 import { UpdateItem } from './update-item/update-item';
@@ -17,18 +16,20 @@ import { ExamService } from '../../../services/exam.service';
 import { EssayFormModal } from './create-item/essay-form-modal/essay-form-modal';
 import { McqFormModal } from './create-item/mcq-form-modal/mcq-form-modal';
 import { McqFormModalService } from './create-item/mcq-form-modal/mcq-form-modal.service';
+import { TrueOrFalseFormModal } from './create-item/true-or-false-form-modal/true-or-false-form-modal';
+import { TrueOrFalseFormModalService } from './create-item/true-or-false-form-modal/true-or-false-form-modal.service';
 
 @Component({
   selector: 'app-teacher-list-exam-items',
   imports: [
     McqItem,
-    TrueOrFalseForm,
     TrueFalseItem,
     EssayItem,
     UpdateItem,
     DeleteItem,
     EssayFormModal,
     McqFormModal,
+    TrueOrFalseFormModal,
   ],
   templateUrl: './list-exam-items.html',
   styleUrl: './list-exam-items.css',
@@ -40,8 +41,8 @@ export class ListExamItems implements OnInit {
   examItemService = inject(ExamItemService);
   essayFormModalService = inject(EssayFormModalService);
   mcqFormModalService = inject(McqFormModalService);
+  trueOrFalseFormModalService = inject(TrueOrFalseFormModalService);
 
-  isFormVisibleSig = signal(true);
   isUpdateModalOpenSig = signal(false);
   selectedForUpdateSig = signal<ExamItem | null>(null);
   isDeleteModalOpenSig = signal(false);
