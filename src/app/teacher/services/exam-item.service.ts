@@ -45,7 +45,7 @@ export interface ExamItem {
   type:
     | 'mcq'
     | 'truefalse'
-    | 'fill_blank'
+    | 'fillblank'
     | 'shortanswer'
     | 'essay'
     | 'matching';
