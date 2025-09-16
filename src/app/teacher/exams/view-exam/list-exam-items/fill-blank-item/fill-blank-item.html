@@ -1,0 +1,15 @@
+@let item = itemSig();
+
+<div class="rounded-lg border border-purple-600 bg-white shadow-sm p-4 space-y-4">
+  <div class="flex items-center justify-between">
+    <span class="bg-purple-100 text-purple-700 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full">Fill in the Blank</span>
+    <span class="text-xs text-gray-500">{{ item.points }} pts</span>
+  </div>
+
+  <p class="text-sm font-semibold text-gray-800">{{ item.question }}</p>
+
+  <div class="bg-gray-50 rounded p-3">
+    <span class="text-sm text-gray-600">Expected Answer:</span>
+    <p class="text-sm text-gray-800 mt-1 italic">{{ item.expected_answer || '—' }}</p>
+  </div>
+</div>

@@ -8,6 +8,9 @@ import { McqItem } from './mcq-item/mcq-item';
 import { HttpClient } from '@angular/common/http';
 import { TrueFalseItem } from './true-false-item/true-false-item';
 import { EssayItem } from './essay-item/essay-item';
+import { FillBlankItem } from './fill-blank-item/fill-blank-item';
+import { ShortAnswerItem } from './short-answer-item/short-answer-item';
+import { MatchingItem } from './matching-item/matching-item';
 import { UpdateItem } from './update-item/update-item';
 import { DeleteItem } from './delete-item/delete-item';
 import { environment } from '../../../../../environments/environment.development';
@@ -15,6 +18,9 @@ import { ExamService } from '../../../services/exam.service';
 import { EssayFormModal } from './create-item/essay-form-modal/essay-form-modal';
 import { McqFormModal } from './create-item/mcq-form-modal/mcq-form-modal';
 import { TrueOrFalseFormModal } from './create-item/true-or-false-form-modal/true-or-false-form-modal';
+import { FillBlankFormModal } from './create-item/fill-blank-form-modal/fill-blank-form-modal';
+import { ShortAnswerFormModal } from './create-item/short-answer-form-modal/short-answer-form-modal';
+import { MatchingFormModal } from './create-item/matching-form-modal/matching-form-modal';
 
 @Component({
   selector: 'app-teacher-list-exam-items',
@@ -22,11 +28,17 @@ import { TrueOrFalseFormModal } from './create-item/true-or-false-form-modal/tru
     McqItem,
     TrueFalseItem,
     EssayItem,
+    FillBlankItem,
+    ShortAnswerItem,
+    MatchingItem,
     UpdateItem,
     DeleteItem,
     EssayFormModal,
     McqFormModal,
     TrueOrFalseFormModal,
+    FillBlankFormModal,
+    ShortAnswerFormModal,
+    MatchingFormModal,
   ],
   templateUrl: './list-exam-items.html',
   styleUrl: './list-exam-items.css',
@@ -44,14 +56,23 @@ export class ListExamItems implements OnInit {
   isEasyTOFModalOpen = signal(false);
   isEasyEssayModalOpen = signal(false);
   isEasyMcqModalOpen = signal(false);
+  isEasyFillBlankModalOpen = signal(false);
+  isEasyShortAnswerModalOpen = signal(false);
+  isEasyMatchingModalOpen = signal(false);
   // moderate modals
   isModerateTOFModalOpen = signal(false);
   isModerateEssayModalOpen = signal(false);
   isModerateMcqModalOpen = signal(false);
+  isModerateFillBlankModalOpen = signal(false);
+  isModerateShortAnswerModalOpen = signal(false);
+  isModerateMatchingModalOpen = signal(false);
   // difficult modals
   isDifficultTOFModalOpen = signal(false);
   isDifficultEssayModalOpen = signal(false);
   isDifficultMcqModalOpen = signal(false);
+  isDifficultFillBlankModalOpen = signal(false);
+  isDifficultShortAnswerModalOpen = signal(false);
+  isDifficultMatchingModalOpen = signal(false);
 
   // collapsible states
   isEasyOpen = signal(true);

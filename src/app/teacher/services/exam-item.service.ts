@@ -45,17 +45,17 @@ export interface ExamItem {
   type:
     | 'mcq'
     | 'truefalse'
-    | 'fillblank'
+    | 'fill_blank'
     | 'shortanswer'
     | 'essay'
     | 'matching';
-  level: 'easy' | 'moderate' | 'difficult'; // aligns with TOS distribution
+  level: 'easy' | 'moderate' | 'difficult';
   question: string;
   points: number;
-  expected_answer: string | null; // for short/essay/fill-in
-  answer: string | null; // student’s submitted answer
-  options: Option[]; // still works for mcq, truefalse
-  pairs?: MatchingPair[]; // new field, only for type = "matching"
+  expected_answer: string | null;
+  answer: string | null;
+  options: Option[];
+  pairs?: MatchingPair[];
   created_at: Date;
   updated_at: Date;
 }
@@ -66,6 +66,6 @@ export interface Option {
 }
 
 export interface MatchingPair {
-  left: string; // e.g. "Term"
-  right: string; // e.g. "Definition"
+  left: string;
+  right: string;
 }

@@ -21,6 +21,15 @@
 
     <button (click)="isEasyTOFModalOpen.set(true)" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition">Add True/False</button>
     <app-true-or-false-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyTOFModalOpen.set(true)" (closeModal)="isEasyTOFModalOpen.set(false)" [isModalOpen]="isEasyTOFModalOpen()"></app-true-or-false-form-modal>
+
+    <button (click)="isEasyFillBlankModalOpen.set(true)" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition">Add Fill in the Blank</button>
+    <app-fill-blank-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyFillBlankModalOpen.set(true)" (closeModal)="isEasyFillBlankModalOpen.set(false)" [isModalOpen]="isEasyFillBlankModalOpen()"></app-fill-blank-form-modal>
+
+    <button (click)="isEasyShortAnswerModalOpen.set(true)" class="px-4 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 transition">Add Short Answer</button>
+    <app-short-answer-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyShortAnswerModalOpen.set(true)" (closeModal)="isEasyShortAnswerModalOpen.set(false)" [isModalOpen]="isEasyShortAnswerModalOpen()"></app-short-answer-form-modal>
+
+    <button (click)="isEasyMatchingModalOpen.set(true)" class="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition">Add Matching</button>
+    <app-matching-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyMatchingModalOpen.set(true)" (closeModal)="isEasyMatchingModalOpen.set(false)" [isModalOpen]="isEasyMatchingModalOpen()"></app-matching-form-modal>
   }
 
     @if (isEasyOpen()) {
@@ -39,6 +48,12 @@
             <app-true-false-item [itemSig]="item"></app-true-false-item>
           } @else if(item.type === 'essay') {
             <app-essay-item [itemSig]="item"></app-essay-item>
+          } @else if(item.type === 'fill_blank') {
+            <app-fill-blank-item [itemSig]="item"></app-fill-blank-item>
+          } @else if(item.type === 'shortanswer') {
+            <app-short-answer-item [itemSig]="item"></app-short-answer-item>
+          } @else if(item.type === 'matching') {
+            <app-matching-item [itemSig]="item"></app-matching-item>
           }
         </div>
       } @empty {
@@ -67,6 +82,15 @@
 
     <button (click)="isModerateTOFModalOpen.set(true)" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition">Add True/False</button>
     <app-true-or-false-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateTOFModalOpen.set(true)" (closeModal)="isModerateTOFModalOpen.set(false)" [isModalOpen]="isModerateTOFModalOpen()"></app-true-or-false-form-modal>
+
+   <button (click)="isModerateFillBlankModalOpen.set(true)" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition">Add Fill in the Blank</button>
+   <app-fill-blank-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateFillBlankModalOpen.set(true)" (closeModal)="isModerateFillBlankModalOpen.set(false)" [isModalOpen]="isModerateFillBlankModalOpen()"></app-fill-blank-form-modal>
+
+   <button (click)="isModerateShortAnswerModalOpen.set(true)" class="px-4 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 transition">Add Short Answer</button>
+   <app-short-answer-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateShortAnswerModalOpen.set(true)" (closeModal)="isModerateShortAnswerModalOpen.set(false)" [isModalOpen]="isModerateShortAnswerModalOpen()"></app-short-answer-form-modal>
+
+   <button (click)="isModerateMatchingModalOpen.set(true)" class="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition">Add Matching</button>
+   <app-matching-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateMatchingModalOpen.set(true)" (closeModal)="isModerateMatchingModalOpen.set(false)" [isModalOpen]="isModerateMatchingModalOpen()"></app-matching-form-modal>
   }
     @if (isModerateOpen()) {
     <div class="space-y-3 mb-10">
@@ -84,6 +108,12 @@
             <app-true-false-item [itemSig]="item"></app-true-false-item>
           } @else if(item.type === 'essay') {
             <app-essay-item [itemSig]="item"></app-essay-item>
+          } @else if(item.type === 'fill_blank') {
+            <app-fill-blank-item [itemSig]="item"></app-fill-blank-item>
+          } @else if(item.type === 'shortanswer') {
+            <app-short-answer-item [itemSig]="item"></app-short-answer-item>
+          } @else if(item.type === 'matching') {
+            <app-matching-item [itemSig]="item"></app-matching-item>
           }
         </div>
       } @empty {
@@ -112,6 +142,15 @@
 
     <button (click)="isDifficultTOFModalOpen.set(true)" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition">Add True/False</button>
     <app-true-or-false-form-modal [examId]="exam?.id!" [level]="'difficult'" (openModal)="isDifficultTOFModalOpen.set(true)" (closeModal)="isDifficultTOFModalOpen.set(false)" [isModalOpen]="isDifficultTOFModalOpen()"></app-true-or-false-form-modal>
+
+    <button (click)="isDifficultFillBlankModalOpen.set(true)" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition">Add Fill in the Blank</button>
+    <app-fill-blank-form-modal [examId]="exam?.id!" [level]="'difficult'" (openModal)="isDifficultFillBlankModalOpen.set(true)" (closeModal)="isDifficultFillBlankModalOpen.set(false)" [isModalOpen]="isDifficultFillBlankModalOpen()"></app-fill-blank-form-modal>
+
+    <button (click)="isDifficultShortAnswerModalOpen.set(true)" class="px-4 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 transition">Add Short Answer</button>
+    <app-short-answer-form-modal [examId]="exam?.id!" [level]="'difficult'" (openModal)="isDifficultShortAnswerModalOpen.set(true)" (closeModal)="isDifficultShortAnswerModalOpen.set(false)" [isModalOpen]="isDifficultShortAnswerModalOpen()"></app-short-answer-form-modal>
+
+    <button (click)="isDifficultMatchingModalOpen.set(true)" class="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition">Add Matching</button>
+    <app-matching-form-modal [examId]="exam?.id!" [level]="'difficult'" (openModal)="isDifficultMatchingModalOpen.set(true)" (closeModal)="isDifficultMatchingModalOpen.set(false)" [isModalOpen]="isDifficultMatchingModalOpen()"></app-matching-form-modal>
   }
     @if (isDifficultOpen()) {
     <div class="space-y-3 mb-10">
@@ -129,6 +168,12 @@
             <app-true-false-item [itemSig]="item"></app-true-false-item>
           } @else if(item.type === 'essay') {
             <app-essay-item [itemSig]="item"></app-essay-item>
+          } @else if(item.type === 'fill_blank') {
+            <app-fill-blank-item [itemSig]="item"></app-fill-blank-item>
+          } @else if(item.type === 'shortanswer') {
+            <app-short-answer-item [itemSig]="item"></app-short-answer-item>
+          } @else if(item.type === 'matching') {
+            <app-matching-item [itemSig]="item"></app-matching-item>
           }
         </div>
       } @empty {
