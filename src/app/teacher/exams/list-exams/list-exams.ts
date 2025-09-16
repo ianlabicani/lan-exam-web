@@ -22,6 +22,7 @@ export class ListExams implements OnInit {
   ngOnInit(): void {
     this.examService.index().subscribe((exams) => {
       this.examsSig.set(exams);
+      console.log(this.examsSig()[0]);
     });
   }
 

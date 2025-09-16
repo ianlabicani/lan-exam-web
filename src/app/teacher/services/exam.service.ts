@@ -19,16 +19,7 @@ export class ExamService {
     return this.http.get<Exam>(`${environment.apiBaseUrl}/teacher/exams/${id}`);
   }
 
-  store(payload: {
-    title: string;
-    description: string;
-    starts_at: string | Date;
-    ends_at: string | Date;
-    year: string | number;
-    section: string;
-    status: string;
-    total_points: number;
-  }) {
+  store(payload: any) {
     return this.http.post<{ exam: Exam }>(
       `${environment.apiBaseUrl}/teacher/exams`,
       payload
