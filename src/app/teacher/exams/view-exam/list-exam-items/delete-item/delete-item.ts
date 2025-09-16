@@ -1,3 +1,4 @@
+import { Exam, ExamService } from './../../../../services/exam.service';
 import { Component, input, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ExamItem, ExamItemService } from '../../../../services/exam-item.service';
@@ -14,6 +15,7 @@ export class DeleteItem {
   close = output<void>();
 
   examItemsService = inject(ExamItemService);
+  examService = inject(ExamService);
 
   deleting = false;
   error: string | null = null;
@@ -25,9 +27,14 @@ export class DeleteItem {
     this.error = null;
 
     this.examItemsService.delete(item.exam_id, item.id).subscribe({
-      next: () => {
+      next: (res) => {
         this.deleting = false;
         this.deleted.emit(item);
+          this.examService.viewingExam.update((prev: Exam | null) => {
+
+            if (!prev) return prev;
+            return { ...prev, total_points: (prev.total_points ?? 0) - item.points };
+          });
       },
       error: (err) => {
         this.deleting = false;
