@@ -1,49 +1,138 @@
-@let examItemsSig = examItemService.items();
-@let exam = this.examService.viewingExam();
+@let easyItemsSig = examItemService.easyItems();
+@let moderateItemsSig = examItemService.moderateItems();
+@let difficultItemsSig = examItemService.difficultItems();
 
-@if (exam?.status === 'draft') {
-  <button (click)="mcqFormModalService.openModal()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Add MCQ</button>
-  <button (click)="essayFormModalService.openModal()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Add Essay</button>
-  <app-essay-form-modal [examId]="exam?.id!"></app-essay-form-modal>
-  <app-mcq-form-modal [examId]="exam?.id!"></app-mcq-form-modal>
-  <button (click)="trueOrFalseFormModalService.openModal()" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition">Add True/False</button>
-  <app-true-or-false-form-modal [examId]="exam?.id!"></app-true-or-false-form-modal>
-}
+
+@let exam = this.examService.viewingExam();
 
 
 @if (exam) {
-<div class="space-y-4">
-  <h2 class="text-lg font-semibold text-gray-900">
-    Exam Items ({{ examItemsSig.length }})
-  </h2>
+  <div class="space-y-4">
+    <h2 class="text-lg font-semibold text-gray-900">
+      Easy Exam Items ({{ easyItemsSig.length }})
+    </h2>
+    @if (exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.easy?.allocation ?? 0) > easyItemsSig.length) {
+      <button (click)="isEasyEssayModalOpen.set(true)" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Add Essay</button>
+    <app-essay-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyEssayModalOpen.set(true)" (closeModal)="isEasyEssayModalOpen.set(false)" [isModalOpen]="isEasyEssayModalOpen()"></app-essay-form-modal>
 
-  <div class="space-y-3 mb-10">
-    @for(item of examItemsSig; track $index) {
-      <div class="flex gap-1 flex-col">
-        @if (exam?.status === 'draft') {
-          <div class="flex justify-end gap-2">
-            <button (click)="openUpdateModal(item)" class="text-xs text-blue-600 hover:text-blue-800">Edit</button>
-            <button (click)="openDeleteModal(item)" class="text-xs text-red-600 hover:text-red-800">Delete</button>
-          </div>
-        }
-        @if(item.type === 'mcq') {
-          <app-mcq-item [item]="item"></app-mcq-item>
-        } @else if(item.type === 'truefalse') {
-          <app-true-false-item [itemSig]="item"></app-true-false-item>
-        } @else if(item.type === 'essay') {
-          <app-essay-item [itemSig]="item"></app-essay-item>
-        }
-      </div>
-    } @empty {
-      <div class="p-8 text-center border border-dashed rounded-lg bg-gray-50 text-gray-500 text-sm">
-        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        No items added yet.
-      </div>
-    }
+    <button (click)="isEasyMcqModalOpen.set(true)" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Add MCQ</button>
+    <app-mcq-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyMcqModalOpen.set(true)" (closeModal)="isEasyMcqModalOpen.set(false)" [isModalOpen]="isEasyMcqModalOpen()"></app-mcq-form-modal>
+
+    <button (click)="isEasyTOFModalOpen.set(true)" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition">Add True/False</button>
+    <app-true-or-false-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyTOFModalOpen.set(true)" (closeModal)="isEasyTOFModalOpen.set(false)" [isModalOpen]="isEasyTOFModalOpen()"></app-true-or-false-form-modal>
+  }
+
+    <div class="space-y-3 mb-10">
+      @for(item of easyItemsSig; track $index) {
+        <div class="flex gap-1 flex-col">
+          @if (exam?.status === 'draft') {
+            <div class="flex justify-end gap-2">
+              <button (click)="openUpdateModal(item)" class="text-xs text-blue-600 hover:text-blue-800">Edit</button>
+              <button (click)="openDeleteModal(item)" class="text-xs text-red-600 hover:text-red-800">Delete</button>
+            </div>
+          }
+          @if(item.type === 'mcq') {
+            <app-mcq-item [item]="item"></app-mcq-item>
+          } @else if(item.type === 'truefalse') {
+            <app-true-false-item [itemSig]="item"></app-true-false-item>
+          } @else if(item.type === 'essay') {
+            <app-essay-item [itemSig]="item"></app-essay-item>
+          }
+        </div>
+      } @empty {
+        <div class="p-8 text-center border border-dashed rounded-lg bg-gray-50 text-gray-500 text-sm">
+          <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          No items added yet.
+        </div>
+      }
+    </div>
   </div>
-</div>
+
+  <div class="space-y-4">
+    <h2 class="text-lg font-semibold text-gray-900">
+      Moderate Exam Items ({{ moderateItemsSig.length }})
+    </h2>
+ @if (exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.moderate?.allocation ?? 0) > moderateItemsSig.length) {
+    <button (click)="isModerateEssayModalOpen.set(true)" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Add Essay</button>
+    <app-essay-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateEssayModalOpen.set(true)" (closeModal)="isModerateEssayModalOpen.set(false)" [isModalOpen]="isModerateEssayModalOpen()"></app-essay-form-modal>
+
+    <button (click)="isModerateMcqModalOpen.set(true)" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Add MCQ</button>
+    <app-mcq-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateMcqModalOpen.set(true)" (closeModal)="isModerateMcqModalOpen.set(false)" [isModalOpen]="isModerateMcqModalOpen()"></app-mcq-form-modal>
+
+    <button (click)="isModerateTOFModalOpen.set(true)" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition">Add True/False</button>
+    <app-true-or-false-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateTOFModalOpen.set(true)" (closeModal)="isModerateTOFModalOpen.set(false)" [isModalOpen]="isModerateTOFModalOpen()"></app-true-or-false-form-modal>
+  }
+    <div class="space-y-3 mb-10">
+      @for(item of moderateItemsSig; track $index) {
+        <div class="flex gap-1 flex-col">
+          @if (exam?.status === 'draft') {
+            <div class="flex justify-end gap-2">
+              <button (click)="openUpdateModal(item)" class="text-xs text-blue-600 hover:text-blue-800">Edit</button>
+              <button (click)="openDeleteModal(item)" class="text-xs text-red-600 hover:text-red-800">Delete</button>
+            </div>
+          }
+          @if(item.type === 'mcq') {
+            <app-mcq-item [item]="item"></app-mcq-item>
+          } @else if(item.type === 'truefalse') {
+            <app-true-false-item [itemSig]="item"></app-true-false-item>
+          } @else if(item.type === 'essay') {
+            <app-essay-item [itemSig]="item"></app-essay-item>
+          }
+        </div>
+      } @empty {
+        <div class="p-8 text-center border border-dashed rounded-lg bg-gray-50 text-gray-500 text-sm">
+          <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          No items added yet.
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="space-y-4">
+    <h2 class="text-lg font-semibold text-gray-900">
+      Difficult Exam Items ({{ difficultItemsSig.length }})
+    </h2>
+    @if (exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.difficult?.allocation ?? 0) > difficultItemsSig.length) {
+    <button (click)="isDifficultEssayModalOpen.set(true)" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Add Essay</button>
+    <app-essay-form-modal [examId]="exam?.id!" [level]="'difficult'" (openModal)="isDifficultEssayModalOpen.set(true)" (closeModal)="isDifficultEssayModalOpen.set(false)" [isModalOpen]="isDifficultEssayModalOpen()"></app-essay-form-modal>
+
+    <button (click)="isDifficultMcqModalOpen.set(true)" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Add MCQ</button>
+    <app-mcq-form-modal [examId]="exam?.id!" [level]="'difficult'" (openModal)="isDifficultMcqModalOpen.set(true)" (closeModal)="isDifficultMcqModalOpen.set(false)" [isModalOpen]="isDifficultMcqModalOpen()"></app-mcq-form-modal>
+
+    <button (click)="isDifficultTOFModalOpen.set(true)" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition">Add True/False</button>
+    <app-true-or-false-form-modal [examId]="exam?.id!" [level]="'difficult'" (openModal)="isDifficultTOFModalOpen.set(true)" (closeModal)="isDifficultTOFModalOpen.set(false)" [isModalOpen]="isDifficultTOFModalOpen()"></app-true-or-false-form-modal>
+  }
+    <div class="space-y-3 mb-10">
+      @for(item of difficultItemsSig; track $index) {
+        <div class="flex gap-1 flex-col">
+          @if (exam?.status === 'draft') {
+            <div class="flex justify-end gap-2">
+              <button (click)="openUpdateModal(item)" class="text-xs text-blue-600 hover:text-blue-800">Edit</button>
+              <button (click)="openDeleteModal(item)" class="text-xs text-red-600 hover:text-red-800">Delete</button>
+            </div>
+          }
+          @if(item.type === 'mcq') {
+            <app-mcq-item [item]="item"></app-mcq-item>
+          } @else if(item.type === 'truefalse') {
+            <app-true-false-item [itemSig]="item"></app-true-false-item>
+          } @else if(item.type === 'essay') {
+            <app-essay-item [itemSig]="item"></app-essay-item>
+          }
+        </div>
+      } @empty {
+        <div class="p-8 text-center border border-dashed rounded-lg bg-gray-50 text-gray-500 text-sm">
+          <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          No items added yet.
+        </div>
+      }
+    </div>
+  </div>
 
   @if (isUpdateModalOpenSig()) {
     <app-update-item [itemInput]="selectedForUpdateSig()!" (itemSaved)="onItemSaved($event)" (close)="closeUpdateModal()"></app-update-item>

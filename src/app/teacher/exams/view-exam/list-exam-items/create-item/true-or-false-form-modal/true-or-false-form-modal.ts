@@ -1,4 +1,11 @@
-import { Component, OnInit, inject, input, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../../environments/environment.development';
@@ -6,7 +13,6 @@ import {
   ExamItem,
   ExamItemService,
 } from '../../../../../services/exam-item.service';
-import { TrueOrFalseFormModalService } from './true-or-false-form-modal.service';
 
 @Component({
   selector: 'app-true-or-false-form-modal',
@@ -14,23 +20,24 @@ import { TrueOrFalseFormModalService } from './true-or-false-form-modal.service'
   templateUrl: './true-or-false-form-modal.html',
   styleUrl: './true-or-false-form-modal.css',
 })
-export class TrueOrFalseFormModal implements OnInit {
+export class TrueOrFalseFormModal {
   fb = inject(FormBuilder);
   http = inject(HttpClient);
   examItemService = inject(ExamItemService);
-  tfFormModalService = inject(TrueOrFalseFormModalService);
 
+  level = input.required<'easy' | 'moderate' | 'difficult'>();
   examId = input.required<number>();
   isSaving = signal(false);
   errorMessage = signal<string | null>(null);
+  isModalOpen = input.required<boolean>();
+  openModal = output<void>();
+  closeModal = output<void>();
 
   tfForm = this.fb.nonNullable.group({
     question: ['', [Validators.required, Validators.minLength(3)]],
-    answer: [true, [Validators.required]],
+    answer: ['true', [Validators.required]],
     points: [1, [Validators.required, Validators.min(1)]],
   });
-
-  ngOnInit(): void {}
 
   onSubmit() {
     if (this.tfForm.invalid) {
@@ -45,6 +52,7 @@ export class TrueOrFalseFormModal implements OnInit {
       question: this.tfForm.value.question!,
       answer: this.tfForm.value.answer!,
       points: this.tfForm.value.points!,
+      level: this.level(),
     };
 
     const examId = this.examId();
@@ -56,9 +64,9 @@ export class TrueOrFalseFormModal implements OnInit {
       .subscribe({
         next: (res) => {
           this.examItemService.items.update((prev) => [...prev, res.item]);
-          this.tfForm.reset({ question: '', answer: true, points: 1 });
+          this.tfForm.reset({ question: '', answer: 'true', points: 1 });
           this.isSaving.set(false);
-          this.tfFormModalService.closeModal();
+          this.closeModal.emit();
         },
         error: (err) => {
           this.errorMessage.set(

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environment.development';
 import { Exam } from './exam.service';
 
@@ -9,6 +9,15 @@ import { Exam } from './exam.service';
 export class ExamItemService {
   private http = inject(HttpClient);
   items = signal<ExamItem[]>([]);
+  easyItems = computed(() =>
+    this.items().filter((item) => item.level === 'easy')
+  );
+  moderateItems = computed(() =>
+    this.items().filter((item) => item.level === 'moderate')
+  );
+  difficultItems = computed(() =>
+    this.items().filter((item) => item.level === 'difficult')
+  );
 
   index(examId: number) {
     return this.http.get<ExamItem[]>(
@@ -33,12 +42,20 @@ export class ExamItemService {
 export interface ExamItem {
   id: number;
   exam_id: number;
-  type: string;
+  type:
+    | 'mcq'
+    | 'truefalse'
+    | 'fillblank'
+    | 'shortanswer'
+    | 'essay'
+    | 'matching';
+  level: 'easy' | 'moderate' | 'difficult'; // aligns with TOS distribution
   question: string;
   points: number;
-  expected_answer: null;
-  answer: null;
-  options: Option[];
+  expected_answer: string | null; // for short/essay/fill-in
+  answer: string | null; // student’s submitted answer
+  options: Option[]; // still works for mcq, truefalse
+  pairs?: MatchingPair[]; // new field, only for type = "matching"
   created_at: Date;
   updated_at: Date;
 }
@@ -46,4 +63,9 @@ export interface ExamItem {
 export interface Option {
   text: string;
   correct: boolean;
+}
+
+export interface MatchingPair {
+  left: string; // e.g. "Term"
+  right: string; // e.g. "Definition"
 }

@@ -1,5 +1,11 @@
-import { Component, OnInit, inject, input, signal } from '@angular/core';
-import { McqFormModalService } from './mcq-form-modal.service';
+import {
+  Component,
+  OnInit,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -24,12 +30,15 @@ import {
 export class McqFormModal implements OnInit {
   fb = inject(FormBuilder);
   http = inject(HttpClient);
-  mcqFormModalService = inject(McqFormModalService);
   examItemService = inject(ExamItemService);
 
+  level = input.required<'easy' | 'moderate' | 'difficult'>();
   examId = input.required<number>();
   isSaving = signal(false);
   errorMessage = signal<string | null>(null);
+  isModalOpen = input.required<boolean>();
+  openModal = output<void>();
+  closeModal = output<void>();
 
   readonly MIN_OPTIONS = 2;
   readonly MAX_OPTIONS = 6;
@@ -88,6 +97,7 @@ export class McqFormModal implements OnInit {
       question: val.question.trim(),
       points: val.points || 1,
       options: opts.map((o) => ({ text: o.text, correct: o.correct })),
+      level: this.level(),
     };
 
     const examId = this.examId();
@@ -107,8 +117,7 @@ export class McqFormModal implements OnInit {
           this.addOption();
           this.mcqForm.markAsPristine();
           this.isSaving.set(false);
-          // close modal
-          this.mcqFormModalService.closeModal();
+          this.closeModal.emit();
         },
         error: (err) => {
           this.errorMessage.set(err?.error?.message || 'Failed to add MCQ');

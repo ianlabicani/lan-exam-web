@@ -1,4 +1,3 @@
-import { EssayFormModalService } from './create-item/essay-form-modal/essay-form-modal.service';
 import {
   ExamItem,
   ExamItemService,
@@ -15,9 +14,7 @@ import { environment } from '../../../../../environments/environment.development
 import { ExamService } from '../../../services/exam.service';
 import { EssayFormModal } from './create-item/essay-form-modal/essay-form-modal';
 import { McqFormModal } from './create-item/mcq-form-modal/mcq-form-modal';
-import { McqFormModalService } from './create-item/mcq-form-modal/mcq-form-modal.service';
 import { TrueOrFalseFormModal } from './create-item/true-or-false-form-modal/true-or-false-form-modal';
-import { TrueOrFalseFormModalService } from './create-item/true-or-false-form-modal/true-or-false-form-modal.service';
 
 @Component({
   selector: 'app-teacher-list-exam-items',
@@ -39,13 +36,22 @@ export class ListExamItems implements OnInit {
   activatedRoute = inject(ActivatedRoute);
   examService = inject(ExamService);
   examItemService = inject(ExamItemService);
-  essayFormModalService = inject(EssayFormModalService);
-  mcqFormModalService = inject(McqFormModalService);
-  trueOrFalseFormModalService = inject(TrueOrFalseFormModalService);
 
   isUpdateModalOpenSig = signal(false);
   selectedForUpdateSig = signal<ExamItem | null>(null);
   isDeleteModalOpenSig = signal(false);
+  // easy modals
+  isEasyTOFModalOpen = signal(false);
+  isEasyEssayModalOpen = signal(false);
+  isEasyMcqModalOpen = signal(false);
+  // moderate modals
+  isModerateTOFModalOpen = signal(false);
+  isModerateEssayModalOpen = signal(false);
+  isModerateMcqModalOpen = signal(false);
+  // difficult modals
+  isDifficultTOFModalOpen = signal(false);
+  isDifficultEssayModalOpen = signal(false);
+  isDifficultMcqModalOpen = signal(false);
 
   ngOnInit(): void {
     const examId: number =
@@ -58,6 +64,7 @@ export class ListExamItems implements OnInit {
     this.examItemService.index(examId).subscribe({
       next: (items) => {
         this.examItemService.items.set(items);
+        console.log('Fetched exam items:', items);
       },
       error: (err) => {
         console.error('Error fetching exam items:', err);

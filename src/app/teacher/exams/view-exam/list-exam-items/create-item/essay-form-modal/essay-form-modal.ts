@@ -1,4 +1,3 @@
-import { ExamService } from './../../../../../services/exam.service';
 import {
   ExamItem,
   ExamItemService,
@@ -10,8 +9,6 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { EssayFormModalService } from './essay-form-modal.service';
-import { Exam } from '../../../../../services/exam.service';
 import { environment } from '../../../../../../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
 
@@ -23,15 +20,17 @@ import { HttpClient } from '@angular/common/http';
 })
 export class EssayFormModal {
   fb = inject(FormBuilder);
-  essayFormModalService = inject(EssayFormModalService);
   http = inject(HttpClient);
   examItemService = inject(ExamItemService);
 
-  isModalOpen = input(false);
+  level = input.required<'easy' | 'moderate' | 'difficult'>();
   close = output<void>();
   isSaving = signal(false);
   examId = input.required<number>();
   errorMessage = signal<string | null>(null);
+  isModalOpen = input.required<boolean>();
+  openModal = output<void>();
+  closeModal = output<void>();
 
   essayForm = this.fb.nonNullable.group({
     question: ['', [Validators.required, Validators.minLength(3)]],
@@ -64,17 +63,16 @@ export class EssayFormModal {
     this.http
       .post<{ item: ExamItem }>(
         `${environment.apiBaseUrl}/teacher/exams/${examId}/items`,
-        newItem
+        { ...newItem, level: this.level() }
       )
       .subscribe({
         next: (res) => {
           this.essayForm.reset();
           this.examItemService.items.update((prev) => [...prev, res.item]);
           console.log('Essay item created:', res.item);
-          console.log(this.examItemService.items());
 
           this.isSaving.set(false);
-          this.essayFormModalService.closeModal();
+          this.closeModal.emit();
         },
         error: (error) => {
           console.error('Error creating essay item:', error);
