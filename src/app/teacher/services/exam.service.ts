@@ -9,6 +9,7 @@ import { environment } from '../../../environments/environment.development';
 export class ExamService {
   private http = inject(HttpClient);
   viewingExam = signal<Exam | null>(null);
+  exams = signal<Exam[]>([]);
 
   index() {
     return this.http.get<Exam[]>(`${environment.apiBaseUrl}/teacher/exams`);

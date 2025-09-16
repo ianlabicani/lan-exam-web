@@ -8,6 +8,7 @@ import { Exam } from './exam.service';
 })
 export class ExamItemService {
   private http = inject(HttpClient);
+  items = signal<ExamItem[]>([]);
 
   index(examId: number) {
     return this.http.get<ExamItem[]>(
@@ -27,7 +28,6 @@ export class ExamItemService {
       `http://127.0.0.1:8000/api/teacher/exams/${examId}/items/${itemId}`
     );
   }
-
 }
 
 export interface ExamItem {

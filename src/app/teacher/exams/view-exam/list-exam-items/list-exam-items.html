@@ -1,6 +1,12 @@
-@let examItemsSig = examItems();
+@let examItemsSig = examItemService.items();
 @let exam = this.examService.viewingExam();
 @let isFormVisible = isFormVisibleSig();
+
+@if (exam?.status === 'draft') {
+  <button (click)="essayFormModalService.openModal()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Add Essay</button>
+  <app-essay-form-modal [examId]="exam?.id!"></app-essay-form-modal>
+}
+
 
 @if (exam) {
 @if (exam?.status === 'draft') {
@@ -13,11 +19,6 @@ class="mt-4 mb-6 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 tran
 
 @if (exam?.status == 'draft' && isFormVisible) {
   <div class="grid md:grid-cols-3 gap-6">
-    <!-- MCQ (Reusable Form Component now creates items) -->
-    <div class="bg-white border rounded-lg p-4 shadow-sm">
-      <h3 class="text-sm font-semibold mb-3">Add MCQ</h3>
-      <app-mcq-form [examIdSig]="exam.id" (addItemOutput)="addItem($event)"></app-mcq-form>
-    </div>
     <!-- True/False (Reusable Form Component) -->
     <div class="bg-white border rounded-lg p-4 shadow-sm">
       <h3 class="text-sm font-semibold mb-3">Add True / False</h3>
@@ -25,14 +26,6 @@ class="mt-4 mb-6 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 tran
       [examIdSig]="exam.id"
       (addItemOutput)="addItem($event)"
       ></app-true-or-false-form>
-    </div>
-    <!-- Essay -->
-    <div class="bg-white border rounded-lg p-4 shadow-sm">
-      <h3 class="text-sm font-semibold mb-3">Add Essay</h3>
-      <app-essay-form
-      [examIdSig]="exam.id"
-      (addItemOutput)="addItem($event)"
-      ></app-essay-form>
     </div>
   </div>
 }

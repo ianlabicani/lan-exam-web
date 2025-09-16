@@ -1,3 +1,4 @@
+import { EssayFormModalService } from './create-item/essay-form-modal/essay-form-modal.service';
 import {
   ExamItem,
   ExamItemService,
@@ -6,7 +7,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { McqItem } from './mcq-item/mcq-item';
 import { HttpClient } from '@angular/common/http';
-import { EssayForm } from './create-item/essay-form/essay-form';
 import { McqForm } from './create-item/mcq-form/mcq-form';
 import { TrueOrFalseForm } from './create-item/true-or-false-form/true-or-false-form';
 import { TrueFalseItem } from './true-false-item/true-false-item';
@@ -15,18 +15,18 @@ import { UpdateItem } from './update-item/update-item';
 import { DeleteItem } from './delete-item/delete-item';
 import { environment } from '../../../../../environments/environment.development';
 import { ExamService } from '../../../services/exam.service';
+import { EssayFormModal } from './create-item/essay-form-modal/essay-form-modal';
 
 @Component({
   selector: 'app-teacher-list-exam-items',
   imports: [
     McqItem,
-    McqForm,
     TrueOrFalseForm,
-    EssayForm,
     TrueFalseItem,
     EssayItem,
     UpdateItem,
     DeleteItem,
+    EssayFormModal,
   ],
   templateUrl: './list-exam-items.html',
   styleUrl: './list-exam-items.css',
@@ -36,8 +36,8 @@ export class ListExamItems implements OnInit {
   activatedRoute = inject(ActivatedRoute);
   examService = inject(ExamService);
   examItemService = inject(ExamItemService);
+  essayFormModalService = inject(EssayFormModalService);
 
-  examItems = signal<ExamItem[]>([]);
   isFormVisibleSig = signal(true);
   isUpdateModalOpenSig = signal(false);
   selectedForUpdateSig = signal<ExamItem | null>(null);
@@ -53,7 +53,7 @@ export class ListExamItems implements OnInit {
   getExamItems(examId: number) {
     this.examItemService.index(examId).subscribe({
       next: (items) => {
-        this.examItems.set(items);
+        this.examItemService.items.set(items);
       },
       error: (err) => {
         console.error('Error fetching exam items:', err);
@@ -62,11 +62,7 @@ export class ListExamItems implements OnInit {
   }
 
   addItem(item: ExamItem) {
-
-
-
-
-    this.examItems.update((items) => [...items, item]);
+    this.examItemService.items.update((items) => [...items, item]);
   }
 
   openUpdateModal(item: ExamItem) {
@@ -99,12 +95,14 @@ export class ListExamItems implements OnInit {
 
     this.http
       .patch<{ item: ExamItem }>(
-        `${environment.apiBaseUrl}/teacher/exams/${this.examService.viewingExam()?.id}/items/${itemId}`,
+        `${environment.apiBaseUrl}/teacher/exams/${
+          this.examService.viewingExam()?.id
+        }/items/${itemId}`,
         updated
       )
       .subscribe({
         next: (res) => {
-          this.examItems.update((items) =>
+          this.examItemService.items.update((items) =>
             items.map((it) => (it.id === res.item.id ? res.item : it))
           );
           this.closeUpdateModal();
@@ -113,6 +111,8 @@ export class ListExamItems implements OnInit {
   }
 
   removeItem(item: ExamItem) {
-    this.examItems.update((items) => items.filter((i) => i.id !== item.id));
+    this.examItemService.items.update((items) =>
+      items.filter((i) => i.id !== item.id)
+    );
   }
 }
