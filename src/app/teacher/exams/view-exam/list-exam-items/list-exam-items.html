@@ -8,10 +8,11 @@
 
 @if (exam) {
   <div class="space-y-4">
-    <h2 class="text-lg font-semibold text-gray-900">
-      Easy Exam Items ({{ easyItemsSig.length }})
-    </h2>
-    @if (exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.easy?.allocation ?? 0) > easyItemsSig.length) {
+  <button type="button" class="flex w-full items-center justify-between rounded border bg-white px-3 py-2 text-left shadow-sm hover:bg-gray-50" (click)="isEasyOpen.set(!isEasyOpen())">
+      <span class="text-lg font-semibold text-gray-900">Easy Exam Items ({{ easyItemsSig.length }})</span>
+      <span class="text-gray-500 text-sm">{{ isEasyOpen() ? 'Hide' : 'Show' }}</span>
+    </button>
+    @if (isEasyOpen() && exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.easy?.allocation ?? 0) > easyItemsSig.length) {
       <button (click)="isEasyEssayModalOpen.set(true)" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Add Essay</button>
     <app-essay-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyEssayModalOpen.set(true)" (closeModal)="isEasyEssayModalOpen.set(false)" [isModalOpen]="isEasyEssayModalOpen()"></app-essay-form-modal>
 
@@ -22,6 +23,7 @@
     <app-true-or-false-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyTOFModalOpen.set(true)" (closeModal)="isEasyTOFModalOpen.set(false)" [isModalOpen]="isEasyTOFModalOpen()"></app-true-or-false-form-modal>
   }
 
+    @if (isEasyOpen()) {
     <div class="space-y-3 mb-10">
       @for(item of easyItemsSig; track $index) {
         <div class="flex gap-1 flex-col">
@@ -48,13 +50,15 @@
         </div>
       }
     </div>
+    }
   </div>
 
   <div class="space-y-4">
-    <h2 class="text-lg font-semibold text-gray-900">
-      Moderate Exam Items ({{ moderateItemsSig.length }})
-    </h2>
- @if (exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.moderate?.allocation ?? 0) > moderateItemsSig.length) {
+  <button type="button" class="flex w-full items-center justify-between rounded border bg-white px-3 py-2 text-left shadow-sm hover:bg-gray-50" (click)="isModerateOpen.set(!isModerateOpen())">
+      <span class="text-lg font-semibold text-gray-900">Moderate Exam Items ({{ moderateItemsSig.length }})</span>
+      <span class="text-gray-500 text-sm">{{ isModerateOpen() ? 'Hide' : 'Show' }}</span>
+    </button>
+ @if (isModerateOpen() && exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.moderate?.allocation ?? 0) > moderateItemsSig.length) {
     <button (click)="isModerateEssayModalOpen.set(true)" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Add Essay</button>
     <app-essay-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateEssayModalOpen.set(true)" (closeModal)="isModerateEssayModalOpen.set(false)" [isModalOpen]="isModerateEssayModalOpen()"></app-essay-form-modal>
 
@@ -64,6 +68,7 @@
     <button (click)="isModerateTOFModalOpen.set(true)" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition">Add True/False</button>
     <app-true-or-false-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateTOFModalOpen.set(true)" (closeModal)="isModerateTOFModalOpen.set(false)" [isModalOpen]="isModerateTOFModalOpen()"></app-true-or-false-form-modal>
   }
+    @if (isModerateOpen()) {
     <div class="space-y-3 mb-10">
       @for(item of moderateItemsSig; track $index) {
         <div class="flex gap-1 flex-col">
@@ -90,13 +95,15 @@
         </div>
       }
     </div>
+    }
   </div>
 
   <div class="space-y-4">
-    <h2 class="text-lg font-semibold text-gray-900">
-      Difficult Exam Items ({{ difficultItemsSig.length }})
-    </h2>
-    @if (exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.difficult?.allocation ?? 0) > difficultItemsSig.length) {
+  <button type="button" class="flex w-full items-center justify-between rounded border bg-white px-3 py-2 text-left shadow-sm hover:bg-gray-50" (click)="isDifficultOpen.set(!isDifficultOpen())">
+      <span class="text-lg font-semibold text-gray-900">Difficult Exam Items ({{ difficultItemsSig.length }})</span>
+      <span class="text-gray-500 text-sm">{{ isDifficultOpen() ? 'Hide' : 'Show' }}</span>
+    </button>
+    @if (isDifficultOpen() && exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.difficult?.allocation ?? 0) > difficultItemsSig.length) {
     <button (click)="isDifficultEssayModalOpen.set(true)" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Add Essay</button>
     <app-essay-form-modal [examId]="exam?.id!" [level]="'difficult'" (openModal)="isDifficultEssayModalOpen.set(true)" (closeModal)="isDifficultEssayModalOpen.set(false)" [isModalOpen]="isDifficultEssayModalOpen()"></app-essay-form-modal>
 
@@ -106,6 +113,7 @@
     <button (click)="isDifficultTOFModalOpen.set(true)" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition">Add True/False</button>
     <app-true-or-false-form-modal [examId]="exam?.id!" [level]="'difficult'" (openModal)="isDifficultTOFModalOpen.set(true)" (closeModal)="isDifficultTOFModalOpen.set(false)" [isModalOpen]="isDifficultTOFModalOpen()"></app-true-or-false-form-modal>
   }
+    @if (isDifficultOpen()) {
     <div class="space-y-3 mb-10">
       @for(item of difficultItemsSig; track $index) {
         <div class="flex gap-1 flex-col">
@@ -132,6 +140,7 @@
         </div>
       }
     </div>
+    }
   </div>
 
   @if (isUpdateModalOpenSig()) {

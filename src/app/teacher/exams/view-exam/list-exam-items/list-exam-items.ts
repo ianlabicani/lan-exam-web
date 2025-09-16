@@ -53,6 +53,11 @@ export class ListExamItems implements OnInit {
   isDifficultEssayModalOpen = signal(false);
   isDifficultMcqModalOpen = signal(false);
 
+  // collapsible states
+  isEasyOpen = signal(true);
+  isModerateOpen = signal(true);
+  isDifficultOpen = signal(true);
+
   ngOnInit(): void {
     const examId: number =
       this.activatedRoute.parent?.snapshot.params['examId'];
