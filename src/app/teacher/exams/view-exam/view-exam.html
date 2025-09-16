@@ -1,5 +1,24 @@
 @let examSig = this.examService.viewingExam();
 @let loading = loadingSig();
+@let errorMsgSig = errorMsg();
+
+
+@if (errorMsgSig) {
+  <div class="fixed right-4 top-4 z-50 w-[calc(100%-2rem)] max-w-md pointer-events-none">
+    <div
+      class="pointer-events-auto rounded-md border border-red-200 bg-red-50 p-4 text-red-700 shadow-lg"
+      role="alert"
+    >
+      <div class="flex items-start gap-3">
+        <span class="text-xl leading-none">⚠️</span>
+        <div>
+          <p class="font-semibold">Error</p>
+          <p class="text-sm break-words">{{ errorMsgSig }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 
 @if (loading) {
 <span class="p-10 text-center text-gray-500">Loading exam...</span>
@@ -37,12 +56,13 @@
       <p>Points {{ examSig.total_points }}</p>
     </div>
     <div class="flex items-center gap-2 self-start">
-      @if (examSig.status == 'draft') {
+      @if (examSig.status == 'draft' ) {
       <div>
         <button
           type="button"
           class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 text-sm font-medium disabled:opacity-50"
-          [disabled]="loading"
+          [ngClass]="{ 'opacity-50 cursor-not-allowed': examSig.total_points <= 0 }"
+          [disabled]="loading || examSig.total_points <= 0"
           (click)="updateStatus(examSig.id, 'active')"
         >
           Activate Exam

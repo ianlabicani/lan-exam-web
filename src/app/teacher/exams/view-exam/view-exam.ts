@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { RouterLink, RouterOutlet, ActivatedRoute } from '@angular/router';
-import { DatePipe, UpperCasePipe } from '@angular/common';
+import { DatePipe, NgClass, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExamService } from '../../services/exam.service';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
@@ -8,7 +8,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-view-exam',
-  imports: [RouterLink, DatePipe, UpperCasePipe, FormsModule, RouterOutlet, FaIconComponent],
+  imports: [RouterLink, DatePipe, UpperCasePipe, FormsModule, RouterOutlet, FaIconComponent, NgClass],
   templateUrl: './view-exam.html',
   styleUrl: './view-exam.css',
 })
@@ -30,6 +30,15 @@ export class ViewExam implements OnInit {
     examId: number,
     status: 'active' | 'published' | 'archived' | 'draft'
   ) {
+    const viewingExam = this.examService.viewingExam();
+    if ((viewingExam?.total_points ?? 0) <= 0) {
+      this.errorMsg.set('Exam must have at least one item to be activated.');
+      setTimeout(() => {
+        this.errorMsg.set(null);
+      }, 3000);
+      return;
+    }
+
     this.examService.updateStatus(examId, status).subscribe({
       next: (exam) => {
         this.examService.viewingExam.set(exam);
