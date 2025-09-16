@@ -69,7 +69,6 @@ export class ListExamItems implements OnInit {
     this.examItemService.index(examId).subscribe({
       next: (items) => {
         this.examItemService.items.set(items);
-        console.log('Fetched exam items:', items);
       },
       error: (err) => {
         console.error('Error fetching exam items:', err);

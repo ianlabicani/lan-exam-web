@@ -61,8 +61,6 @@ export class ViewExam implements OnInit {
     this.examService.show(id).subscribe({
       next: (exam) => {
         this.loadingSig.set(false);
-        console.log(exam);
-
         this.examService.viewingExam.set(exam);
       },
       error: (err) => {

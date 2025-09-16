@@ -50,8 +50,6 @@ export class EssayFormModal {
 
   createEssayItem() {
     if (this.essayForm.invalid) {
-      console.log('Form is invalid');
-
       this.essayForm.markAllAsTouched();
       return;
     }
@@ -69,8 +67,6 @@ export class EssayFormModal {
         next: (res) => {
           this.essayForm.reset();
           this.examItemService.items.update((prev) => [...prev, res.item]);
-          console.log('Essay item created:', res.item);
-
           this.isSaving.set(false);
           this.closeModal.emit();
         },
