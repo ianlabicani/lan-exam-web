@@ -20,4 +20,10 @@ export class StudentTakenExamService {
       `http://127.0.0.1:8000/api/student/taken-exams/${takenExamId}`
     );
   }
+
+  getAll() {
+    return this.http.get<{ data: ITakenExam[] }>(
+      `http://127.0.0.1:8000/api/student/taken-exams`
+    );
+  }
 }

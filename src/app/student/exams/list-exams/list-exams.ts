@@ -41,7 +41,7 @@ export class ListExams implements OnInit {
 
   goTo(exam: Exam) {
     if (exam.status !== 'active') return;
-    this.router.navigate(['/student/take-exam', exam.id]);
+    this.router.navigate(['/student/taken-exams', exam.id]);
   }
 
   cardIcon(exam: Exam): { bg: string; icon: string; color: string } {
