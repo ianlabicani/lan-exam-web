@@ -1,3 +1,5 @@
+import { StudentExamService } from './../../services/student-exam.service';
+import { StudentTakenExamService } from './../../services/student-taken-exam.service';
 import {
   Component,
   OnInit,
@@ -9,49 +11,12 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import {} from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AuthService } from '../../../auth/services/auth.service';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin, of, concatMap } from 'rxjs';
 import { ExamQuestion } from './exam-question/exam-question';
 import { ExamProgress } from './exam-progress/exam-progress';
 import { ExamHeader } from './exam-header/exam-header';
 import { Exam } from '../../../teacher/services/exam.service';
-
-export interface ITakenExam {
-  id: number; // attempt id
-  exam_id: number;
-  user_id: number;
-  started_at: string;
-  submitted_at?: string | null;
-  total_points?: number;
-  updated_at: string;
-  created_at: string;
-  answers?: ITakenExamAnswer[];
-  exam?: Exam;
-}
-
-export interface IExamItem {
-  id: number;
-  exam_id: number;
-  type: string;
-  question: string;
-  points: number;
-  expected_answer: string | null;
-  answer: any;
-  options: any[] | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ITakenExamAnswer {
-  id: number;
-  taken_exam_id: number;
-  exam_item_id: number; // backend field
-  type: string;
-  answer: any; // stored as string for mcq index coming from backend
-  points_awarded?: number | null;
-  created_at: string;
-  updated_at: string;
-}
+import { StudentExamItemService } from '../../services/student-exam-item.service';
 
 @Component({
   selector: 'app-take-exam',
@@ -63,8 +28,10 @@ export interface ITakenExamAnswer {
 export class TakeExam implements OnInit {
   private router = inject(Router);
   private http = inject(HttpClient);
-
-  examId = input<string>();
+  private route = inject(ActivatedRoute);
+  studentTakenExamService = inject(StudentTakenExamService);
+  studentExamService = inject(StudentExamService);
+  studentExamItemService = inject(StudentExamItemService);
 
   wasSubmitted = computed(() => this.takenExamSig()?.submitted_at !== null);
 
@@ -79,66 +46,58 @@ export class TakeExam implements OnInit {
   examItems = signal<IExamItem[]>([]);
 
   ngOnInit(): void {
-    const examId = this.examId();
+    const takenExamId = this.route.snapshot.params['takenExamId'];
 
-    if (!examId) {
-      this.error.set('Invalid exam id');
-      return;
-    }
+    this.studentTakenExamService.getOne(takenExamId).subscribe({
+      next: (res) => {
+        this.takenExamSig.set(res.data);
+        if (res.data.answers?.length) {
+          this.setAnswers(res.data.answers);
+        }
+      },
+    });
 
-    this.takeExam(+examId);
-    this.getExamItems(+examId);
-  }
-
-  private takeExam(examId: number) {
-    this.http
-      .post<{ takenExam: ITakenExam }>(
-        `http://127.0.0.1:8000/api/student/exams/${examId}/take`,
-        {}
-      )
-      .subscribe({
-        next: ({ takenExam }) => {
-          this.takenExamSig.set(takenExam);
-          if (takenExam.answers?.length) {
-            const restored: Record<string, any> = {};
-            takenExam.answers.forEach((ans) => {
-              const key = ans.exam_item_id;
-              let value: any = ans.answer;
-              if (ans.type === 'mcq') {
-                const num = Number(value);
-                if (!Number.isNaN(num)) value = num;
-              } else if (ans.type === 'truefalse') {
-                if (value === '1' || value === 1 || value === true)
-                  value = true;
-                else if (value === '0' || value === 0 || value === false)
-                  value = false;
-              }
-              restored[key] = value;
-            });
-            this.answers.set(restored);
+    this.studentTakenExamService
+      .getOne(takenExamId)
+      .pipe(
+        concatMap((res) => {
+          this.takenExamSig.set(res.data);
+          if (res.data.answers?.length) {
+            this.setAnswers(res.data.answers);
           }
-        },
-        error: (err) => {
-          this.error.set(err?.error?.message || 'Failed to start exam');
-        },
-      });
-  }
-
-  private getExamItems(examId: number) {
-    this.http
-      .get<IExamItem[]>(
-        `http://127.0.0.1:8000/api/student/exams/${examId}/items`
+          return this.studentExamItemService.getExamItems(res.data.exam_id);
+        })
       )
       .subscribe({
         next: (examItems) => {
           this.examItems.set(examItems);
         },
-        error: (err) =>
-          this.error.set(err?.error?.message || 'Failed to load items'),
       });
   }
 
+  private setAnswers(answers: ITakenExamAnswer[]) {
+    if (answers?.length) {
+      const restored: Record<string, any> = {};
+      answers.forEach((ans) => {
+        const key = ans.exam_item_id;
+        let value: any = ans.answer;
+        if (ans.type === 'mcq') {
+          const num = Number(value);
+          if (!Number.isNaN(num)) value = num;
+        } else if (ans.type === 'truefalse') {
+          if (value === '1' || value === 1 || value === true) value = true;
+          else if (value === '0' || value === 0 || value === false)
+            value = false;
+        }
+        restored[key] = value;
+      });
+      this.answers.set(restored);
+    }
+  }
+
   onAnswerChange(item: IExamItem, value: any) {
+    console.log('Answer changed for item:', item.id, 'New value:', value);
+
     this.answers.set({ ...this.answers(), [item.id]: value });
     this.upsertAnswer(item, value);
   }
@@ -210,4 +169,41 @@ export class TakeExam implements OnInit {
       )
       .subscribe({ error: () => {} });
   }
+}
+
+export interface ITakenExam {
+  id: number;
+  exam_id: number;
+  user_id: number;
+  started_at: string;
+  submitted_at?: string | null;
+  total_points?: number;
+  updated_at: string;
+  created_at: string;
+  answers?: ITakenExamAnswer[];
+  exam?: Exam;
+}
+
+export interface IExamItem {
+  id: number;
+  exam_id: number;
+  type: string;
+  question: string;
+  points: number;
+  expected_answer: string | null;
+  answer: any;
+  options: any[] | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ITakenExamAnswer {
+  id: number;
+  taken_exam_id: number;
+  exam_item_id: number; // backend field
+  type: string;
+  answer: any; // stored as string for mcq index coming from backend
+  points_awarded?: number | null;
+  created_at: string;
+  updated_at: string;
 }

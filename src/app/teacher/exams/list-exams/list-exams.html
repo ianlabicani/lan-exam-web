@@ -46,7 +46,14 @@
             {{ exam.title }}
           </td>
           <td class="px-4 py-2 text-sm text-gray-600">
-            {{ exam.year }} - {{ exam.section | uppercase }}
+            {{ exam.year }} -
+            <div class="inline-flex flex-wrap gap-1">
+              @for (s of exam.sections; track $index) {
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-300 text-gray-700">
+                  {{ s }}
+                </span>
+              }
+            </div>
           </td>
           <td class="px-4 py-2 text-sm text-gray-600">
             <div>

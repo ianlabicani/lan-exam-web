@@ -1,0 +1,92 @@
+@let examsSig= exams();
+
+<div class="mb-8 container mx-auto">
+  <h2 class="text-xl font-semibold text-gray-900 mb-6">Available Exams</h2>
+
+  <!-- Empty state -->
+  @if (!examsSig.length) {
+  <div class="border border-dashed border-gray-300 rounded-lg p-10 text-center text-gray-500 bg-white">
+    <p class="mb-2 font-medium">
+      No exams available for your year & section yet.
+    </p>
+    <p class="text-sm">Please check back later.</p>
+  </div>
+  }
+
+  <!-- Exam list -->
+  @if (examsSig.length) {
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    @for (exam of examsSig; track exam.id) {
+    <div
+      class="p-5 rounded-lg border border-slate-200 bg-white shadow-sm flex flex-col justify-between"
+    >
+      <!-- Exam Info -->
+      <div>
+        <h3 class="text-lg font-semibold text-slate-800">{{ exam.title }}</h3>
+        <p class="text-sm text-slate-600 mb-2">{{ exam.description }}</p>
+
+        <div class="space-y-1 text-xs text-slate-500">
+          <p>
+            📚 Year & Section:
+            <span class="font-medium">{{ exam.year }}{{ exam.section }}</span>
+          </p>
+          <p>
+            🕒 {{ exam.starts_at | date:'short' }} → {{ exam.ends_at |
+            date:'short' }}
+          </p>
+          <p>
+            Status:
+            <span
+              [ngClass]="{
+                'text-green-600 font-medium': exam.status === 'active',
+                'text-gray-500 italic': exam.status !== 'active'
+              }"
+            >
+              {{ exam.status | titlecase }}
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-4">
+        @if (exam.taken_exams.length) {
+          @if (exam.taken_exams[0].submitted_at) {
+          <button
+            class="w-full rounded-lg bg-green-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-green-500 transition"
+            (click)="goTo(exam)">
+            ✅ Submitted
+          </button>
+          } @else {
+            <a class="w-full rounded-lg bg-orange-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-green-500 transition"
+              [routerLink]="['/student/taken-exams', exam.taken_exams[0].id]">
+              Continue Exam
+            </a>
+          }
+        } @else if(exam.status ==='active') {
+        <button
+          (click)="takeExam(exam.id)"
+          class="cursor-pointer w-full rounded-lg bg-indigo-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-indigo-500 transition">
+          📝 Take Exam
+        </button>
+        } @else if (exam.status === 'draft') {
+        <button
+          (click)="goTo(exam)"
+          class="w-full rounded-lg bg-gray-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-gray-500 transition"
+        >
+          📝 Exam is being created
+        </button>
+        } @else if (exam.status === 'archived') {
+        <button
+          (click)="goTo(exam)"
+          class="w-full rounded-lg bg-yellow-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-yellow-500 transition"
+        >
+          📝 Exam is archived
+        </button>
+        }
+      </div>
+    </div>
+    }
+  </div>
+  }
+</div>

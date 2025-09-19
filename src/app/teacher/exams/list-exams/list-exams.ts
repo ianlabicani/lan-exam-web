@@ -10,7 +10,7 @@ import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-exam-list',
-  imports: [RouterLink, DatePipe, NgClass, TitleCasePipe, UpperCasePipe],
+  imports: [RouterLink, DatePipe, NgClass, TitleCasePipe],
   templateUrl: './list-exams.html',
   styleUrl: './list-exams.css',
 })
@@ -22,6 +22,7 @@ export class ListExams implements OnInit {
   ngOnInit(): void {
     this.examService.index().subscribe((exams) => {
       this.examsSig.set(exams);
+      console.log(exams);
     });
   }
 
