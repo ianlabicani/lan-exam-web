@@ -85,9 +85,42 @@ export class TakeExam implements OnInit {
           const num = Number(value);
           if (!Number.isNaN(num)) value = num;
         } else if (ans.type === 'truefalse') {
-          if (value === '1' || value === 1 || value === true) value = true;
-          else if (value === '0' || value === 0 || value === false)
+          if (
+            value === '1' ||
+            value === 1 ||
+            value === true ||
+            value === 'true'
+          )
+            value = true;
+          else if (
+            value === '0' ||
+            value === 0 ||
+            value === false ||
+            value === 'false'
+          )
             value = false;
+        } else if (
+          ans.type === 'shortanswer' ||
+          ans.type === 'fill_blank' ||
+          ans.type === 'essay'
+        ) {
+          // ensure string
+          value = value ?? '';
+          if (typeof value !== 'string') value = String(value);
+        } else if (ans.type === 'matching') {
+          // Expect array of selected right indices; parse JSON if string
+          try {
+            if (typeof value === 'string') value = JSON.parse(value);
+          } catch (_) {
+            // fallback: empty array
+            value = [];
+          }
+          if (Array.isArray(value)) {
+            value = value.map((v) => {
+              const n = typeof v === 'number' ? v : parseInt(String(v), 10);
+              return Number.isNaN(n) ? null : n;
+            });
+          }
         }
         restored[key] = value;
       });
@@ -193,6 +226,7 @@ export interface IExamItem {
   expected_answer: string | null;
   answer: any;
   options: any[] | null;
+  pairs?: { left: string; right: string }[] | null; // for matching
   created_at: string;
   updated_at: string;
 }

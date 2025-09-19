@@ -28,4 +28,22 @@ export class ExamQuestion {
     if (this.essayTimer) clearTimeout(this.essayTimer);
     this.essayTimer = setTimeout(() => this.answerChange.emit(val), 600);
   }
+
+  // Generic text handler (fill_blank, shortanswer)
+  onText(val: string) {
+    if (this.essayTimer) clearTimeout(this.essayTimer);
+    this.essayTimer = setTimeout(() => this.answerChange.emit(val), 600);
+  }
+
+  // Matching: answer as array where index = left item index, value = selected right index
+  setMatching(leftIndex: number, raw: any) {
+    const parsed = typeof raw === 'number' ? raw : parseInt(String(raw), 10);
+    const rightIndex = Number.isNaN(parsed) ? null : parsed;
+    const len = this.item?.pairs?.length ?? 0;
+    const current = Array.isArray(this.currentAnswer)
+      ? [...this.currentAnswer]
+      : Array(len).fill(null);
+    current[leftIndex] = rightIndex;
+    this.answerChange.emit(current);
+  }
 }

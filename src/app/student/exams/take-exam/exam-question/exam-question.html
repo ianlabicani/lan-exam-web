@@ -23,71 +23,127 @@
     <h3 class="font-medium text-slate-800 leading-snug mb-4">
       {{ item.question }}
     </h3>
-    @switch (item.type) { @case ('mcq') {
-    <div class="space-y-2">
-      @for (opt of item.options; let oIdx = $index; track oIdx) {
-      <button
-        type="button"
-        (click)="setMcq(oIdx)"
-        [disabled]="isReadonly"
-        class="w-full text-left group rounded-lg border px-4 py-3 flex items-start gap-3 transition-colors"
-        [ngClass]="{
-      'border-indigo-500 bg-indigo-50/70': currentAnswer === oIdx,
-      'border-slate-200 hover:border-slate-300': currentAnswer !== oIdx,
-      'opacity-50 cursor-not-allowed': isReadonly
-    }"
-      >
-        <span
-          class="font-semibold text-indigo-600 group-hover:scale-110 origin-center transition-transform"
-          >{{ letters[oIdx] }}</span
-        >
-        <span class="text-slate-700">{{ opt.text }}</span>
-      </button>
+    @switch (item.type) {
+      @case ('mcq') {
+        <div class="space-y-2">
+          @for (opt of item.options; let oIdx = $index; track oIdx) {
+            <button
+            type="button"
+            (click)="setMcq(oIdx)"
+            [disabled]="isReadonly"
+            class="w-full text-left group rounded-lg border px-4 py-3 flex items-start gap-3 transition-colors"
+            [ngClass]="{
+            'border-indigo-500 bg-indigo-50/70': currentAnswer === oIdx,
+            'border-slate-200 hover:border-slate-300': currentAnswer !== oIdx,
+            'opacity-50 cursor-not-allowed': isReadonly
+            }">
+            <span class="font-semibold text-indigo-600 group-hover:scale-110 origin-center transition-transform">
+              {{ letters[oIdx] }}
+            </span>
+            <span class="text-slate-700">{{ opt.text }}</span>
+          </button>
+          }
+      </div>
       }
-    </div>
-    } @case ('truefalse') {
-    <div class="flex gap-4">
-      <button
-        type="button"
-        (click)="setTrueFalse(true)"
-        [disabled]="isReadonly"
-        class="flex-1 rounded-lg border px-4 py-3 font-medium transition"
-        [ngClass]="{
-              'bg-green-50 border-green-500 text-green-700':
-                currentAnswer === true,
-              'border-slate-200 hover:border-slate-300 text-slate-600':
-                currentAnswer !== true,
-              'opacity-50 cursor-not-allowed': isReadonly
-            }"
-      >
-        True
-      </button>
-      <button
-        type="button"
-        (click)="setTrueFalse(false)"
-        [disabled]="isReadonly"
-        class="flex-1 rounded-lg border px-4 py-3 font-medium transition"
-        [ngClass]="{
-              'bg-rose-50 border-rose-500 text-rose-700':
-                currentAnswer === false,
-              'border-slate-200 hover:border-slate-300 text-slate-600':
-                currentAnswer !== false,
-              'opacity-50 cursor-not-allowed': isReadonly
-            }"
-      >
-        False
-      </button>
-    </div>
-    } @case ('essay') {
-    <textarea
-      rows="5"
-      class="w-full resize-y rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/60 outline-none px-4 py-3 text-slate-700 placeholder:text-slate-400 text-sm"
-      [value]="currentAnswer || ''"
-      (input)="onEssay($any($event.target).value)"
-      [disabled]="isReadonly"
-      [ngClass]="{ 'opacity-50 cursor-not-allowed': isReadonly }"
-      placeholder="Type your answer here..."
-    ></textarea>
-    } }
+      @case ('truefalse') {
+      <div class="flex gap-4">
+        <button
+          type="button"
+          (click)="setTrueFalse(true)"
+          [disabled]="isReadonly"
+          class="flex-1 rounded-lg border px-4 py-3 font-medium transition"
+          [ngClass]="{
+                'bg-green-50 border-green-500 text-green-700':
+                  currentAnswer === true,
+                'border-slate-200 hover:border-slate-300 text-slate-600':
+                  currentAnswer !== true,
+                'opacity-50 cursor-not-allowed': isReadonly
+              }">
+          True
+        </button>
+        <button
+          type="button"
+          (click)="setTrueFalse(false)"
+          [disabled]="isReadonly"
+          class="flex-1 rounded-lg border px-4 py-3 font-medium transition"
+          [ngClass]="{
+                'bg-rose-50 border-rose-500 text-rose-700':
+                  currentAnswer === false,
+                'border-slate-200 hover:border-slate-300 text-slate-600':
+                  currentAnswer !== false,
+                'opacity-50 cursor-not-allowed': isReadonly
+              }">
+          False
+        </button>
+      </div>
+      }
+      @case ('essay') {
+        <textarea
+          rows="5"
+          class="w-full resize-y rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/60 outline-none px-4 py-3 text-slate-700 placeholder:text-slate-400 text-sm"
+          [value]="currentAnswer || ''"
+          (input)="onEssay($any($event.target).value)"
+          [disabled]="isReadonly"
+          [ngClass]="{ 'opacity-50 cursor-not-allowed': isReadonly }"
+          placeholder="Type your answer here..."></textarea>
+      }
+      @case ('fill_blank') {
+        <input
+          type="text"
+          class="w-full rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/60 outline-none px-4 py-3 text-slate-700 placeholder:text-slate-400 text-sm"
+          [value]="currentAnswer || ''"
+          (input)="onText($any($event.target).value)"
+          [disabled]="isReadonly"
+          [ngClass]="{ 'opacity-50 cursor-not-allowed': isReadonly }"
+          placeholder="Enter your answer" />
+      }
+      @case ('shortanswer') {
+        <textarea
+          rows="3"
+          class="w-full resize-y rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/60 outline-none px-4 py-3 text-slate-700 placeholder:text-slate-400 text-sm"
+          [value]="currentAnswer || ''"
+          (input)="onText($any($event.target).value)"
+          [disabled]="isReadonly"
+          [ngClass]="{ 'opacity-50 cursor-not-allowed': isReadonly }"
+          placeholder="Type your answer here..."></textarea>
+      }
+      @case ('matching') {
+        @if (item.pairs?.length) {
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 mb-2">Left</p>
+              <ul class="space-y-2">
+                @for (p of item.pairs; track $index; let i = $index) {
+                  <li class="px-3 py-2 rounded border bg-slate-50 text-sm">{{ p.left }}</li>
+                }
+              </ul>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-slate-500 mb-2">Select match</p>
+              <ul class="space-y-2">
+                @for (p of item.pairs; track $index; let i = $index) {
+                  <li>
+                    <select
+                      class="w-full rounded border border-slate-300 px-2 py-2 text-sm"
+                      [value]="'' + (currentAnswer?.[i] ?? '')"
+                      (change)="setMatching(i, $any($event.target).value)"
+                      [disabled]="isReadonly"
+                      [ngClass]="{ 'opacity-50 cursor-not-allowed': isReadonly }"
+                    >
+                      <option value="" disabled>Select…</option>
+                        @for (r of item.pairs; track $index; let j = $index) {
+                          <option [value]="'' + j" [selected]="('' + (currentAnswer?.[i] ?? '')) === ('' + j)">{{ r.right }}</option>
+                      }
+                    </select>
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+        } @else {
+          <div class="text-slate-500 text-sm">No pairs provided.</div>
+        }
+      }
+    }
   </div>
 </div>
