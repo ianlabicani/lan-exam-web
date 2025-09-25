@@ -28,7 +28,7 @@
         <div class="space-y-1 text-xs text-slate-500">
           <p>
             📚 Year & Section:
-            <span class="font-medium">{{ exam.year }}{{ exam.section }}</span>
+            <span class="font-medium">{{ exam.year }}{{ exam.sections }}</span>
           </p>
           <p>
             🕒 {{ exam.starts_at | date:'short' }} → {{ exam.ends_at |
@@ -50,16 +50,16 @@
 
       <!-- Actions -->
       <div class="mt-4">
-        @if (exam.taken_exams.length) {
-          @if (exam.taken_exams[0].submitted_at) {
+        @if (exam.taken_exam) {
+          @if (exam.taken_exam.submitted_at) {
           <a
             class="w-full rounded-lg bg-green-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-green-500 transition"
-            [routerLink]="['/student/taken-exams', exam.taken_exams[0].id]">
+            [routerLink]="['/student/taken-exams', exam.taken_exam.id]">
             ✅ Submitted (view submission)
           </a>
           } @else {
             <a class="w-full rounded-lg bg-orange-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-green-500 transition"
-              [routerLink]="['/student/taken-exams', exam.taken_exams[0].id]">
+              [routerLink]="['/student/taken-exams', exam.taken_exam.id]">
               Continue Exam
             </a>
           }
@@ -70,19 +70,17 @@
           📝 Take Exam
         </button>
         } @else if (exam.status === 'draft') {
-        <button
-          (click)="goTo(exam)"
+        <div
           class="w-full rounded-lg bg-gray-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-gray-500 transition"
         >
           📝 Exam is being created
-        </button>
+        </div>
         } @else if (exam.status === 'archived') {
-        <button
-          (click)="goTo(exam)"
+        <div
           class="w-full rounded-lg bg-yellow-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-yellow-500 transition"
         >
           📝 Exam is archived
-        </button>
+        </div>
         }
       </div>
     </div>

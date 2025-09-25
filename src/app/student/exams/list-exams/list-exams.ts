@@ -1,12 +1,9 @@
-import { StudentTakenExamService } from './../../services/student-taken-exam.service';
 import { Component, inject, OnInit, signal } from '@angular/core';
-import {
-  ITakenExam,
-  StudentExamService,
-} from '../../services/student-exam.service';
+import { ITakenExamAnswer } from '../../services/student-exam.service';
 import { Exam } from '../../../teacher/services/exam.service';
 import { Router, RouterLink } from '@angular/router';
 import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-list-exams',
@@ -15,33 +12,38 @@ import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
   styleUrl: './list-exams.css',
 })
 export class ListExams implements OnInit {
-  studentExamService = inject(StudentExamService);
-  studentTakenExamService = inject(StudentTakenExamService);
   router = inject(Router);
+  http = inject(HttpClient);
 
-  exams = signal<(Exam & { taken_exams: ITakenExam[] })[]>([]);
+  exams = signal<NewExam[]>([]);
 
   ngOnInit(): void {
-    this.studentExamService.getAll().subscribe({
-      next: (res) => {
-        this.exams.set(res.data as (Exam & { taken_exams: ITakenExam[] })[]);
-      },
-      error: (error) => console.error('Error fetching exams:', error),
-    });
+    this.getExams();
+  }
+
+  getExams() {
+    return this.http
+      .get<{ data: NewExam[] }>('http://127.0.0.1:8000/api/student/exams')
+      .subscribe({
+        next: (res) => {
+          this.exams.set(res.data);
+          console.log('New Exams:', res.data);
+        },
+      });
   }
 
   takeExam(examId: number) {
-    this.studentTakenExamService.create(examId).subscribe({
-      next: (res) => {
-        console.log('Taken exam created:', res);
-        this.router.navigate(['/student/take-exam', examId]);
-      },
-    });
-  }
-
-  goTo(exam: Exam) {
-    if (exam.status !== 'active') return;
-    this.router.navigate(['/student/taken-exams', exam.id]);
+    this.http
+      .post<{ data: NewTakenExam }>(
+        `http://127.0.0.1:8000/api/student/exams/${examId}/take`,
+        {}
+      )
+      .subscribe({
+        next: (res) => {
+          console.log('Taken exam created:', res);
+          this.router.navigate(['/student/taken-exams', res.data.id]);
+        },
+      });
   }
 
   cardIcon(exam: Exam): { bg: string; icon: string; color: string } {
@@ -68,4 +70,52 @@ export class ListExams implements OnInit {
         };
     }
   }
+}
+
+export interface NewExam {
+  id: number;
+  title: string;
+  description: string;
+  starts_at: Date;
+  ends_at: Date;
+  year: string;
+  sections: string[];
+  status: string;
+  total_points: number;
+  tos: To[];
+  created_at: Date;
+  updated_at: Date;
+  taken_exam?: NewTakenExam;
+}
+
+export interface To {
+  topic: string;
+  outcomes: string[];
+  time_allotment: number;
+  no_of_items: number;
+  distribution: Distribution;
+}
+
+export interface Distribution {
+  easy: Difficult;
+  moderate: Difficult;
+  difficult: Difficult;
+}
+
+export interface Difficult {
+  allocation: number;
+  placement: string[];
+}
+
+interface NewTakenExam {
+  id: number;
+  exam_id: number;
+  user_id: number;
+  started_at: string;
+  submitted_at?: string | null;
+  total_points?: number;
+  updated_at: string;
+  created_at: string;
+  answers?: ITakenExamAnswer[];
+  exam?: Exam;
 }
