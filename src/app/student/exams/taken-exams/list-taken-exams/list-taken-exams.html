@@ -41,7 +41,7 @@
 									<div class="mt-3 flex gap-1 flex-wrap">
 							@for (sec of t.exam.sections; track $index) {
 											<span class="inline-flex items-center justify-center rounded border px-2 py-0.5 text-[10px] font-semibold text-slate-600 bg-slate-50">
-												<a [routerLink]="['/student/taken-exams', t.id]" class="hover:underline">Section {{ sec }}</a>
+												<p>Section {{ sec }}</p>
 											</span>
 							}
 						</div>
