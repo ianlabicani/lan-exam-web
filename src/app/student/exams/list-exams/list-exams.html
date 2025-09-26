@@ -63,6 +63,11 @@
               Continue Exam
             </a>
           }
+        } @else if(exam.status ==='active') {
+        <div
+          class="w-full rounded-lg bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-amber-500 transition">
+          📝 Wait for the schedule
+        </div>
         } @else if(exam.status ==='published') {
         <button
           (click)="takeExam(exam.id)"

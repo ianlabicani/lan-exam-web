@@ -39,7 +39,11 @@ export class ListExams implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          this.router.navigate(['/student/taken-exams', res.data.id]);
+          this.router.navigate([
+            '/student/taken-exams',
+            res.data.id,
+            'continue',
+          ]);
         },
       });
   }

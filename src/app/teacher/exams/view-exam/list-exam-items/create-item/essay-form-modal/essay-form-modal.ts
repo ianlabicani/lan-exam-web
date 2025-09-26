@@ -11,6 +11,7 @@ import {
 } from '@angular/forms';
 import { environment } from '../../../../../../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
+import { ViewExamSvc } from '../../../view-exam-svc';
 
 @Component({
   selector: 'app-essay-form-modal',
@@ -19,6 +20,7 @@ import { HttpClient } from '@angular/common/http';
   styleUrl: './essay-form-modal.css',
 })
 export class EssayFormModal {
+  viewExamSvc = inject(ViewExamSvc);
   fb = inject(FormBuilder);
   http = inject(HttpClient);
   examItemService = inject(ExamItemService);
@@ -67,6 +69,13 @@ export class EssayFormModal {
         next: (res) => {
           this.essayForm.reset();
           this.examItemService.items.update((prev) => [...prev, res.item]);
+          this.viewExamSvc.exam.update((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              total_points: prev.total_points + res.item.points,
+            };
+          });
           this.isSaving.set(false);
           this.closeModal.emit();
         },
