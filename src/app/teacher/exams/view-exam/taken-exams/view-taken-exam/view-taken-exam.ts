@@ -59,13 +59,9 @@ export class ViewTakenExam implements OnInit {
     const examTakerId = this.route.snapshot.paramMap.get('examTakerId');
     const examId = this.route.parent?.snapshot.paramMap.get('examId');
 
-    this.route.params.subscribe((params) => {
-      console.log(params);
-    });
-    console.log(examId, examTakerId);
+    this.route.params.subscribe((params) => {});
 
     if (!examTakerId) {
-      console.log('no id');
       return;
     }
 
@@ -75,7 +71,6 @@ export class ViewTakenExam implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          console.log(res);
           this.examTaker.set(res.data);
           this.answerComparisons.set(res.answer_comparison);
         },
