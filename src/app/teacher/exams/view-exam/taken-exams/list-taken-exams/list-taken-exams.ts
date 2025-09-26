@@ -28,8 +28,6 @@ export class ListTakenExams implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          console.log(res);
-
           this.exam.set(res);
           this.takers.set(res.data || []);
           this.loading.set(false);
