@@ -3,13 +3,13 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { StudentTakenExamService } from '../../../services/student-taken-exam.service';
 import { StudentExamItemService } from '../../../services/student-exam-item.service';
 import { concatMap } from 'rxjs';
-import { ExamHeader } from '../../take-exam/exam-header/exam-header';
-import { ExamQuestion } from '../../take-exam/exam-question/exam-question';
+import { ExamHeader } from '../create-taken-exam/exam-header/exam-header';
+import { ExamQuestion } from '../create-taken-exam/exam-question/exam-question';
 import {
-  ITakenExam,
   IExamItem,
+  ITakenExam,
   ITakenExamAnswer,
-} from '../../take-exam/take-exam';
+} from '../create-taken-exam/create-taken-exam';
 
 @Component({
   selector: 'app-view-taken-exam',

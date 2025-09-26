@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { IExamItem } from '../exams/take-exam/take-exam';
+import { IExamItem } from '../exams/taken-exams/create-taken-exam/create-taken-exam';
 
 @Injectable({
   providedIn: 'root',

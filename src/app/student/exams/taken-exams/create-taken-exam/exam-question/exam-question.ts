@@ -1,6 +1,6 @@
 import { Component, EventEmitter, input, Input, Output } from '@angular/core';
-import { IExamItem } from '../take-exam';
 import { NgClass } from '@angular/common';
+import { IExamItem } from '../create-taken-exam';
 
 @Component({
   selector: 'app-exam-question',

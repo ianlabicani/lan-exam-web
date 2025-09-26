@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
-import { ITakenExam } from '../take-exam';
 import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
+import { ITakenExam } from '../create-taken-exam';
 
 @Component({
   selector: 'app-exam-header',

@@ -1,39 +1,28 @@
-import { StudentExamService } from './../../services/student-exam.service';
-import { StudentTakenExamService } from './../../services/student-taken-exam.service';
-import {
-  Component,
-  OnInit,
-  computed,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import {} from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { forkJoin, of, concatMap } from 'rxjs';
-import { ExamQuestion } from './exam-question/exam-question';
-import { ExamProgress } from './exam-progress/exam-progress';
+import { Component, computed, inject, signal } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { concatMap, of, forkJoin } from 'rxjs';
+import { Exam } from '../../../../teacher/services/exam.service';
+import { StudentExamItemService } from '../../../services/student-exam-item.service';
+import { StudentExamService } from '../../../services/student-exam.service';
+import { StudentTakenExamService } from '../../../services/student-taken-exam.service';
 import { ExamHeader } from './exam-header/exam-header';
-import { Exam } from '../../../teacher/services/exam.service';
-import { StudentExamItemService } from '../../services/student-exam-item.service';
+import { ExamProgress } from './exam-progress/exam-progress';
+import { ExamQuestion } from './exam-question/exam-question';
 
 @Component({
-  selector: 'app-take-exam',
-  standalone: true,
+  selector: 'app-create-taken-exam',
   imports: [ExamHeader, ExamProgress, ExamQuestion],
-  templateUrl: './take-exam.html',
-  styleUrl: './take-exam.css',
+  templateUrl: './create-taken-exam.html',
+  styleUrl: './create-taken-exam.css',
 })
-export class TakeExam implements OnInit {
-  private router = inject(Router);
+export class CreateTakenExam {
+  router = inject(Router);
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
   studentTakenExamService = inject(StudentTakenExamService);
   studentExamService = inject(StudentExamService);
   studentExamItemService = inject(StudentExamItemService);
-
-  wasSubmitted = computed(() => this.takenExamSig()?.submitted_at !== null);
 
   submitting = signal(false);
   error = signal<string | null>(null);
@@ -42,15 +31,20 @@ export class TakeExam implements OnInit {
   private essayDebounceHandles: Record<string, any> = {};
 
   takenExamSig = signal<ITakenExam | null>(null);
+  wasSubmitted = computed(() => this.takenExamSig()?.submitted_at !== null);
   private attemptId = computed(() => this.takenExamSig()?.id || null);
   examItems = signal<IExamItem[]>([]);
 
   ngOnInit(): void {
+    console.log('here');
+
     const takenExamId = this.route.snapshot.params['takenExamId'];
 
     this.studentTakenExamService.getOne(takenExamId).subscribe({
       next: (res) => {
         this.takenExamSig.set(res.data);
+        console.log(res.data);
+
         if (res.data.answers?.length) {
           this.setAnswers(res.data.answers);
         }
