@@ -27,7 +27,6 @@ export class ListExams implements OnInit {
       .subscribe({
         next: (res) => {
           this.exams.set(res.data);
-          console.log('New Exams:', res.data);
         },
       });
   }
@@ -40,7 +39,6 @@ export class ListExams implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          console.log('Taken exam created:', res);
           this.router.navigate(['/student/taken-exams', res.data.id]);
         },
       });

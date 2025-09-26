@@ -24,7 +24,6 @@ export class ListTakenExams implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          console.log(res);
           this.takenExams.set(res.data);
         },
       });

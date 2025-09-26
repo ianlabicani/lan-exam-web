@@ -36,14 +36,11 @@ export class CreateTakenExam {
   examItems = signal<IExamItem[]>([]);
 
   ngOnInit(): void {
-    console.log('here');
-
     const takenExamId = this.route.snapshot.params['takenExamId'];
 
     this.studentTakenExamService.getOne(takenExamId).subscribe({
       next: (res) => {
         this.takenExamSig.set(res.data);
-        console.log(res.data);
 
         if (res.data.answers?.length) {
           this.setAnswers(res.data.answers);
@@ -123,8 +120,6 @@ export class CreateTakenExam {
   }
 
   onAnswerChange(item: IExamItem, value: any) {
-    console.log('Answer changed for item:', item.id, 'New value:', value);
-
     this.answers.set({ ...this.answers(), [item.id]: value });
     this.upsertAnswer(item, value);
   }
