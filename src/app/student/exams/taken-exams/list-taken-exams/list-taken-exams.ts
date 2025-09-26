@@ -1,10 +1,11 @@
 import { RouterLink } from '@angular/router';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-list-taken-exams',
-  imports: [RouterLink],
+  imports: [RouterLink, TitleCasePipe],
   templateUrl: './list-taken-exams.html',
   styleUrl: './list-taken-exams.css',
 })
