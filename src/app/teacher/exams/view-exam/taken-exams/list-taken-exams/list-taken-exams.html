@@ -43,7 +43,9 @@
         <tr class="border-t">
           <td class="px-4 py-2">
             <div class="font-medium text-gray-800">
-              {{ t.user.name || t.user_id }}
+              <a [routerLink]="[t.id]" class="text-blue-600 hover:underline">
+                {{ t.user.name || t.user_id }}
+              </a>
             </div>
             <div class="text-[11px] text-gray-500">
               {{ t.user.year }} - {{ t.user.section | uppercase }}

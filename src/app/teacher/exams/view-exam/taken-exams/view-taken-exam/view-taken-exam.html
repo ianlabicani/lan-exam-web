@@ -1,0 +1,493 @@
+@let takenExam = examTaker();
+
+@if (takenExam) {
+  <div class="mx-auto max-w-6xl p-6 space-y-6 bg-white/70 backdrop-blur rounded-xl shadow-sm border border-slate-200">
+
+    <!-- Student and Exam Header -->
+    <div class="bg-white p-6 rounded-lg shadow border border-slate-200">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Student Information -->
+        <div>
+          <h2 class="text-xl font-semibold text-slate-800 mb-4">Student Information</h2>
+          <div class="space-y-2 text-sm">
+            <p><span class="font-medium text-slate-600">Name:</span> {{ takenExam.user.name }}</p>
+            <p><span class="font-medium text-slate-600">Email:</span> {{ takenExam.user.email }}</p>
+            <p><span class="font-medium text-slate-600">Year & Section:</span> {{ takenExam.user.year }}{{ takenExam.user.section }}</p>
+          </div>
+        </div>
+
+        <!-- Exam Information -->
+        <div>
+          <h2 class="text-xl font-semibold text-slate-800 mb-4">Exam Information</h2>
+          <div class="space-y-2 text-sm">
+            <p><span class="font-medium text-slate-600">Title:</span> {{ takenExam.exam.title }}</p>
+            <p><span class="font-medium text-slate-600">Description:</span> {{ takenExam.exam.description }}</p>
+            <p><span class="font-medium text-slate-600">Total Points:</span> {{ takenExam.exam.total_points }}</p>
+            <p><span class="font-medium text-slate-600">Status:</span>
+              <span class="px-2 py-1 rounded text-xs font-medium"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': takenExam.exam.status === 'published',
+                      'bg-yellow-100 text-yellow-800': takenExam.exam.status === 'draft',
+                      'bg-gray-100 text-gray-800': takenExam.exam.status === 'archived'
+                    }">
+                {{ takenExam.exam.status | titlecase }}
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submission Details -->
+      <div class="mt-6 pt-4 border-t border-slate-200">
+        <h3 class="text-lg font-medium text-slate-800 mb-3">Submission Details</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div>
+            <span class="font-medium text-slate-600">Started:</span>
+            <p class="text-slate-800">{{ takenExam.started_at | date:'medium' }}</p>
+          </div>
+          <div>
+            <span class="font-medium text-slate-600">Submitted:</span>
+            <p class="text-slate-800">{{ takenExam.submitted_at | date:'medium' }}</p>
+          </div>
+          <div>
+            <span class="font-medium text-slate-600">Score:</span>
+            <p class="text-slate-800 font-medium">{{ takenExam.total_points }} points</p>
+          </div>
+        </div>
+
+        <!-- Performance Summary -->
+        <div class="mt-4 p-4 bg-slate-50 rounded-lg">
+          <h4 class="text-sm font-semibold text-slate-700 mb-2">Performance Summary</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+            <div class="text-center">
+              <div class="text-lg font-bold text-green-600">{{ getCorrectAnswersCount() }}/{{ getTotalGradableAnswers() }}</div>
+              <div class="text-slate-600">Auto-Graded Correct</div>
+            </div>
+            @if (getEssayAnswersCount() > 0) {
+              <div class="text-center">
+                <div class="text-lg font-bold text-amber-600">{{ getEssayAnswersCount() }}</div>
+                <div class="text-slate-600">Essay Questions</div>
+              </div>
+            }
+            <div class="text-center">
+              <div class="text-lg font-bold text-slate-700">
+                {{ getAccuracyRate().toFixed(1) }}%
+              </div>
+              <div class="text-slate-600">Accuracy Rate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance Legend -->
+    <div class="bg-white p-4 rounded-lg shadow border border-slate-200">
+      <h4 class="text-sm font-semibold text-slate-700 mb-3">Legend</h4>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+        <div class="flex items-center gap-2">
+          <div class="w-4 h-4 bg-green-100 border border-green-500 rounded"></div>
+          <span>Correct Answer</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-4 h-4 bg-red-100 border border-red-500 rounded"></div>
+          <span>Incorrect Selection</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-4 h-4 bg-green-25 border border-green-300 rounded"></div>
+          <span>Missed Correct</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-4 h-4 bg-amber-100 border border-amber-500 rounded"></div>
+          <span>Manual Review</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Answers Section -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-semibold text-slate-800">Student Answers</h3>
+        <div class="text-sm text-slate-600">
+          {{ takenExam.answers.length }} question{{ takenExam.answers.length !== 1 ? 's' : '' }} answered
+        </div>
+      </div>
+
+      @if (takenExam.answers.length) {
+        @for (answer of takenExam.answers; track answer.id; let idx = $index) {
+          <div class="bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow transition-shadow">
+            <div class="p-5">
+              <!-- Question Header -->
+              <div class="flex items-baseline gap-2 mb-3">
+                <span class="inline-flex size-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-sm font-semibold">
+                  {{ idx + 1 }}
+                </span>
+                <span class="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                  {{ answer.item.points }} pts
+                </span>
+                <span class="text-[10px] uppercase tracking-wide font-semibold text-slate-400">
+                  {{ answer.type }}
+                </span>
+                <!-- Answer Result Indicator -->
+                @if (answer.type !== 'essay') {
+                  @if (isAnswerCorrect(answer)) {
+                    <span class="ml-auto flex items-center gap-1 text-xs font-medium text-green-700 bg-green-100 px-2 py-1 rounded-full">
+                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                      Correct
+                    </span>
+                  } @else {
+                    <span class="ml-auto flex items-center gap-1 text-xs font-medium text-red-700 bg-red-100 px-2 py-1 rounded-full">
+                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                      </svg>
+                      Incorrect
+                    </span>
+                  }
+                } @else {
+                  <span class="ml-auto flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-100 px-2 py-1 rounded-full">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                    </svg>
+                    Manual Review
+                  </span>
+                }
+              </div>
+
+              <!-- Question -->
+              <h4 class="font-medium text-slate-800 leading-snug mb-4">
+                {{ answer.item.question }}
+              </h4>
+
+              <!-- Answer Display -->
+              @switch (answer.type) {
+                @case ('mcq') {
+                  @let comparison = getAnswerComparison(answer.exam_item_id);
+                  <div class="space-y-2">
+                    @if (answer.item.options) {
+                      @for (option of answer.item.options; let optIdx = $index; track optIdx) {
+                        <div class="flex items-start gap-3 p-3 rounded-lg border"
+                             [ngClass]="{
+                               'border-green-500 bg-green-50': option.correct && answer.answer === optIdx,
+                               'border-red-500 bg-red-50': !option.correct && answer.answer === optIdx,
+                               'border-green-300 bg-green-25': option.correct && answer.answer !== optIdx,
+                               'border-slate-200 bg-white': answer.answer !== optIdx && !option.correct
+                             }">
+                          <span class="font-semibold text-sm"
+                                [ngClass]="{
+                                  'text-green-700': option.correct && answer.answer === optIdx,
+                                  'text-red-700': !option.correct && answer.answer === optIdx,
+                                  'text-green-600': option.correct && answer.answer !== optIdx,
+                                  'text-slate-500': answer.answer !== optIdx && !option.correct
+                                }">
+                            {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[optIdx] }}
+                          </span>
+                          <span class="text-slate-700 flex-1">{{ option.text }}</span>
+
+                          <!-- Status indicators -->
+                          <div class="flex items-center gap-2">
+                            @if (option.correct && answer.answer === optIdx) {
+                              <span class="text-green-700 text-xs font-medium flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Correct & Selected
+                              </span>
+                            }
+                            @if (option.correct && answer.answer !== optIdx) {
+                              <span class="text-green-600 text-xs font-medium flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Correct Answer
+                              </span>
+                            }
+                            @if (!option.correct && answer.answer === optIdx) {
+                              <span class="text-red-700 text-xs font-medium flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                                Student Selected
+                              </span>
+                            }
+                          </div>
+                        </div>
+                      }
+                    }
+
+                    <!-- Show comparison info -->
+                    @if (comparison) {
+                      <div class="mt-3 p-3 rounded-lg"
+                           [ngClass]="{
+                             'bg-green-50 border border-green-200': comparison.is_correct,
+                             'bg-red-50 border border-red-200': comparison.is_correct === false
+                           }">
+                        <div class="text-sm">
+                          <span class="font-medium">Student selected:</span> {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[comparison.student_answer] }}
+                          <span class="mx-2">|</span>
+                          <span class="font-medium">Correct answer:</span> {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[comparison.correct_answer] }}
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+
+                @case ('truefalse') {
+                  @let comparison = getAnswerComparison(answer.exam_item_id);
+                  @let isCorrectTrue = comparison?.correct_answer === true;
+                  @let studentAnsweredTrue = answer.answer === true;
+
+                  <div class="flex gap-4">
+                    <div class="flex-1 p-3 rounded-lg border font-medium relative"
+                         [ngClass]="{
+                           'border-green-500 bg-green-50 text-green-700': studentAnsweredTrue && isCorrectTrue,
+                           'border-red-500 bg-red-50 text-red-700': studentAnsweredTrue && !isCorrectTrue,
+                           'border-green-300 bg-green-25 text-green-600': !studentAnsweredTrue && isCorrectTrue,
+                           'border-slate-200 text-slate-600': !studentAnsweredTrue && !isCorrectTrue
+                         }">
+                      <div class="flex items-center justify-between">
+                        <span>True</span>
+                        <div class="flex items-center gap-2">
+                          @if (studentAnsweredTrue && isCorrectTrue) {
+                            <span class="text-xs text-green-700 flex items-center gap-1">
+                              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                              </svg>
+                              Correct
+                            </span>
+                          }
+                          @if (studentAnsweredTrue && !isCorrectTrue) {
+                            <span class="text-xs text-red-700 flex items-center gap-1">
+                              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                              </svg>
+                              Selected
+                            </span>
+                          }
+                          @if (!studentAnsweredTrue && isCorrectTrue) {
+                            <span class="text-xs text-green-600">✓ Correct</span>
+                          }
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="flex-1 p-3 rounded-lg border font-medium relative"
+                         [ngClass]="{
+                           'border-green-500 bg-green-50 text-green-700': !studentAnsweredTrue && !isCorrectTrue,
+                           'border-red-500 bg-red-50 text-red-700': !studentAnsweredTrue && isCorrectTrue,
+                           'border-green-300 bg-green-25 text-green-600': studentAnsweredTrue && !isCorrectTrue,
+                           'border-slate-200 text-slate-600': studentAnsweredTrue && isCorrectTrue
+                         }">
+                      <div class="flex items-center justify-between">
+                        <span>False</span>
+                        <div class="flex items-center gap-2">
+                          @if (!studentAnsweredTrue && !isCorrectTrue) {
+                            <span class="text-xs text-green-700 flex items-center gap-1">
+                              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                              </svg>
+                              Correct
+                            </span>
+                          }
+                          @if (!studentAnsweredTrue && isCorrectTrue) {
+                            <span class="text-xs text-red-700 flex items-center gap-1">
+                              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                              </svg>
+                              Selected
+                            </span>
+                          }
+                          @if (studentAnsweredTrue && !isCorrectTrue) {
+                            <span class="text-xs text-green-600">✓ Correct</span>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Show comparison info -->
+                  @if (comparison) {
+                    <div class="mt-3 p-3 rounded-lg"
+                         [ngClass]="{
+                           'bg-green-50 border border-green-200': comparison.is_correct,
+                           'bg-red-50 border border-red-200': comparison.is_correct === false
+                         }">
+                      <div class="text-sm">
+                        <span class="font-medium">Student answered:</span> {{ comparison.student_answer ? 'True' : 'False' }}
+                        <span class="mx-2">|</span>
+                        <span class="font-medium">Correct answer:</span> {{ comparison.correct_answer ? 'True' : 'False' }}
+                      </div>
+                    </div>
+                  }
+                }
+
+                @case ('essay') {
+                  @let comparison = getAnswerComparison(answer.exam_item_id);
+
+                  <div class="bg-slate-50 rounded-lg p-4 border">
+                    <div class="text-sm font-medium text-slate-600 mb-2">Student Answer:</div>
+                    <div class="text-slate-800 whitespace-pre-wrap">{{ answer.answer }}</div>
+                  </div>
+
+                  @if (answer.item.expected_answer) {
+                    <div class="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div class="text-sm font-medium text-green-800 mb-1">Expected Answer:</div>
+                      <div class="text-green-700 text-sm whitespace-pre-wrap">{{ answer.item.expected_answer }}</div>
+                    </div>
+                  }
+
+                  @if (comparison) {
+                    <div class="mt-3 p-3 rounded-lg"
+                         [ngClass]="{
+                           'bg-green-50 border border-green-200': comparison.is_correct,
+                           'bg-red-50 border border-red-200': comparison.is_correct === false,
+                           'bg-amber-50 border border-amber-200': comparison.is_correct === null
+                         }">
+                      <div class="text-sm">
+                        <span class="font-medium">Status:</span>
+                        @if (comparison.is_correct === true) {
+                          <span class="text-green-700">Manually graded - Correct</span>
+                        } @else if (comparison.is_correct === false) {
+                          <span class="text-red-700">Manually graded - Incorrect</span>
+                        } @else {
+                          <span class="text-amber-700">Manual grading required</span>
+                        }
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                      <div class="text-sm text-amber-800">
+                        <span class="font-medium">Status:</span> Manual grading required
+                      </div>
+                    </div>
+                  }
+                }
+
+                @case ('fill_blank') {
+                  @let comparison = getAnswerComparison(answer.exam_item_id);
+
+                  <div class="bg-slate-50 rounded-lg p-4 border">
+                    <div class="text-sm font-medium text-slate-600 mb-2">Student Answer:</div>
+                    <div class="text-slate-800 font-mono">{{ answer.answer }}</div>
+                  </div>
+
+                  @if (answer.item.expected_answer) {
+                    <div class="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div class="text-sm font-medium text-green-800 mb-1">Expected Answer:</div>
+                      <div class="text-green-700 text-sm font-mono">{{ answer.item.expected_answer }}</div>
+                    </div>
+                  }
+
+                  @if (comparison) {
+                    <div class="mt-3 p-3 rounded-lg"
+                         [ngClass]="{
+                           'bg-green-50 border border-green-200': comparison.is_correct,
+                           'bg-red-50 border border-red-200': comparison.is_correct === false,
+                           'bg-amber-50 border border-amber-200': comparison.is_correct === null
+                         }">
+                      <div class="text-sm">
+                        <span class="font-medium">Status:</span>
+                        @if (comparison.is_correct === true) {
+                          <span class="text-green-700">Correct</span>
+                        } @else if (comparison.is_correct === false) {
+                          <span class="text-red-700">Incorrect</span>
+                        } @else {
+                          <span class="text-amber-700">Manual grading required</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                }
+
+                @case ('shortanswer') {
+                  @let comparison = getAnswerComparison(answer.exam_item_id);
+
+                  <div class="bg-slate-50 rounded-lg p-4 border">
+                    <div class="text-sm font-medium text-slate-600 mb-2">Student Answer:</div>
+                    <div class="text-slate-800 whitespace-pre-wrap">{{ answer.answer }}</div>
+                  </div>
+
+                  @if (answer.item.expected_answer) {
+                    <div class="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div class="text-sm font-medium text-green-800 mb-1">Expected Answer:</div>
+                      <div class="text-green-700 text-sm whitespace-pre-wrap">{{ answer.item.expected_answer }}</div>
+                    </div>
+                  }
+
+                  @if (comparison) {
+                    <div class="mt-3 p-3 rounded-lg"
+                         [ngClass]="{
+                           'bg-green-50 border border-green-200': comparison.is_correct,
+                           'bg-red-50 border border-red-200': comparison.is_correct === false,
+                           'bg-amber-50 border border-amber-200': comparison.is_correct === null
+                         }">
+                      <div class="text-sm">
+                        <span class="font-medium">Status:</span>
+                        @if (comparison.is_correct === true) {
+                          <span class="text-green-700">Correct</span>
+                        } @else if (comparison.is_correct === false) {
+                          <span class="text-red-700">Incorrect</span>
+                        } @else {
+                          <span class="text-amber-700">Manual grading required</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                }
+
+                @case ('matching') {
+                  @let comparison = getAnswerComparison(answer.exam_item_id);
+
+                  <div class="bg-slate-50 rounded-lg p-4 border">
+                    <div class="text-sm font-medium text-slate-600 mb-2">Student Answer:</div>
+                    <div class="text-slate-800">{{ answer.answer }}</div>
+                  </div>
+
+                  @if (answer.item.expected_answer) {
+                    <div class="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div class="text-sm font-medium text-green-800 mb-1">Expected Answer:</div>
+                      <div class="text-green-700 text-sm">{{ answer.item.expected_answer }}</div>
+                    </div>
+                  }
+
+                  @if (comparison) {
+                    <div class="mt-3 p-3 rounded-lg"
+                         [ngClass]="{
+                           'bg-green-50 border border-green-200': comparison.is_correct,
+                           'bg-red-50 border border-red-200': comparison.is_correct === false,
+                           'bg-amber-50 border border-amber-200': comparison.is_correct === null
+                         }">
+                      <div class="text-sm">
+                        <span class="font-medium">Status:</span>
+                        @if (comparison.is_correct === true) {
+                          <span class="text-green-700">Correct</span>
+                        } @else if (comparison.is_correct === false) {
+                          <span class="text-red-700">Incorrect</span>
+                        } @else {
+                          <span class="text-amber-700">Manual grading required</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                }
+              }
+            </div>
+          </div>
+        }
+      } @else {
+        <div class="text-center py-8 text-slate-500">
+          <p>No answers submitted yet.</p>
+        </div>
+      }
+    </div>
+
+  </div>
+} @else {
+  <div class="max-w-md mx-auto mt-16 flex flex-col items-center gap-4 text-slate-500">
+    <svg class="size-10 animate-pulse text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M12 6v6l4 2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+    <p>Loading taken exam...</p>
+  </div>
+}

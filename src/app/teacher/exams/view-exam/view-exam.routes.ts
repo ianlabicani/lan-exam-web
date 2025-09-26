@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { routes as examTakerRoutes } from './taken-exams/taken-exams.routes';
 
 export const routes: Routes = [
   {
@@ -11,11 +12,5 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./list-exam-items/list-exam-items').then((c) => c.ListExamItems),
   },
-  {
-    path: 'takers',
-    loadComponent: () =>
-      import('./list-exam-takers/list-exam-takers').then(
-        (c) => c.ListExamTakers
-      ),
-  },
+  ...examTakerRoutes,
 ];

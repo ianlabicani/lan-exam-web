@@ -4,12 +4,12 @@ import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'app-list-exam-takers',
+  selector: 'app-list-taken-exams',
   imports: [UpperCasePipe, DatePipe, RouterLink],
-  templateUrl: './list-exam-takers.html',
-  styleUrl: './list-exam-takers.css',
+  templateUrl: './list-taken-exams.html',
+  styleUrl: './list-taken-exams.css',
 })
-export class ListExamTakers implements OnInit {
+export class ListTakenExams implements OnInit {
   examId = signal<number>(0);
   loading = signal(true);
   exam = signal<any | null>(null);
@@ -23,13 +23,15 @@ export class ListExamTakers implements OnInit {
       +this.activatedRoute.parent?.snapshot.paramMap.get('examId')!
     );
     this.http
-      .get<{ takenExams: ITakenExam[] }>(
-        `http://127.0.0.1:8000/api/teacher/exams/${this.examId()}/takers`
+      .get<{ data: ITakenExam[] }>(
+        `http://127.0.0.1:8000/api/teacher/exams/${this.examId()}/takenExams`
       )
       .subscribe({
         next: (res) => {
+          console.log(res);
+
           this.exam.set(res);
-          this.takers.set(res.takenExams || []);
+          this.takers.set(res.data || []);
           this.loading.set(false);
         },
         error: () => {
