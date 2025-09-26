@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
 
@@ -15,6 +15,7 @@ export class ViewTakenExam implements OnInit {
 
   examTaker = signal<TakenExam | null>(null);
   answerComparisons = signal<AnswerComparison[]>([]);
+  totalPoints = signal(0);
 
   // Helper methods for answer comparison using the backend comparison data
   isAnswerCorrect(answer: AnswerElement): boolean {
@@ -59,8 +60,6 @@ export class ViewTakenExam implements OnInit {
     const examTakerId = this.route.snapshot.paramMap.get('examTakerId');
     const examId = this.route.parent?.snapshot.paramMap.get('examId');
 
-    this.route.params.subscribe((params) => {});
-
     if (!examTakerId) {
       return;
     }
@@ -73,6 +72,11 @@ export class ViewTakenExam implements OnInit {
         next: (res) => {
           this.examTaker.set(res.data);
           this.answerComparisons.set(res.answer_comparison);
+          const points = res.answer_comparison.reduce(
+            (sum, comp) => sum + (comp.is_correct ? comp.points : 0),
+            0
+          );
+          this.totalPoints.set(points);
         },
         error: () => {
           this.examTaker.set(null);
