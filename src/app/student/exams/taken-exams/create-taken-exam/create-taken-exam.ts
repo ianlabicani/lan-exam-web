@@ -140,6 +140,8 @@ export class CreateTakenExam {
   }
 
   submit() {
+    if (this.wasSubmitted()) return;
+
     if (!this.attemptId() || this.submitting()) return;
     const pendingIds = Object.keys(this.essayDebounceHandles);
     if (!pendingIds.length) {
