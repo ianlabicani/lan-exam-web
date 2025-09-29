@@ -1,28 +1,41 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  signal,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { concatMap, of, forkJoin } from 'rxjs';
 import { Exam } from '../../../../teacher/services/exam.service';
 import { StudentExamItemService } from '../../../services/student-exam-item.service';
 import { StudentExamService } from '../../../services/student-exam.service';
 import { StudentTakenExamService } from '../../../services/student-taken-exam.service';
+import {
+  ExamActivityService,
+  ExamActivityEvent,
+} from '../../../services/exam-activity.service';
 import { ExamHeader } from './exam-header/exam-header';
 import { ExamProgress } from './exam-progress/exam-progress';
 import { ExamQuestion } from './exam-question/exam-question';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-create-taken-exam',
-  imports: [ExamHeader, ExamProgress, ExamQuestion],
+  imports: [ExamHeader, ExamProgress, ExamQuestion, CommonModule],
   templateUrl: './create-taken-exam.html',
   styleUrl: './create-taken-exam.css',
 })
-export class CreateTakenExam {
+export class CreateTakenExam implements OnInit, OnDestroy {
   router = inject(Router);
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
   studentTakenExamService = inject(StudentTakenExamService);
   studentExamService = inject(StudentExamService);
   studentExamItemService = inject(StudentExamItemService);
+  examActivityService = inject(ExamActivityService);
 
   submitting = signal(false);
   error = signal<string | null>(null);
@@ -35,8 +48,33 @@ export class CreateTakenExam {
   private attemptId = computed(() => this.takenExamSig()?.id || null);
   examItems = signal<IExamItem[]>([]);
 
+  // Activity tracking
+  sessionEvents = this.examActivityService.examActivityEvents$;
+  showEventPanel = signal(false);
+  eventSummary = computed(() => {
+    const events = this.sessionEvents();
+    return {
+      totalEvents: events.length,
+      tabSwitches: events.filter(
+        (e) => e.event_type === 'tab_hidden' || e.event_type === 'tab_visible'
+      ).length,
+      windowSwitches: events.filter(
+        (e) => e.event_type === 'window_blur' || e.event_type === 'window_focus'
+      ).length,
+      questionsAnswered: events.filter(
+        (e) => e.event_type === 'question_answered'
+      ).length,
+      lastActivity:
+        events.length > 0 ? events[events.length - 1].created_at : undefined,
+    };
+  });
+
   ngOnInit(): void {
     const takenExamId = this.route.snapshot.params['takenExamId'];
+
+    this.examActivityService.fetchUserSessions(takenExamId);
+    // Track page navigation/reload
+    this.examActivityService.logActivity('exam_page_loaded');
 
     this.studentTakenExamService.getOne(takenExamId).subscribe({
       next: (res) => {
@@ -124,20 +162,91 @@ export class CreateTakenExam {
     this.upsertAnswer(item, value);
   }
 
-  answeredCount() {
-    return Object.keys(this.answers()).length;
+  refreshSessions() {}
+
+  toggleEventPanel() {
+    this.showEventPanel.update((show) => !show);
   }
 
-  answeredPercent() {
-    const total = this.examItems().length;
-    if (!total) return 0;
-    return (this.answeredCount() / total) * 100;
+  getEventTypeDisplay(eventType: string): string {
+    const eventTypeMap: Record<string, string> = {
+      exam_session_started: '🎯 Exam Started',
+      exam_session_ended: '✅ Exam Ended',
+      exam_submitted: '📤 Exam Submitted',
+      tab_hidden: '👁️ Tab Hidden',
+      tab_visible: '👁️ Tab Visible',
+      window_blur: '🔄 Window Lost Focus',
+      window_focus: '🔄 Window Gained Focus',
+      exam_page_loaded: '📄 Exam Page Loaded',
+      previous_answers_loaded: '📄 Previous Answers Loaded',
+    };
+    return eventTypeMap[eventType] || `📝 ${eventType}`;
+  }
+
+  getEventSeverity(eventType: string): 'normal' | 'warning' | 'danger' {
+    if (eventType.includes('tab_hidden') || eventType.includes('window_blur')) {
+      return 'warning';
+    }
+    return 'normal';
+  }
+
+  getActivityTrend(): 'active' | 'moderate' {
+    const events = this.sessionEvents();
+    const recentEvents = events.filter((e) => {
+      const eventTime = new Date(e.created_at!);
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      return eventTime > fiveMinutesAgo;
+    });
+
+    const warningCount = recentEvents.filter(
+      (e) => this.getEventSeverity(e.event_type) === 'warning'
+    ).length;
+
+    if (warningCount > 3) return 'moderate';
+    return 'active';
+  }
+
+  getSessionDuration(): string {
+    const events = this.sessionEvents();
+    const startEvent = events.find(
+      (e) => e.event_type === 'exam_session_started'
+    );
+
+    if (!startEvent?.created_at) return '0 minutes';
+
+    const startTime = new Date(startEvent.created_at);
+    const now = new Date();
+    const diffMs = now.getTime() - startTime.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+    if (diffMinutes < 60) {
+      return `${diffMinutes} minutes`;
+    } else {
+      const hours = Math.floor(diffMinutes / 60);
+      const minutes = diffMinutes % 60;
+      return `${hours}h ${minutes}m`;
+    }
+  }
+
+  answeredCount() {
+    return Object.keys(this.answers()).length;
   }
 
   submit() {
     if (this.wasSubmitted()) return;
 
     if (!this.attemptId() || this.submitting()) return;
+
+    // Log submission attempt with completion stats
+    const totalQuestions = this.examItems().length;
+    const answeredCount = this.answeredCount();
+    this.examActivityService.logActivity(
+      'exam_submit_attempted',
+      `Attempting to submit exam: ${answeredCount}/${totalQuestions} questions answered (${Math.round(
+        (answeredCount / totalQuestions) * 100
+      )}% complete)`
+    );
+
     const pendingIds = Object.keys(this.essayDebounceHandles);
     if (!pendingIds.length) {
       this.persistSubmit();
@@ -162,9 +271,18 @@ export class CreateTakenExam {
     });
   }
 
+  ngOnDestroy(): void {
+    // Stop exam activity monitoring when component is destroyed
+    this.examActivityService.stopExamSession();
+  }
+
   private persistSubmit() {
     if (!this.attemptId()) return;
     this.submitting.set(true);
+
+    // Log exam submission
+    this.examActivityService.logExamSubmitted();
+
     this.http
       .post(
         `http://127.0.0.1:8000/api/student/taken-exams/${this.attemptId()}/submit`,
@@ -173,6 +291,8 @@ export class CreateTakenExam {
       .subscribe({
         next: () => {
           this.submitting.set(false);
+          // Stop monitoring after successful submission
+          this.examActivityService.stopExamSession();
           this.router.navigate(['/student/exams']);
         },
         error: (err) => {
