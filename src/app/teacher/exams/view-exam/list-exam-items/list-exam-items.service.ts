@@ -65,7 +65,7 @@ export class ListExamItemsService {
 
   delete(itemId: number) {
     return this.http
-      .delete<{ success: boolean }>(
+      .delete<{ data: boolean }>(
         `http://127.0.0.1:8000/api/teacher/exams/items/${itemId}`
       )
       .pipe(
