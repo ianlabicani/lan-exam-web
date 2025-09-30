@@ -1,7 +1,4 @@
-import {
-  ExamItem,
-  ExamItemService,
-} from './../../../services/exam-item.service';
+import { ExamItem, ListExamItemsService } from './list-exam-items.service';
 import { ActivatedRoute } from '@angular/router';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { McqItem } from './mcq-item/mcq-item';
@@ -47,7 +44,7 @@ export class ListExamItems implements OnInit {
   http = inject(HttpClient);
   activatedRoute = inject(ActivatedRoute);
   examService = inject(ExamService);
-  examItemService = inject(ExamItemService);
+  listExamItemsSvc = inject(ListExamItemsService);
 
   isUpdateModalOpenSig = signal(false);
   selectedForUpdateSig = signal<ExamItem | null>(null);
@@ -79,17 +76,25 @@ export class ListExamItems implements OnInit {
   isModerateOpen = signal(true);
   isDifficultOpen = signal(true);
 
+  items = signal<any[]>([]);
+
   ngOnInit(): void {
     const examId: number =
       this.activatedRoute.parent?.snapshot.params['examId'];
+
+    this.listExamItemsSvc.index(examId).subscribe({
+      next: (res) => {
+        console.log('Fetched exam items:', res);
+      },
+    });
 
     this.getExamItems(examId);
   }
 
   getExamItems(examId: number) {
-    this.examItemService.index(examId).subscribe({
+    this.listExamItemsSvc.index(examId).subscribe({
       next: (items) => {
-        this.examItemService.items.set(items);
+        this.listExamItemsSvc.items.set(items);
       },
       error: (err) => {
         console.error('Error fetching exam items:', err);
@@ -98,7 +103,7 @@ export class ListExamItems implements OnInit {
   }
 
   addItem(item: ExamItem) {
-    this.examItemService.items.update((items) => [...items, item]);
+    this.listExamItemsSvc.items.update((items) => [...items, item]);
   }
 
   openUpdateModal(item: ExamItem) {
@@ -138,7 +143,7 @@ export class ListExamItems implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          this.examItemService.items.update((items) =>
+          this.listExamItemsSvc.items.update((items) =>
             items.map((it) => (it.id === res.item.id ? res.item : it))
           );
           this.closeUpdateModal();
@@ -147,8 +152,23 @@ export class ListExamItems implements OnInit {
   }
 
   removeItem(item: ExamItem) {
-    this.examItemService.items.update((items) =>
+    this.listExamItemsSvc.items.update((items) =>
       items.filter((i) => i.id !== item.id)
     );
   }
+}
+
+interface GetItemsData {
+  id: number;
+  exam_id: number;
+  type: string;
+  question: string;
+  points: number;
+  expected_answer: null;
+  answer: string;
+  options: null;
+  pairs: null;
+  created_at: Date;
+  updated_at: Date;
+  level: string;
 }

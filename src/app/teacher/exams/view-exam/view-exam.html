@@ -1,4 +1,4 @@
-@let examSig = this.examService.viewingExam();
+@let examSig = viewExamSvc.exam();
 @let loading = loadingSig();
 @let errorMsgSig = errorMsg();
 
@@ -41,7 +41,16 @@
     <div>
       <div class="flex items-center gap-3 mb-2">
         <h1 class="text-2xl font-bold text-gray-900">{{ examSig.title }}</h1>
-        <span class="px-2 py-0.5 text-xs font-semibold rounded-full tracking-wide uppercase {{ statusBadge(examSig?.status) }}">
+        <span
+        class="px-2 py-0.5 text-xs font-semibold rounded-full tracking-wide uppercase"
+        [ngClass]="
+        {
+          active: 'bg-blue-100 text-blue-700',
+          published: 'bg-green-100 text-green-700',
+          draft: 'bg-gray-100 text-gray-700',
+          archived: 'bg-yellow-100 text-yellow-700',
+        }
+        ">
           {{ examSig.status }}
         </span>
       </div>

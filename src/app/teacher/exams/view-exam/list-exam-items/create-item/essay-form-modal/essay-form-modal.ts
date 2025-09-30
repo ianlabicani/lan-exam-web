@@ -1,17 +1,9 @@
-import {
-  ExamItem,
-  ExamItemService,
-} from './../../../../../services/exam-item.service';
 import { Component, inject, input, output, signal } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { environment } from '../../../../../../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
-import { ViewExamSvc } from '../../../view-exam-svc';
+import { ViewExamService } from '../../../view-exam.service';
+import { ExamItem, ListExamItemsService } from '../../list-exam-items.service';
 
 @Component({
   selector: 'app-essay-form-modal',
@@ -20,10 +12,10 @@ import { ViewExamSvc } from '../../../view-exam-svc';
   styleUrl: './essay-form-modal.css',
 })
 export class EssayFormModal {
-  viewExamSvc = inject(ViewExamSvc);
+  viewExamSvc = inject(ViewExamService);
   fb = inject(FormBuilder);
   http = inject(HttpClient);
-  examItemService = inject(ExamItemService);
+  listExamItemsSvc = inject(ListExamItemsService);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();
   close = output<void>();
@@ -68,7 +60,7 @@ export class EssayFormModal {
       .subscribe({
         next: (res) => {
           this.essayForm.reset();
-          this.examItemService.items.update((prev) => [...prev, res.item]);
+          this.listExamItemsSvc.items.update((prev) => [...prev, res.item]);
           this.viewExamSvc.exam.update((prev) => {
             if (!prev) return prev;
             return {

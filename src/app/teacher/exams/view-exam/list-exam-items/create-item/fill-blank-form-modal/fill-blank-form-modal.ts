@@ -2,10 +2,7 @@ import { Component, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../../environments/environment.development';
-import {
-  ExamItem,
-  ExamItemService,
-} from '../../../../../services/exam-item.service';
+import { ExamItem, ListExamItemsService } from '../../list-exam-items.service';
 
 @Component({
   selector: 'app-fill-blank-form-modal',
@@ -16,7 +13,7 @@ import {
 export class FillBlankFormModal {
   fb = inject(FormBuilder);
   http = inject(HttpClient);
-  examItemService = inject(ExamItemService);
+  listExamItemsSvc = inject(ListExamItemsService);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();
   examId = input.required<number>();
@@ -58,7 +55,7 @@ export class FillBlankFormModal {
       )
       .subscribe({
         next: (res) => {
-          this.examItemService.items.update((prev) => [...prev, res.item]);
+          this.listExamItemsSvc.items.update((prev) => [...prev, res.item]);
           this.form.reset({ question: '', expected_answer: '', points: 1 });
           this.isSaving.set(false);
           this.closeModal.emit();

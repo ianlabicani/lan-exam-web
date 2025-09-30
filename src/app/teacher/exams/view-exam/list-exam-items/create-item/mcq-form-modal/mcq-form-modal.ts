@@ -16,10 +16,7 @@ import {
 } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../../environments/environment.development';
-import {
-  ExamItem,
-  ExamItemService,
-} from '../../../../../services/exam-item.service';
+import { ExamItem, ListExamItemsService } from '../../list-exam-items.service';
 
 @Component({
   selector: 'app-mcq-form-modal',
@@ -30,7 +27,7 @@ import {
 export class McqFormModal implements OnInit {
   fb = inject(FormBuilder);
   http = inject(HttpClient);
-  examItemService = inject(ExamItemService);
+  listExamItemsSvc = inject(ListExamItemsService);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();
   examId = input.required<number>();
@@ -109,7 +106,7 @@ export class McqFormModal implements OnInit {
       .subscribe({
         next: (res) => {
           // update list
-          this.examItemService.items.update((prev) => [...prev, res.item]);
+          this.listExamItemsSvc.items.update((prev) => [...prev, res.item]);
           // reset form
           this.mcqForm.reset({ question: '', points: 1 });
           while (this.options.length) this.options.removeAt(0);

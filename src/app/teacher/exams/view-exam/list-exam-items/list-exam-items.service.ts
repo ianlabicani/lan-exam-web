@@ -1,13 +1,14 @@
-import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { environment } from '../../../environments/environment.development';
-import { Exam } from './exam.service';
+import { environment } from '../../../../../environments/environment.development';
+import { HttpClient } from '@angular/common/http';
+import { tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ExamItemService {
-  private http = inject(HttpClient);
+export class ListExamItemsService {
+  http = inject(HttpClient);
+
   items = signal<ExamItem[]>([]);
   easyItems = computed(() =>
     this.items().filter((item) => item.level === 'easy')

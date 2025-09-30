@@ -9,10 +9,7 @@ import {
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../../environments/environment.development';
-import {
-  ExamItem,
-  ExamItemService,
-} from '../../../../../services/exam-item.service';
+import { ExamItem, ListExamItemsService } from '../../list-exam-items.service';
 
 @Component({
   selector: 'app-true-or-false-form-modal',
@@ -23,7 +20,7 @@ import {
 export class TrueOrFalseFormModal {
   fb = inject(FormBuilder);
   http = inject(HttpClient);
-  examItemService = inject(ExamItemService);
+  listExamItemsSvc = inject(ListExamItemsService);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();
   examId = input.required<number>();
@@ -63,7 +60,7 @@ export class TrueOrFalseFormModal {
       )
       .subscribe({
         next: (res) => {
-          this.examItemService.items.update((prev) => [...prev, res.item]);
+          this.listExamItemsSvc.items.update((prev) => [...prev, res.item]);
           this.tfForm.reset({ question: '', answer: 'true', points: 1 });
           this.isSaving.set(false);
           this.closeModal.emit();

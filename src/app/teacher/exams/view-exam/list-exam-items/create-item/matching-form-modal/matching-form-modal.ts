@@ -7,10 +7,7 @@ import {
 } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../../environments/environment.development';
-import {
-  ExamItem,
-  ExamItemService,
-} from '../../../../../services/exam-item.service';
+import { ExamItem, ListExamItemsService } from '../../list-exam-items.service';
 
 @Component({
   selector: 'app-matching-form-modal',
@@ -21,7 +18,7 @@ import {
 export class MatchingFormModal {
   fb = inject(FormBuilder);
   http = inject(HttpClient);
-  examItemService = inject(ExamItemService);
+  listExamItemsSvc = inject(ListExamItemsService);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();
   examId = input.required<number>();
@@ -87,7 +84,7 @@ export class MatchingFormModal {
       )
       .subscribe({
         next: (res) => {
-          this.examItemService.items.update((prev) => [...prev, res.item]);
+          this.listExamItemsSvc.items.update((prev) => [...prev, res.item]);
           this.form.reset({ question: '', points: 1 });
           while (this.pairs.length) this.pairs.removeAt(0);
           this.initialPairs().forEach((p) => this.pairs.push(p));

@@ -6,7 +6,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { NgClass } from '@angular/common';
-import { ExamItem } from '../../../../services/exam-item.service';
+import { ExamItem } from '../list-exam-items.service';
 
 @Component({
   selector: 'app-mcq-item',

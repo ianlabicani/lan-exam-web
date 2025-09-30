@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { ExamItem } from '../../../../services/exam-item.service';
+import { ExamItem } from '../list-exam-items.service';
 
 @Component({
   selector: 'app-short-answer-item',
