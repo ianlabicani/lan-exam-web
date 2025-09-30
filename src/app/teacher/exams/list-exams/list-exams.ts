@@ -1,12 +1,10 @@
-import { Exam, ExamService } from '../../services/exam.service';
-import {
-  DatePipe,
-  NgClass,
-  TitleCasePipe,
-  UpperCasePipe,
-} from '@angular/common';
+import { Exam } from '../../services/exam.service';
+import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { environment } from '../../../../environments/environment.development';
+import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-exam-list',
@@ -15,37 +13,49 @@ import { RouterLink } from '@angular/router';
   styleUrl: './list-exams.css',
 })
 export class ListExams implements OnInit {
-  examService = inject(ExamService);
+  http = inject(HttpClient);
 
-  examsSig = signal<Exam[]>([]);
+  exams = signal<GetExamsData[]>([]);
 
   ngOnInit(): void {
-    this.examService.index().subscribe((exams) => {
-      this.examsSig.set(exams);
+    this.getExams().subscribe((res) => {
+      const examsWithDuration = res.data.map((exam) => ({
+        ...exam,
+        durationInMins: this.calculateDuration(exam.starts_at, exam.ends_at),
+      }));
+
+      this.exams.set(examsWithDuration);
+      console.log(res);
     });
   }
 
-  calculateDuration(startsAt: Date, endsAt: Date): number {
+  getExams() {
+    return this.http.get<{ data: GetExamsData[] }>(
+      `${environment.apiBaseUrl}/teacher/exams`
+    );
+  }
+
+  calculateDuration(startsAt: Date | string, endsAt: Date | string): number {
     const start = new Date(startsAt);
     const end = new Date(endsAt);
     const diffMs = end.getTime() - start.getTime();
     return Math.round(diffMs / 60000); // Convert ms to minutes
   }
+}
 
-  getStatusClass(status: string): string {
-    const classes = {
-      draft: 'bg-gray-100 text-gray-800',
-      published: 'bg-green-100 text-green-800',
-      archived: 'bg-yellow-100 text-yellow-800',
-      active: 'bg-blue-100 text-blue-800',
-    };
-    return (
-      classes[status as keyof typeof classes] || 'bg-gray-100 text-gray-800'
-    );
-  }
+interface GetExamsData {
+  id: number;
+  title: string;
+  description: string;
+  starts_at: Date;
+  ends_at: Date;
+  year: string;
+  sections: string[];
+  status: string;
+  total_points: number;
+  created_at: Date;
+  updated_at: Date;
 
-  remove(id: number) {
-    this.examsSig.set(this.examsSig().filter((exam) => exam.id !== id));
-    localStorage.setItem('exams', JSON.stringify(this.examsSig()));
-  }
+  // Additional property for duration in minutes
+  durationInMins?: number;
 }

@@ -1,3 +1,5 @@
+@let examsSig = exams();
+
 <div class="p-6">
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold">Exams</h1>
@@ -7,7 +9,7 @@
       >Create Exam</a
     >
   </div>
-  @if ( examsSig().length ) {
+  @if ( examsSig.length ) {
   <div class="overflow-x-auto bg-white shadow rounded-lg">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
@@ -40,7 +42,7 @@
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        @for (exam of examsSig(); track exam.id) {
+        @for (exam of exams(); track exam.id) {
         <tr class="hover:bg-gray-50 transition">
           <td class="px-4 py-2 whitespace-nowrap font-medium text-gray-800">
             {{ exam.title }}
@@ -61,7 +63,7 @@
                 {{ exam.starts_at | date: 'MMM d, y HH:mm' }} → {{ exam.ends_at
                 | date: 'MMM d, y HH:mm' }}
               </div>
-              <div class="text-xs text-gray-400">Duration: {{ 0 }} mins</div>
+              <div class="text-xs text-gray-400">Duration: {{ exam.durationInMins}} mins</div>
             </div>
           </td>
           <td class="px-4 py-2 text-sm">
