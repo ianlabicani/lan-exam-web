@@ -36,7 +36,7 @@ export class ListExamItemsService {
   store(examId: number, payload: any) {
     return this.http
       .post<{ item: ExamItem }>(
-        `http://127.0.0.1:8000/api/teacher/exams/${examId}/items`,
+        `${environment.apiBaseUrl}/teacher/exams/${examId}/items`,
         payload
       )
       .pipe(
@@ -66,7 +66,7 @@ export class ListExamItemsService {
   delete(itemId: number) {
     return this.http
       .delete<{ data: boolean }>(
-        `http://127.0.0.1:8000/api/teacher/exams/items/${itemId}`
+        `${environment.apiBaseUrl}/teacher/exams/items/${itemId}`
       )
       .pipe(
         tap(() => {
