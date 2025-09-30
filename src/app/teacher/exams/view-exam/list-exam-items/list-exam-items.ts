@@ -77,7 +77,7 @@ export class ListExamItems implements OnInit {
   isModerateOpen = signal(true);
   isDifficultOpen = signal(true);
 
-  items = this.listExamItemsSvc.items;
+  items = this.listExamItemsSvc.items$;
 
   ngOnInit(): void {
     const examId: number =

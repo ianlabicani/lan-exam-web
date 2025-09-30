@@ -9,16 +9,16 @@ import { tap } from 'rxjs';
 export class ListExamItemsService {
   private http = inject(HttpClient);
 
-  private items$ = signal<ExamItem[]>([]);
-  items = computed(() => this.items$());
-  easyItems = computed(() =>
-    this.items$().filter((item) => item.level === 'easy')
+  private items = signal<ExamItem[]>([]);
+  items$ = computed(() => this.items());
+  easyItems$ = computed(() =>
+    this.items().filter((item) => item.level === 'easy')
   );
-  moderateItems = computed(() =>
-    this.items$().filter((item) => item.level === 'moderate')
+  moderateItems$ = computed(() =>
+    this.items().filter((item) => item.level === 'moderate')
   );
-  difficultItems = computed(() =>
-    this.items$().filter((item) => item.level === 'difficult')
+  difficultItems$ = computed(() =>
+    this.items().filter((item) => item.level === 'difficult')
   );
 
   index(examId: number) {
@@ -28,7 +28,7 @@ export class ListExamItemsService {
       )
       .pipe(
         tap((res) => {
-          this.items$.set(res.data);
+          this.items.set(res.data);
         })
       );
   }
@@ -41,7 +41,7 @@ export class ListExamItemsService {
       )
       .pipe(
         tap((res) => {
-          this.items$.update((prev) => [...prev, res.item]);
+          this.items.update((prev) => [...prev, res.item]);
         })
       );
   }
@@ -56,7 +56,7 @@ export class ListExamItemsService {
       )
       .pipe(
         tap((res) => {
-          this.items$.update((items) =>
+          this.items.update((items) =>
             items.map((it) => (it.id === res.data.id ? res.data : it))
           );
         })
@@ -70,7 +70,7 @@ export class ListExamItemsService {
       )
       .pipe(
         tap(() => {
-          this.items$.update((prev) =>
+          this.items.update((prev) =>
             prev.filter((item) => item.id !== itemId)
           );
         })
