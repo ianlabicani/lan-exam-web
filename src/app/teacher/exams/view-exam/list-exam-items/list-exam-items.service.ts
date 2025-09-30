@@ -24,7 +24,7 @@ export class ListExamItemsService {
   index(examId: number) {
     return this.http
       .get<{ data: ExamItem[] }>(
-        `${environment.apiBaseUrl}/teacher/exam-items/${examId}`
+        `${environment.apiBaseUrl}/teacher/exams/${examId}/items`
       )
       .pipe(
         tap((res) => {
@@ -36,7 +36,7 @@ export class ListExamItemsService {
   store(examId: number, payload: any) {
     return this.http
       .post<{ item: ExamItem }>(
-        `http://127.0.0.1:8000/api/teacher/exam-items/${examId}`,
+        `http://127.0.0.1:8000/api/teacher/exams/${examId}/items`,
         payload
       )
       .pipe(
@@ -47,9 +47,11 @@ export class ListExamItemsService {
   }
 
   update(examItem: ExamItem) {
+    console.log(examItem);
+
     return this.http
       .patch<{ data: ExamItem }>(
-        `${environment.apiBaseUrl}/teacher/exam-items/${examItem.id}`,
+        `${environment.apiBaseUrl}/teacher/exams/items/${examItem.id}`,
         examItem
       )
       .pipe(
@@ -64,7 +66,7 @@ export class ListExamItemsService {
   delete(itemId: number) {
     return this.http
       .delete<{ success: boolean }>(
-        `http://127.0.0.1:8000/api/teacher/exam-items/${itemId}`
+        `http://127.0.0.1:8000/api/teacher/exams/items/${itemId}`
       )
       .pipe(
         tap(() => {
