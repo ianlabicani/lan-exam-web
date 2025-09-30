@@ -26,7 +26,7 @@ export class DeleteItem {
     this.deleting = true;
     this.error = null;
 
-    this.examItemsSvc.delete(item.exam_id, item.id).subscribe({
+    this.examItemsSvc.delete(item.id).subscribe({
       next: (res) => {
         this.deleting = false;
         this.deleted.emit(item);

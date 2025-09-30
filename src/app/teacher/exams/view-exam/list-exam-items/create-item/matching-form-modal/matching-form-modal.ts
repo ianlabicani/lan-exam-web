@@ -77,26 +77,18 @@ export class MatchingFormModal {
       level: this.level(),
     };
 
-    this.http
-      .post<{ item: ExamItem }>(
-        `${environment.apiBaseUrl}/teacher/exams/${examId}/items`,
-        payload
-      )
-      .subscribe({
-        next: (res) => {
-          this.listExamItemsSvc.items.update((prev) => [...prev, res.item]);
-          this.form.reset({ question: '', points: 1 });
-          while (this.pairs.length) this.pairs.removeAt(0);
-          this.initialPairs().forEach((p) => this.pairs.push(p));
-          this.isSaving.set(false);
-          this.closeModal.emit();
-        },
-        error: (err) => {
-          this.errorMessage.set(
-            err?.error?.message || 'Failed to add Matching'
-          );
-          this.isSaving.set(false);
-        },
-      });
+    this.listExamItemsSvc.store(examId, payload).subscribe({
+      next: (_) => {
+        this.form.reset({ question: '', points: 1 });
+        while (this.pairs.length) this.pairs.removeAt(0);
+        this.initialPairs().forEach((p) => this.pairs.push(p));
+        this.isSaving.set(false);
+        this.closeModal.emit();
+      },
+      error: (err) => {
+        this.errorMessage.set(err?.error?.message || 'Failed to add Matching');
+        this.isSaving.set(false);
+      },
+    });
   }
 }

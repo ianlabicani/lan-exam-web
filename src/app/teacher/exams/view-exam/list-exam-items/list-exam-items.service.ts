@@ -7,36 +7,72 @@ import { tap } from 'rxjs';
   providedIn: 'root',
 })
 export class ListExamItemsService {
-  http = inject(HttpClient);
+  private http = inject(HttpClient);
 
-  items = signal<ExamItem[]>([]);
+  private items$ = signal<ExamItem[]>([]);
+  items = computed(() => this.items$());
   easyItems = computed(() =>
-    this.items().filter((item) => item.level === 'easy')
+    this.items$().filter((item) => item.level === 'easy')
   );
   moderateItems = computed(() =>
-    this.items().filter((item) => item.level === 'moderate')
+    this.items$().filter((item) => item.level === 'moderate')
   );
   difficultItems = computed(() =>
-    this.items().filter((item) => item.level === 'difficult')
+    this.items$().filter((item) => item.level === 'difficult')
   );
 
   index(examId: number) {
-    return this.http.get<ExamItem[]>(
-      `${environment.apiBaseUrl}/teacher/exams/${examId}/items`
-    );
+    return this.http
+      .get<{ data: ExamItem[] }>(
+        `${environment.apiBaseUrl}/teacher/exam-items/${examId}`
+      )
+      .pipe(
+        tap((res) => {
+          this.items$.set(res.data);
+        })
+      );
   }
 
   store(examId: number, payload: any) {
-    return this.http.post<{ item: ExamItem }>(
-      `http://127.0.0.1:8000/api/teacher/exams/${examId}/items`,
-      payload
-    );
+    return this.http
+      .post<{ item: ExamItem }>(
+        `http://127.0.0.1:8000/api/teacher/exam-items/${examId}`,
+        payload
+      )
+      .pipe(
+        tap((res) => {
+          this.items$.update((prev) => [...prev, res.item]);
+        })
+      );
   }
 
-  delete(examId: number, itemId: number) {
-    return this.http.delete<{ success: boolean }>(
-      `http://127.0.0.1:8000/api/teacher/exams/${examId}/items/${itemId}`
-    );
+  update(examItem: ExamItem) {
+    return this.http
+      .patch<{ data: ExamItem }>(
+        `${environment.apiBaseUrl}/teacher/exam-items/${examItem.id}`,
+        examItem
+      )
+      .pipe(
+        tap((res) => {
+          this.items$.update((items) =>
+            items.map((it) => (it.id === res.data.id ? res.data : it))
+          );
+        })
+      );
+  }
+
+  delete(itemId: number) {
+    return this.http
+      .delete<{ success: boolean }>(
+        `http://127.0.0.1:8000/api/teacher/exam-items/${itemId}`
+      )
+      .pipe(
+        tap(() => {
+          this.items$.update((prev) =>
+            prev.filter((item) => item.id !== itemId)
+          );
+        })
+      );
   }
 }
 

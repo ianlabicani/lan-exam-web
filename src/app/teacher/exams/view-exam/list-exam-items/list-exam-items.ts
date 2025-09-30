@@ -18,6 +18,7 @@ import { TrueOrFalseFormModal } from './create-item/true-or-false-form-modal/tru
 import { FillBlankFormModal } from './create-item/fill-blank-form-modal/fill-blank-form-modal';
 import { ShortAnswerFormModal } from './create-item/short-answer-form-modal/short-answer-form-modal';
 import { MatchingFormModal } from './create-item/matching-form-modal/matching-form-modal';
+import { ViewExamService } from '../view-exam.service';
 
 @Component({
   selector: 'app-teacher-list-exam-items',
@@ -43,7 +44,7 @@ import { MatchingFormModal } from './create-item/matching-form-modal/matching-fo
 export class ListExamItems implements OnInit {
   http = inject(HttpClient);
   activatedRoute = inject(ActivatedRoute);
-  examService = inject(ExamService);
+  viewExamSvc = inject(ViewExamService);
   listExamItemsSvc = inject(ListExamItemsService);
 
   isUpdateModalOpenSig = signal(false);
@@ -76,34 +77,24 @@ export class ListExamItems implements OnInit {
   isModerateOpen = signal(true);
   isDifficultOpen = signal(true);
 
-  items = signal<any[]>([]);
+  items = this.listExamItemsSvc.items;
 
   ngOnInit(): void {
     const examId: number =
       this.activatedRoute.parent?.snapshot.params['examId'];
-
-    this.listExamItemsSvc.index(examId).subscribe({
-      next: (res) => {
-        console.log('Fetched exam items:', res);
-      },
-    });
 
     this.getExamItems(examId);
   }
 
   getExamItems(examId: number) {
     this.listExamItemsSvc.index(examId).subscribe({
-      next: (items) => {
-        this.listExamItemsSvc.items.set(items);
+      next: (res) => {
+        console.log(this.items());
       },
       error: (err) => {
         console.error('Error fetching exam items:', err);
       },
     });
-  }
-
-  addItem(item: ExamItem) {
-    this.listExamItemsSvc.items.update((items) => [...items, item]);
   }
 
   openUpdateModal(item: ExamItem) {
@@ -127,34 +118,15 @@ export class ListExamItems implements OnInit {
   }
 
   onItemDeleted(item: ExamItem) {
-    this.removeItem(item);
     this.closeDeleteModal();
   }
 
-  onItemSaved(updated: ExamItem) {
-    const itemId = updated.id;
-
-    this.http
-      .patch<{ item: ExamItem }>(
-        `${environment.apiBaseUrl}/teacher/exams/${
-          this.examService.viewingExam()?.id
-        }/items/${itemId}`,
-        updated
-      )
-      .subscribe({
-        next: (res) => {
-          this.listExamItemsSvc.items.update((items) =>
-            items.map((it) => (it.id === res.item.id ? res.item : it))
-          );
-          this.closeUpdateModal();
-        },
-      });
-  }
-
-  removeItem(item: ExamItem) {
-    this.listExamItemsSvc.items.update((items) =>
-      items.filter((i) => i.id !== item.id)
-    );
+  onItemSaved(examItem: ExamItem) {
+    this.listExamItemsSvc.update(examItem).subscribe({
+      next: (res) => {
+        this.closeUpdateModal();
+      },
+    });
   }
 }
 

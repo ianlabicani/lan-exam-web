@@ -98,29 +98,21 @@ export class McqFormModal implements OnInit {
     };
 
     const examId = this.examId();
-    this.http
-      .post<{ item: ExamItem }>(
-        `${environment.apiBaseUrl}/teacher/exams/${examId}/items`,
-        payload
-      )
-      .subscribe({
-        next: (res) => {
-          // update list
-          this.listExamItemsSvc.items.update((prev) => [...prev, res.item]);
-          // reset form
-          this.mcqForm.reset({ question: '', points: 1 });
-          while (this.options.length) this.options.removeAt(0);
-          this.addOption();
-          this.addOption();
-          this.mcqForm.markAsPristine();
-          this.isSaving.set(false);
-          this.closeModal.emit();
-        },
-        error: (err) => {
-          this.errorMessage.set(err?.error?.message || 'Failed to add MCQ');
-          this.isSaving.set(false);
-        },
-      });
+    this.listExamItemsSvc.store(examId, payload).subscribe({
+      next: (_) => {
+        this.mcqForm.reset({ question: '', points: 1 });
+        while (this.options.length) this.options.removeAt(0);
+        this.addOption();
+        this.addOption();
+        this.mcqForm.markAsPristine();
+        this.isSaving.set(false);
+        this.closeModal.emit();
+      },
+      error: (err) => {
+        this.errorMessage.set(err?.error?.message || 'Failed to add MCQ');
+        this.isSaving.set(false);
+      },
+    });
   }
 
   hasAnyCorrect(): boolean {

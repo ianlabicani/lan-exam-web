@@ -1,9 +1,8 @@
 @let easyItemsSig = listExamItemsSvc.easyItems();
 @let moderateItemsSig = listExamItemsSvc.moderateItems();
 @let difficultItemsSig = listExamItemsSvc.difficultItems();
+@let exam = viewExamSvc.exam();
 
-
-@let exam = this.examService.viewingExam();
 
 
 @if (exam) {
@@ -14,23 +13,23 @@
     </button>
     @if (isEasyOpen() && exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.easy?.allocation ?? 0) > easyItemsSig.length) {
       <button (click)="isEasyEssayModalOpen.set(true)" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Add Essay</button>
-    <app-essay-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyEssayModalOpen.set(true)" (closeModal)="isEasyEssayModalOpen.set(false)" [isModalOpen]="isEasyEssayModalOpen()"></app-essay-form-modal>
+      <app-essay-form-modal [examId]="exam.id" [level]="'easy'" (openModal)="isEasyEssayModalOpen.set(true)" (closeModal)="isEasyEssayModalOpen.set(false)" [isModalOpen]="isEasyEssayModalOpen()"></app-essay-form-modal>
 
-    <button (click)="isEasyMcqModalOpen.set(true)" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Add MCQ</button>
-    <app-mcq-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyMcqModalOpen.set(true)" (closeModal)="isEasyMcqModalOpen.set(false)" [isModalOpen]="isEasyMcqModalOpen()"></app-mcq-form-modal>
+      <button (click)="isEasyMcqModalOpen.set(true)" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Add MCQ</button>
+      <app-mcq-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyMcqModalOpen.set(true)" (closeModal)="isEasyMcqModalOpen.set(false)" [isModalOpen]="isEasyMcqModalOpen()"></app-mcq-form-modal>
 
-    <button (click)="isEasyTOFModalOpen.set(true)" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition">Add True/False</button>
-    <app-true-or-false-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyTOFModalOpen.set(true)" (closeModal)="isEasyTOFModalOpen.set(false)" [isModalOpen]="isEasyTOFModalOpen()"></app-true-or-false-form-modal>
+      <button (click)="isEasyTOFModalOpen.set(true)" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition">Add True/False</button>
+      <app-true-or-false-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyTOFModalOpen.set(true)" (closeModal)="isEasyTOFModalOpen.set(false)" [isModalOpen]="isEasyTOFModalOpen()"></app-true-or-false-form-modal>
 
-    <button (click)="isEasyFillBlankModalOpen.set(true)" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition">Add Fill in the Blank</button>
-    <app-fill-blank-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyFillBlankModalOpen.set(true)" (closeModal)="isEasyFillBlankModalOpen.set(false)" [isModalOpen]="isEasyFillBlankModalOpen()"></app-fill-blank-form-modal>
+      <button (click)="isEasyFillBlankModalOpen.set(true)" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition">Add Fill in the Blank</button>
+      <app-fill-blank-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyFillBlankModalOpen.set(true)" (closeModal)="isEasyFillBlankModalOpen.set(false)" [isModalOpen]="isEasyFillBlankModalOpen()"></app-fill-blank-form-modal>
 
-    <button (click)="isEasyShortAnswerModalOpen.set(true)" class="px-4 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 transition">Add Short Answer</button>
-    <app-short-answer-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyShortAnswerModalOpen.set(true)" (closeModal)="isEasyShortAnswerModalOpen.set(false)" [isModalOpen]="isEasyShortAnswerModalOpen()"></app-short-answer-form-modal>
+      <button (click)="isEasyShortAnswerModalOpen.set(true)" class="px-4 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 transition">Add Short Answer</button>
+      <app-short-answer-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyShortAnswerModalOpen.set(true)" (closeModal)="isEasyShortAnswerModalOpen.set(false)" [isModalOpen]="isEasyShortAnswerModalOpen()"></app-short-answer-form-modal>
 
-    <button (click)="isEasyMatchingModalOpen.set(true)" class="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition">Add Matching</button>
-    <app-matching-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyMatchingModalOpen.set(true)" (closeModal)="isEasyMatchingModalOpen.set(false)" [isModalOpen]="isEasyMatchingModalOpen()"></app-matching-form-modal>
-  }
+      <button (click)="isEasyMatchingModalOpen.set(true)" class="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition">Add Matching</button>
+      <app-matching-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyMatchingModalOpen.set(true)" (closeModal)="isEasyMatchingModalOpen.set(false)" [isModalOpen]="isEasyMatchingModalOpen()"></app-matching-form-modal>
+    }
 
     @if (isEasyOpen()) {
     <div class="space-y-3 mb-10">

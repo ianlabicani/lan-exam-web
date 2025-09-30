@@ -52,15 +52,11 @@ export class EssayFormModal {
     const newItem = this.essayForm.getRawValue();
     const examId = this.examId();
 
-    this.http
-      .post<{ item: ExamItem }>(
-        `${environment.apiBaseUrl}/teacher/exams/${examId}/items`,
-        { ...newItem, level: this.level() }
-      )
+    this.listExamItemsSvc
+      .store(examId, { ...newItem, level: this.level() })
       .subscribe({
         next: (res) => {
           this.essayForm.reset();
-          this.listExamItemsSvc.items.update((prev) => [...prev, res.item]);
           this.viewExamSvc.exam.update((prev) => {
             if (!prev) return prev;
             return {
