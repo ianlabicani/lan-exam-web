@@ -3,7 +3,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { LogoutComfirmModal } from './logout-comfirm-modal/logout-comfirm-modal';
 import { Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-logout-button',
   imports: [FaIconComponent, LogoutComfirmModal],
