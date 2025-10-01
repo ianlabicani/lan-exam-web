@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { ExamItem } from '../list-exam-items.service';
+import { ExamItem } from '../../list-exam-items.service';
 @Component({
   selector: 'app-true-false-item',
   imports: [NgClass],

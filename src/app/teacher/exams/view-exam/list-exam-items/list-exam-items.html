@@ -16,7 +16,7 @@
       <app-essay-form-modal [examId]="exam.id" [level]="'easy'" (openModal)="isEasyEssayModalOpen.set(true)" (closeModal)="isEasyEssayModalOpen.set(false)" [isModalOpen]="isEasyEssayModalOpen()"></app-essay-form-modal>
 
       <button (click)="isEasyMcqModalOpen.set(true)" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Add MCQ</button>
-      <app-mcq-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyMcqModalOpen.set(true)" (closeModal)="isEasyMcqModalOpen.set(false)" [isModalOpen]="isEasyMcqModalOpen()"></app-mcq-form-modal>
+      <app-mcq-form-modal [examId]="exam.id" [level]="'easy'" (openModal)="isEasyMcqModalOpen.set(true)" (closeModal)="isEasyMcqModalOpen.set(false)" [isModalOpen]="isEasyMcqModalOpen()"></app-mcq-form-modal>
 
       <button (click)="isEasyTOFModalOpen.set(true)" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition">Add True/False</button>
       <app-true-or-false-form-modal [examId]="exam?.id!" [level]="'easy'" (openModal)="isEasyTOFModalOpen.set(true)" (closeModal)="isEasyTOFModalOpen.set(false)" [isModalOpen]="isEasyTOFModalOpen()"></app-true-or-false-form-modal>
