@@ -62,7 +62,6 @@ export class ViewExam implements OnInit {
       next: (res) => {
         this.loadingSig.set(false);
         this.viewExamSvc.exam.set(res.data);
-        console.log('exam', res);
       },
       error: (err) => {
         this.errorMsg.set(err?.error?.message || 'Failed to load exam');

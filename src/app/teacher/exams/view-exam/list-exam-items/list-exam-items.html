@@ -68,29 +68,29 @@
   </div>
 
   <div class="space-y-4">
-  <button type="button" class="flex w-full items-center justify-between rounded border bg-white px-3 py-2 text-left shadow-sm hover:bg-gray-50" (click)="isModerateOpen.set(!isModerateOpen())">
+    <button type="button" class="flex w-full items-center justify-between rounded border bg-white px-3 py-2 text-left shadow-sm hover:bg-gray-50" (click)="isModerateOpen.set(!isModerateOpen())">
       <span class="text-lg font-semibold text-gray-900">Moderate Exam Items ({{ moderateItemsSig.length }})</span>
       <span class="text-gray-500 text-sm">{{ isModerateOpen() ? 'Hide' : 'Show' }}</span>
     </button>
- @if (isModerateOpen() && exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.moderate?.allocation ?? 0) > moderateItemsSig.length) {
-    <button (click)="isModerateEssayModalOpen.set(true)" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Add Essay</button>
-    <app-essay-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateEssayModalOpen.set(true)" (closeModal)="isModerateEssayModalOpen.set(false)" [isModalOpen]="isModerateEssayModalOpen()"></app-essay-form-modal>
+    @if (isModerateOpen() && exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.moderate?.allocation ?? 0) > moderateItemsSig.length) {
+        <button (click)="isModerateEssayModalOpen.set(true)" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Add Essay</button>
+        <app-essay-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateEssayModalOpen.set(true)" (closeModal)="isModerateEssayModalOpen.set(false)" [isModalOpen]="isModerateEssayModalOpen()"></app-essay-form-modal>
 
-    <button (click)="isModerateMcqModalOpen.set(true)" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Add MCQ</button>
-    <app-mcq-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateMcqModalOpen.set(true)" (closeModal)="isModerateMcqModalOpen.set(false)" [isModalOpen]="isModerateMcqModalOpen()"></app-mcq-form-modal>
+        <button (click)="isModerateMcqModalOpen.set(true)" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Add MCQ</button>
+        <app-mcq-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateMcqModalOpen.set(true)" (closeModal)="isModerateMcqModalOpen.set(false)" [isModalOpen]="isModerateMcqModalOpen()"></app-mcq-form-modal>
 
-    <button (click)="isModerateTOFModalOpen.set(true)" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition">Add True/False</button>
-    <app-true-or-false-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateTOFModalOpen.set(true)" (closeModal)="isModerateTOFModalOpen.set(false)" [isModalOpen]="isModerateTOFModalOpen()"></app-true-or-false-form-modal>
+        <button (click)="isModerateTOFModalOpen.set(true)" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition">Add True/False</button>
+        <app-true-or-false-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateTOFModalOpen.set(true)" (closeModal)="isModerateTOFModalOpen.set(false)" [isModalOpen]="isModerateTOFModalOpen()"></app-true-or-false-form-modal>
 
-   <button (click)="isModerateFillBlankModalOpen.set(true)" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition">Add Fill in the Blank</button>
-   <app-fill-blank-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateFillBlankModalOpen.set(true)" (closeModal)="isModerateFillBlankModalOpen.set(false)" [isModalOpen]="isModerateFillBlankModalOpen()"></app-fill-blank-form-modal>
+      <button (click)="isModerateFillBlankModalOpen.set(true)" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition">Add Fill in the Blank</button>
+      <app-fill-blank-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateFillBlankModalOpen.set(true)" (closeModal)="isModerateFillBlankModalOpen.set(false)" [isModalOpen]="isModerateFillBlankModalOpen()"></app-fill-blank-form-modal>
 
-   <button (click)="isModerateShortAnswerModalOpen.set(true)" class="px-4 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 transition">Add Short Answer</button>
-   <app-short-answer-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateShortAnswerModalOpen.set(true)" (closeModal)="isModerateShortAnswerModalOpen.set(false)" [isModalOpen]="isModerateShortAnswerModalOpen()"></app-short-answer-form-modal>
+      <button (click)="isModerateShortAnswerModalOpen.set(true)" class="px-4 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 transition">Add Short Answer</button>
+      <app-short-answer-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateShortAnswerModalOpen.set(true)" (closeModal)="isModerateShortAnswerModalOpen.set(false)" [isModalOpen]="isModerateShortAnswerModalOpen()"></app-short-answer-form-modal>
 
-   <button (click)="isModerateMatchingModalOpen.set(true)" class="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition">Add Matching</button>
-   <app-matching-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateMatchingModalOpen.set(true)" (closeModal)="isModerateMatchingModalOpen.set(false)" [isModalOpen]="isModerateMatchingModalOpen()"></app-matching-form-modal>
-  }
+      <button (click)="isModerateMatchingModalOpen.set(true)" class="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition">Add Matching</button>
+      <app-matching-form-modal [examId]="exam?.id!" [level]="'moderate'" (openModal)="isModerateMatchingModalOpen.set(true)" (closeModal)="isModerateMatchingModalOpen.set(false)" [isModalOpen]="isModerateMatchingModalOpen()"></app-matching-form-modal>
+      }
     @if (isModerateOpen()) {
     <div class="space-y-3 mb-10">
       @for(item of moderateItemsSig; track $index) {

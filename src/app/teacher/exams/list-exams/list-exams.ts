@@ -25,7 +25,6 @@ export class ListExams implements OnInit {
       }));
 
       this.exams.set(examsWithDuration);
-      console.log(res);
     });
   }
 

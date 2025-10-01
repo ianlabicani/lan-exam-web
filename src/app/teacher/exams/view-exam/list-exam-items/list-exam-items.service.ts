@@ -47,8 +47,6 @@ export class ListExamItemsService {
   }
 
   update(examItem: ExamItem) {
-    console.log(examItem);
-
     return this.http
       .patch<{ data: ExamItem }>(
         `${environment.apiBaseUrl}/teacher/exams/items/${examItem.id}`,
