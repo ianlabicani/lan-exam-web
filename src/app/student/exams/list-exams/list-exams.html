@@ -55,24 +55,28 @@
           <a
             class="w-full rounded-lg bg-green-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-green-500 transition"
             [routerLink]="['/student/taken-exams', exam.taken_exam.id]">
-            ✅ Submitted (view submission)
+            <fa-icon [icon]="fasFileAlt" class="mr-2"></fa-icon>
+            Submitted (view submission)
           </a>
           } @else {
             <a class="w-full rounded-lg bg-orange-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-green-500 transition"
               [routerLink]="['/student/taken-exams', exam.taken_exam.id, 'continue']">
+              <fa-icon [icon]="fasClipboard" class="mr-2"></fa-icon>
               Continue Exam
             </a>
           }
         } @else if(exam.status ==='active') {
         <div
           class="w-full rounded-lg bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-amber-500 transition">
-          📝 Wait for the schedule
+          <fa-icon [icon]="fasPlayCircle" class="mr-2"></fa-icon>
+          Wait for the schedule
         </div>
         } @else if(exam.status ==='published') {
         <button
           (click)="takeExam(exam.id)"
           class="cursor-pointer w-full rounded-lg bg-indigo-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-indigo-500 transition">
-          📝 Take Exam
+          <fa-icon [icon]="fasPlayCircle" class="mr-2"></fa-icon>
+          Take Exam
         </button>
         } @else if (exam.status === 'draft') {
         <div
