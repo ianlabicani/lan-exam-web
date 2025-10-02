@@ -1,10 +1,10 @@
-@let takenExam = takenExamSig();
+@let takenExamSig = takenExam();
 @let examItemsSig = examItems();
 @let events = sessionEvents();
 @let summary = eventSummary();
 
 <!-- Activity Monitoring Toggle Button -->
-@if (examActivityService.currentSession()?.isActive) {
+@if (takenExamSig?.submitted_at == null) {
 <div class="fixed top-4 right-4 z-50">
   <button
     (click)="toggleEventPanel()"
@@ -139,11 +139,11 @@
 }
 }
 
-@if (takenExam) {
+@if (takenExamSig) {
 <div
   class="mx-auto max-w-4xl p-6 space-y-6 bg-white/70 backdrop-blur rounded-xl shadow-sm border border-slate-200"
 >
-  <app-exam-header [takenExam]="takenExam">
+  <app-exam-header [takenExam]="takenExamSig">
     <app-exam-progress
       [answered]="answeredCount()"
       [total]="examItemsSig.length"

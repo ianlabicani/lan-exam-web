@@ -9,5 +9,5 @@ import { TakenExam } from '../../../../models/exam';
   styleUrl: './exam-header.css',
 })
 export class ExamHeader {
-  takenExam = input.required<TakenExam>();
+  takenExam = input.required<any>();
 }

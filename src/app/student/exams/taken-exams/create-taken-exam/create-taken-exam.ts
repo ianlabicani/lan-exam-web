@@ -8,20 +8,16 @@ import {
   OnInit,
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { concatMap, of, forkJoin } from 'rxjs';
-import { Exam, ExamService } from '../../../../teacher/services/exam.service';
+import { of, forkJoin } from 'rxjs';
+import { ExamService } from '../../../../teacher/services/exam.service';
 import { StudentExamItemService } from '../../../services/student-exam-item.service';
-import {
-  ExamActivityService,
-  ExamActivityEvent,
-} from '../../../services/exam-activity.service';
 import { ExamHeader } from './exam-header/exam-header';
 import { ExamProgress } from './exam-progress/exam-progress';
 import { ExamQuestion } from './exam-question/exam-question';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../../../environments/environment.development';
 import { TakenExamService } from '../../../services/taken-exam.service';
-import { TakenExam } from '../../../models/exam';
+import { ExamActivityLogService } from '../../../services/exam-activity-log.service';
 
 @Component({
   selector: 'app-create-taken-exam',
@@ -36,7 +32,7 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   takenExamSvc = inject(TakenExamService);
   studentExamService = inject(ExamService);
   studentExamItemService = inject(StudentExamItemService);
-  examActivityService = inject(ExamActivityService);
+  examActivityService = inject(ExamActivityLogService);
 
   submitting = signal(false);
   error = signal<string | null>(null);
@@ -44,9 +40,8 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   answers = signal<Record<string, any>>({});
   private essayDebounceHandles: Record<string, any> = {};
 
-  takenExamSig = signal<TakenExam | null>(null);
-  wasSubmitted = computed(() => this.takenExamSig()?.submitted_at !== null);
-  private attemptId = computed(() => this.takenExamSig()?.id || null);
+  takenExam = signal<TakenExam | null>(null);
+  wasSubmitted = computed(() => this.takenExam()?.submitted_at !== null);
   examItems = signal<IExamItem[]>([]);
 
   // Activity tracking
@@ -70,68 +65,44 @@ export class CreateTakenExam implements OnInit, OnDestroy {
     };
   });
 
-  getTakenExam() {
+  ngOnInit(): void {
     const takenExamId = this.route.snapshot.params['takenExamId'];
+
+    // Fetch exam data
     this.takenExamSvc.getOne(takenExamId).subscribe({
       next: (res) => {
-        console.log(res);
+        this.takenExam.set(res.takenExam);
+        this.examItems.set(res.takenExam.exam?.items || []);
+
+        if (res.takenExam.answers?.length) {
+          this.setAnswers(res.takenExam.answers);
+        }
+
+        // Log page loaded event
+        this.logActivity('exam_page_loaded');
+
+        // Setup activity monitoring after exam is loaded
+        this.setupActivityMonitoring();
       },
       error: (err) => {
         this.error.set(err.message);
       },
     });
+
+    // Fetch user sessions
+    this.examActivityService.fetchUserSessions(takenExamId);
   }
 
-  ngOnInit(): void {
-    const takenExamId = this.route.snapshot.params['takenExamId'];
+  private setupActivityMonitoring(): void {
+    // Only set up if exam is not submitted
+    if (this.wasSubmitted()) return;
 
-    this.getTakenExam();
+    // Visibility change (tab switching, minimizing)
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
 
-    // set the currentSession.
-    this.takenExamSvc
-      .getOne(takenExamId)
-      .pipe(
-        concatMap((res) => {
-          this.takenExamSig.set(res.takenExam);
-          if (res.takenExam.answers?.length) {
-            this.setAnswers(res.takenExam.answers);
-          }
-          return this.studentExamItemService.getExamItems(
-            res.takenExam.exam_id
-          );
-        })
-      )
-      .subscribe({
-        next: (examItems) => {
-          this.examItems.set(examItems);
-          this.examActivityService.currentSession.set({
-            studentId: this.takenExamSig()?.user_id || 0,
-            takenExamId: this.takenExamSig()?.id || 0,
-            isActive: this.takenExamSig()?.submitted_at === null,
-          });
-
-          console.log(this.examActivityService.currentSession());
-        },
-      });
-
-    // this.examActivityService.fetchUserSessions(takenExamId);
-    // // Track page navigation/reload
-    // this.examActivityService.logActivity('exam_page_loaded').subscribe();
-    // document.addEventListener('visibilitychange', this.onVisibilityChange);
-    // window.addEventListener('blur', this.onWindowBlur);
-    // window.addEventListener('focus', this.onWindowFocus);
-    // // Log initial state
-    // this.onVisibilityChange();
-
-    this.takenExamSvc.getOne(takenExamId).subscribe({
-      next: (res) => {
-        this.takenExamSig.set(res.takenExam);
-
-        if (res.takenExam.answers?.length) {
-          this.setAnswers(res.takenExam.answers);
-        }
-      },
-    });
+    // Window focus/blur (switching between applications)
+    window.addEventListener('blur', this.handleWindowBlur);
+    window.addEventListener('focus', this.handleWindowFocus);
   }
 
   private setAnswers(answers: ITakenExamAnswer[]) {
@@ -261,16 +232,16 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   }
 
   submit() {
-    if (this.wasSubmitted()) return;
+    if (this.wasSubmitted() || !this.takenExam() || this.submitting()) return;
 
-    if (!this.attemptId() || this.submitting()) return;
-
-    // Log submission attempt with completion stats
+    const takenExam = this.takenExam()!;
     const totalQuestions = this.examItems().length;
     const answeredCount = this.answeredCount();
-    this.examActivityService.logActivity(
+
+    // Log submission attempt
+    this.logActivity(
       'exam_submit_attempted',
-      `Attempting to submit exam: ${answeredCount}/${totalQuestions} questions answered (${Math.round(
+      `${answeredCount}/${totalQuestions} questions answered (${Math.round(
         (answeredCount / totalQuestions) * 100
       )}% complete)`
     );
@@ -281,6 +252,7 @@ export class CreateTakenExam implements OnInit, OnDestroy {
       return;
     }
 
+    // Save pending essay answers before submission
     const ops = pendingIds.map((id) => {
       const handle = this.essayDebounceHandles[id];
       if (handle) clearTimeout(handle);
@@ -288,11 +260,12 @@ export class CreateTakenExam implements OnInit, OnDestroy {
       if (!item) return of(null);
       const value = this.answers()[id];
       return this.http.post(
-        `http://127.0.0.1:8000/api/student/taken-exams/${this.attemptId()}/answers`,
+        `${environment.apiBaseUrl}/student/taken-exams/${takenExam.id}/answers`,
         { exam_item_id: id, type: item.type, answer: value }
       );
     });
-    this.essayDebounceHandles = {} as any;
+
+    this.essayDebounceHandles = {};
     forkJoin(ops).subscribe({
       next: () => this.persistSubmit(),
       error: () => this.persistSubmit(),
@@ -300,29 +273,63 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Stop exam activity monitoring when component is destroyed
+    // Clean up event listeners
+    document.removeEventListener(
+      'visibilitychange',
+      this.handleVisibilityChange
+    );
+    window.removeEventListener('blur', this.handleWindowBlur);
+    window.removeEventListener('focus', this.handleWindowFocus);
+
+    // Stop exam session
     this.examActivityService.stopExamSession();
-    document.removeEventListener('visibilitychange', this.onVisibilityChange);
-    window.removeEventListener('blur', this.onWindowBlur);
-    window.removeEventListener('focus', this.onWindowFocus);
+  }
+
+  // Simplified visibility and focus handlers
+  private handleVisibilityChange = (): void => {
+    if (this.wasSubmitted()) return;
+
+    const eventType = document.hidden ? 'tab_hidden' : 'tab_visible';
+    this.logActivity(eventType);
+  };
+
+  private handleWindowBlur = (): void => {
+    if (this.wasSubmitted()) return;
+    this.logActivity('window_blur');
+  };
+
+  private handleWindowFocus = (): void => {
+    if (this.wasSubmitted()) return;
+    this.logActivity('window_focus');
+  };
+
+  // Centralized activity logging
+  private logActivity(eventType: string, details?: string): void {
+    const takenExam = this.takenExam();
+    if (!takenExam) return;
+
+    this.examActivityService
+      .logActivity(takenExam.id, takenExam.user_id, eventType, details)
+      .subscribe();
   }
 
   private persistSubmit() {
-    if (!this.attemptId()) return;
+    const takenExam = this.takenExam();
+    if (!takenExam) return;
+
     this.submitting.set(true);
 
     // Log exam submission
-    this.examActivityService.logExamSubmitted();
+    this.logActivity('exam_submitted');
 
     this.http
       .post(
-        `http://127.0.0.1:8000/api/student/taken-exams/${this.attemptId()}/submit`,
+        `${environment.apiBaseUrl}/student/taken-exams/${takenExam.id}/submit`,
         {}
       )
       .subscribe({
         next: () => {
           this.submitting.set(false);
-          // Stop monitoring after successful submission
           this.examActivityService.stopExamSession();
           this.router.navigate(['/student/exams']);
         },
@@ -334,44 +341,20 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   }
 
   private upsertAnswer(examItem: IExamItem, value: any) {
-    const attemptId = this.attemptId();
-    if (!attemptId) return;
-    // Single POST upsert (backend updateOrCreate)
+    const takenExam = this.takenExam();
+    if (!takenExam) return;
+
     this.http
       .post(
-        `http://127.0.0.1:8000/api/student/taken-exams/${attemptId}/answers`,
-        { exam_item_id: examItem.id, type: examItem.type, answer: value }
+        `${environment.apiBaseUrl}/student/taken-exams/${takenExam.id}/answers`,
+        {
+          exam_item_id: examItem.id,
+          type: examItem.type,
+          answer: value,
+        }
       )
       .subscribe({ error: () => {} });
   }
-
-  windowActiveSig = signal<boolean>(true);
-
-  // Handlers as class properties to allow removing listeners
-  private onVisibilityChange = () => {
-    const isActive = !document.hidden;
-    this.windowActiveSig.set(isActive);
-    // Optional: broadcast a custom event for other parts of the app
-    window.dispatchEvent(
-      new CustomEvent(isActive ? 'app:window-active' : 'app:window-inactive')
-    );
-    // Log result
-    console.log(
-      `[App] Window ${isActive ? 'active' : 'inactive'} (visibilitychange)`
-    );
-  };
-
-  private onWindowBlur = () => {
-    this.windowActiveSig.set(false);
-    window.dispatchEvent(new CustomEvent('app:window-inactive'));
-    console.log('[App] Window inactive (blur)');
-  };
-
-  private onWindowFocus = () => {
-    this.windowActiveSig.set(true);
-    window.dispatchEvent(new CustomEvent('app:window-active'));
-    console.log('[App] Window active (focus)');
-  };
 }
 
 export interface ITakenExam {
@@ -410,4 +393,83 @@ export interface ITakenExamAnswer {
   points_awarded?: number | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface TakenExam {
+  id: number;
+  exam_id: number;
+  type: string;
+  user_id: number;
+  started_at: Date;
+  submitted_at: null;
+  total_points: number;
+  created_at: Date;
+  updated_at: Date;
+  exam: Exam;
+  answers: Answer[];
+}
+
+export interface Answer {
+  id: number;
+  taken_exam_id: number;
+  exam_item_id: number;
+  type: string;
+  answer: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Exam {
+  id: number;
+  title: string;
+  description: string;
+  starts_at: Date;
+  ends_at: Date;
+  year: string;
+  sections: string[];
+  status: string;
+  total_points: number;
+  tos: To[];
+  created_at: Date;
+  updated_at: Date;
+  items: Item[];
+}
+
+export interface Item {
+  id: number;
+  exam_id: number;
+  type: string;
+  question: string;
+  points: number;
+  expected_answer: null | string;
+  answer: null | string;
+  options: Option[] | null;
+  pairs: null;
+  created_at: Date;
+  updated_at: Date;
+  level: string;
+}
+
+export interface Option {
+  text: string;
+  correct: boolean;
+}
+
+export interface To {
+  topic: string;
+  outcomes: any[];
+  time_allotment: number;
+  no_of_items: number;
+  distribution: Distribution;
+}
+
+export interface Distribution {
+  easy: Difficult;
+  moderate: Difficult;
+  difficult: Difficult;
+}
+
+export interface Difficult {
+  allocation: number;
+  placement: any[];
 }

@@ -20,7 +20,7 @@ export class TakenExamService {
 
   getOne(takenExamId: number) {
     return this.http
-      .get<{ takenExam: TakenExam }>(
+      .get<{ takenExam: any }>(
         `${environment.apiBaseUrl}/student/taken-exams/${takenExamId}`
       )
       .pipe(tap((res) => this.takenExam.set(res.takenExam)));
