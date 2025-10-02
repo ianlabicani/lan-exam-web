@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
-import { ITakenExam } from '../create-taken-exam';
+import { TakenExam } from '../../../../models/exam';
 
 @Component({
   selector: 'app-exam-header',
@@ -9,5 +9,5 @@ import { ITakenExam } from '../create-taken-exam';
   styleUrl: './exam-header.css',
 })
 export class ExamHeader {
-  takenExamSig = input.required<ITakenExam>();
+  takenExam = input.required<TakenExam>();
 }

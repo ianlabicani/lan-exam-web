@@ -24,6 +24,8 @@ export interface TakenExam {
   total_points: number;
   created_at: Date;
   updated_at: Date;
+  answers: any;
+  exam: Exam | null;
 }
 
 export interface To {

@@ -1,6 +1,5 @@
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { StudentTakenExamService } from '../../../services/student-taken-exam.service';
 import { StudentExamItemService } from '../../../services/student-exam-item.service';
 import { concatMap } from 'rxjs';
 import { ExamHeader } from '../create-taken-exam/exam-header/exam-header';
@@ -10,6 +9,8 @@ import {
   ITakenExam,
   ITakenExamAnswer,
 } from '../create-taken-exam/create-taken-exam';
+import { TakenExamService } from '../../../services/taken-exam.service';
+import { TakenExam } from '../../../models/exam';
 
 @Component({
   selector: 'app-view-taken-exam',
@@ -20,17 +21,17 @@ import {
 })
 export class ViewTakenExam implements OnInit {
   private route = inject(ActivatedRoute);
-  private takenSvc = inject(StudentTakenExamService);
+  private takenExamSvc = inject(TakenExamService);
   private itemSvc = inject(StudentExamItemService);
 
-  takenExamSig = signal<ITakenExam | null>(null);
+  takenExamSig = signal<TakenExam | null>(null);
   examItems = signal<IExamItem[]>([]);
   answers = signal<Record<string, any>>({});
 
   ngOnInit(): void {
     const takenExamId = this.route.snapshot.params['takenExamId'];
 
-    this.takenSvc
+    this.takenExamSvc
       .getOne(takenExamId as unknown as number)
       .pipe(
         concatMap((res) => {

@@ -9,10 +9,8 @@ import {
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { concatMap, of, forkJoin } from 'rxjs';
-import { Exam } from '../../../../teacher/services/exam.service';
+import { Exam, ExamService } from '../../../../teacher/services/exam.service';
 import { StudentExamItemService } from '../../../services/student-exam-item.service';
-import { StudentExamService } from '../../../services/student-exam.service';
-import { StudentTakenExamService } from '../../../services/student-taken-exam.service';
 import {
   ExamActivityService,
   ExamActivityEvent,
@@ -22,6 +20,8 @@ import { ExamProgress } from './exam-progress/exam-progress';
 import { ExamQuestion } from './exam-question/exam-question';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../../../environments/environment.development';
+import { TakenExamService } from '../../../services/taken-exam.service';
+import { TakenExam } from '../../../models/exam';
 
 @Component({
   selector: 'app-create-taken-exam',
@@ -33,8 +33,8 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   router = inject(Router);
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
-  studentTakenExamService = inject(StudentTakenExamService);
-  studentExamService = inject(StudentExamService);
+  takenExamSvc = inject(TakenExamService);
+  studentExamService = inject(ExamService);
   studentExamItemService = inject(StudentExamItemService);
   examActivityService = inject(ExamActivityService);
 
@@ -44,7 +44,7 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   answers = signal<Record<string, any>>({});
   private essayDebounceHandles: Record<string, any> = {};
 
-  takenExamSig = signal<ITakenExam | null>(null);
+  takenExamSig = signal<TakenExam | null>(null);
   wasSubmitted = computed(() => this.takenExamSig()?.submitted_at !== null);
   private attemptId = computed(() => this.takenExamSig()?.id || null);
   examItems = signal<IExamItem[]>([]);
@@ -72,7 +72,7 @@ export class CreateTakenExam implements OnInit, OnDestroy {
 
   getTakenExam() {
     const takenExamId = this.route.snapshot.params['takenExamId'];
-    this.studentTakenExamService.getOne(takenExamId).subscribe({
+    this.takenExamSvc.getOne(takenExamId).subscribe({
       next: (res) => {
         console.log(res);
       },
@@ -88,7 +88,7 @@ export class CreateTakenExam implements OnInit, OnDestroy {
     this.getTakenExam();
 
     // set the currentSession.
-    this.studentTakenExamService
+    this.takenExamSvc
       .getOne(takenExamId)
       .pipe(
         concatMap((res) => {
@@ -123,7 +123,7 @@ export class CreateTakenExam implements OnInit, OnDestroy {
     // // Log initial state
     // this.onVisibilityChange();
 
-    this.studentTakenExamService.getOne(takenExamId).subscribe({
+    this.takenExamSvc.getOne(takenExamId).subscribe({
       next: (res) => {
         this.takenExamSig.set(res.takenExam);
 

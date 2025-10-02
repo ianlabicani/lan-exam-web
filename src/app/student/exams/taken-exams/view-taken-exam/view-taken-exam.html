@@ -3,7 +3,7 @@
 
 @if (takenExam) {
 	<div class="mx-auto max-w-4xl p-6 space-y-6 bg-white/70 backdrop-blur rounded-xl shadow-sm border border-slate-200">
-		<app-exam-header [takenExamSig]="takenExam">
+		<app-exam-header [takenExam]="takenExam">
 			<div class="text-sm text-slate-600">
 				Submitted answers: {{ takenExam?.answers?.length || 0 }}
 			</div>
