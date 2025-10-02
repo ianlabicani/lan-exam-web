@@ -34,7 +34,7 @@ export class ViewTakenExam implements OnInit {
       .getOne(takenExamId as unknown as number)
       .pipe(
         concatMap((res) => {
-          const taken = res.data;
+          const taken = res.takenExam;
           this.takenExamSig.set(taken);
           if (taken.answers?.length) this.setAnswers(taken.answers);
           return this.itemSvc.getExamItems(taken.exam_id);

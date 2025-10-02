@@ -21,6 +21,7 @@ import { ExamHeader } from './exam-header/exam-header';
 import { ExamProgress } from './exam-progress/exam-progress';
 import { ExamQuestion } from './exam-question/exam-question';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../../../environments/environment.development';
 
 @Component({
   selector: 'app-create-taken-exam',
@@ -69,39 +70,68 @@ export class CreateTakenExam implements OnInit, OnDestroy {
     };
   });
 
+  getTakenExam() {
+    const takenExamId = this.route.snapshot.params['takenExamId'];
+    this.studentTakenExamService.getOne(takenExamId).subscribe({
+      next: (res) => {
+        console.log(res);
+      },
+      error: (err) => {
+        this.error.set(err.message);
+      },
+    });
+  }
+
   ngOnInit(): void {
     const takenExamId = this.route.snapshot.params['takenExamId'];
 
-    this.examActivityService.fetchUserSessions(takenExamId);
-    // Track page navigation/reload
-    this.examActivityService.logActivity('exam_page_loaded');
+    this.getTakenExam();
 
-    this.studentTakenExamService.getOne(takenExamId).subscribe({
-      next: (res) => {
-        this.takenExamSig.set(res.data);
-
-        if (res.data.answers?.length) {
-          this.setAnswers(res.data.answers);
-        }
-      },
-    });
-
+    // set the currentSession.
     this.studentTakenExamService
       .getOne(takenExamId)
       .pipe(
         concatMap((res) => {
-          this.takenExamSig.set(res.data);
-          if (res.data.answers?.length) {
-            this.setAnswers(res.data.answers);
+          this.takenExamSig.set(res.takenExam);
+          if (res.takenExam.answers?.length) {
+            this.setAnswers(res.takenExam.answers);
           }
-          return this.studentExamItemService.getExamItems(res.data.exam_id);
+          return this.studentExamItemService.getExamItems(
+            res.takenExam.exam_id
+          );
         })
       )
       .subscribe({
         next: (examItems) => {
           this.examItems.set(examItems);
+          this.examActivityService.currentSession.set({
+            studentId: this.takenExamSig()?.user_id || 0,
+            takenExamId: this.takenExamSig()?.id || 0,
+            isActive: this.takenExamSig()?.submitted_at === null,
+          });
+
+          console.log(this.examActivityService.currentSession());
         },
       });
+
+    // this.examActivityService.fetchUserSessions(takenExamId);
+    // // Track page navigation/reload
+    // this.examActivityService.logActivity('exam_page_loaded').subscribe();
+    // document.addEventListener('visibilitychange', this.onVisibilityChange);
+    // window.addEventListener('blur', this.onWindowBlur);
+    // window.addEventListener('focus', this.onWindowFocus);
+    // // Log initial state
+    // this.onVisibilityChange();
+
+    this.studentTakenExamService.getOne(takenExamId).subscribe({
+      next: (res) => {
+        this.takenExamSig.set(res.takenExam);
+
+        if (res.takenExam.answers?.length) {
+          this.setAnswers(res.takenExam.answers);
+        }
+      },
+    });
   }
 
   private setAnswers(answers: ITakenExamAnswer[]) {
@@ -161,8 +191,6 @@ export class CreateTakenExam implements OnInit, OnDestroy {
     this.answers.set({ ...this.answers(), [item.id]: value });
     this.upsertAnswer(item, value);
   }
-
-  refreshSessions() {}
 
   toggleEventPanel() {
     this.showEventPanel.update((show) => !show);
@@ -274,6 +302,9 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     // Stop exam activity monitoring when component is destroyed
     this.examActivityService.stopExamSession();
+    document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    window.removeEventListener('blur', this.onWindowBlur);
+    window.removeEventListener('focus', this.onWindowFocus);
   }
 
   private persistSubmit() {
@@ -313,6 +344,34 @@ export class CreateTakenExam implements OnInit, OnDestroy {
       )
       .subscribe({ error: () => {} });
   }
+
+  windowActiveSig = signal<boolean>(true);
+
+  // Handlers as class properties to allow removing listeners
+  private onVisibilityChange = () => {
+    const isActive = !document.hidden;
+    this.windowActiveSig.set(isActive);
+    // Optional: broadcast a custom event for other parts of the app
+    window.dispatchEvent(
+      new CustomEvent(isActive ? 'app:window-active' : 'app:window-inactive')
+    );
+    // Log result
+    console.log(
+      `[App] Window ${isActive ? 'active' : 'inactive'} (visibilitychange)`
+    );
+  };
+
+  private onWindowBlur = () => {
+    this.windowActiveSig.set(false);
+    window.dispatchEvent(new CustomEvent('app:window-inactive'));
+    console.log('[App] Window inactive (blur)');
+  };
+
+  private onWindowFocus = () => {
+    this.windowActiveSig.set(true);
+    window.dispatchEvent(new CustomEvent('app:window-active'));
+    console.log('[App] Window active (focus)');
+  };
 }
 
 export interface ITakenExam {

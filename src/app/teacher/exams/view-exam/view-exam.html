@@ -1,7 +1,11 @@
 @let examSig = viewExamSvc.exam();
-@let loading = loadingSig();
+@let loadingSig = loading();
 @let errorMsgSig = errorMsg();
 
+
+@if (loadingSig) {
+  <span class="p-10 text-center text-gray-500">Loading exam...</span>
+}
 
 @if (errorMsgSig) {
   <div class="fixed right-4 top-4 z-50 w-[calc(100%-2rem)] max-w-md pointer-events-none">
@@ -20,121 +24,117 @@
   </div>
 }
 
-@if (loading) {
-<span class="p-10 text-center text-gray-500">Loading exam...</span>
-} @else {
+@if(examSig) {
   <div class="space-y-6 container mx-auto mt-10 px-6">
-  @if(examSig) {
     <div class="flex justify-between">
       <a routerLink="/teacher/exams" class="px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium">
         <fa-icon [icon]="faArrowLeft" class="mr-1"></fa-icon>
         Back
       </a>
       @if(examSig.status === 'draft') {
-      <span class="px-2 py-1 bg-gray-100 rounded font-medium">Draft (editable)</span>
+        <span class="px-2 py-1 bg-gray-100 rounded font-medium">Draft (editable)</span>
       } @else {
-      <span class="px-2 py-1 bg-gray-100 rounded font-medium">Read Only</span>
+        <span class="px-2 py-1 bg-gray-100 rounded font-medium">Read Only</span>
       }
     </div>
 
-  <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-    <div>
-      <div class="flex items-center gap-3 mb-2">
-        <h1 class="text-2xl font-bold text-gray-900">{{ examSig.title }}</h1>
-        <span
-        class="px-2 py-0.5 text-xs font-semibold rounded-full tracking-wide uppercase"
-        [ngClass]="
-        {
-          active: 'bg-blue-100 text-blue-700',
-          published: 'bg-green-100 text-green-700',
-          draft: 'bg-gray-100 text-gray-700',
-          archived: 'bg-yellow-100 text-yellow-700',
+  <div class="bg-white rounded-lg shadow-sm border p-6 space-y-6">
+    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <h1 class="text-2xl font-bold text-gray-900">{{ examSig.title }}</h1>
+          <span
+            class="px-2 py-0.5 text-xs font-semibold rounded-full tracking-wide uppercase"
+            [ngClass]="{
+              'bg-blue-100 text-blue-700': examSig.status === 'active',
+              'bg-green-100 text-green-700': examSig.status === 'published',
+              'bg-gray-100 text-gray-700': examSig.status === 'draft',
+              'bg-yellow-100 text-yellow-700': examSig.status === 'archived'
+            }">
+            {{ examSig.status }}
+          </span>
+        </div>
+        <p class="text-sm text-gray-600 max-w-prose">{{ examSig.description }}</p>
+        <div class="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
+          <span>Starts: {{ examSig.starts_at | date:'medium' }}</span>
+          <span>Ends: {{ examSig.ends_at | date:'medium' }}</span>
+          <span>Created: {{ examSig.created_at | date:'short' }}</span>
+          <span>Updated: {{ examSig.updated_at | date:'short' }}</span>
+          <span>Year {{ examSig.year }}</span>
+          <span class="flex items-center gap-1">
+            <span>Sections:</span>
+            @if (examSig.sections?.length) {
+              <span class="flex flex-wrap gap-1">
+                @for (s of examSig.sections; track $index) {
+                  <span
+                    class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 uppercase">
+                    {{ s }}
+                  </span>
+                }
+              </span>
+            } @else if (examSig.section) {
+              <span
+                class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 uppercase">
+                {{ examSig.section }}
+              </span>
+            }
+          </span>
+        </div>
+        <p class="mt-2 text-sm font-medium text-gray-700">
+          Points: <span class="font-semibold">{{ examSig.total_points }}</span>
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 self-start">
+        @if (examSig.status == 'draft') {
+          <button
+            type="button"
+            class="px-4 py-2 rounded bg-green-600 text-white text-sm font-medium disabled:opacity-50"
+            [ngClass]="{ 'opacity-50 cursor-not-allowed': examSig.total_points <= 0 }"
+            [disabled]="loadingSig || examSig.total_points <= 0"
+            (click)="updateStatus(examSig.id, 'active')">
+            Activate Exam
+          </button>
         }
-        ">
-          {{ examSig.status }}
-        </span>
-      </div>
-      <p class="text-sm text-gray-600 max-w-prose">{{ examSig.description }}</p>
-      <div class="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
-        <span>Starts: {{ examSig.starts_at | date:'medium' }}</span>
-        <span>Ends: {{ examSig.ends_at | date:'medium' }}</span>
-        <span>Created: {{ examSig.created_at | date:'short' }}</span>
-        <span>Updated: {{ examSig.updated_at | date:'short' }}</span>
-        <span>Year {{ examSig.year }}</span>
-        <span class="flex items-center gap-1">
-          <span>Sections:</span>
-          @if (examSig.sections?.length) {
-            <span class="flex flex-wrap gap-1">
-              @for (s of examSig.sections; track $index) {
-                <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 uppercase">{{ s }}</span>
-              }
-            </span>
-          } @else if (examSig.section) {
-            <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 uppercase">{{ examSig.section }}</span>
-          }
-        </span>
-      </div>
-      <p>Points {{ examSig.total_points }}</p>
-    </div>
-    <div class="flex items-center gap-2 self-start">
-      @if (examSig.status == 'draft' ) {
-      <div>
-        <button
-          type="button"
-          class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 text-sm font-medium disabled:opacity-50"
-          [ngClass]="{ 'opacity-50 cursor-not-allowed': examSig.total_points <= 0 }"
-          [disabled]="loading || examSig.total_points <= 0"
-          (click)="updateStatus(examSig.id, 'active')"
-        >
-          Activate Exam
-        </button>
-      </div>
-    }
 
-    @if (examSig.status == 'active') {
-      <div>
-        <button
-          type="button"
-          class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 text-sm font-medium disabled:opacity-50"
-          [disabled]="loading"
-          (click)="updateStatus(examSig.id, 'published')"
-        >
-          Publish Exam
-        </button>
-      </div>
-    }
+        @if (examSig.status == 'active') {
+          <button
+            type="button"
+            class="px-4 py-2 rounded bg-green-600 text-white text-sm font-medium disabled:opacity-50"
+            [disabled]="loadingSig"
+            (click)="updateStatus(examSig.id, 'published')">
+            Publish Exam
+          </button>
+        }
 
-    @if (examSig.status == 'published') {
-      <div>
-        <button
-          type="button"
-          class="px-4 py-2 rounded bg-red-600 text-white hover:bg-green-700 text-sm font-medium disabled:opacity-50"
-          [disabled]="loading"
-          (click)="updateStatus(examSig.id, 'archived')"
-        >
-          Archive Exam
-        </button>
+        @if (examSig.status == 'published') {
+          <button
+            type="button"
+            class="px-4 py-2 rounded bg-red-600 text-white text-sm font-medium disabled:opacity-50"
+            [disabled]="loadingSig"
+            (click)="updateStatus(examSig.id, 'archived')">
+            Archive Exam
+          </button>
+        }
       </div>
-    }
     </div>
   </div>
 
   <div class="flex gap-4 mt-6">
     @if (examSig.status === 'published') {
-    <a [routerLink]="['./items']" class="px-4 py-2 rounded bg-green-100 hover:bg-green-200 text-sm font-medium">
-      View Items
-    </a>
-
+      <a [routerLink]="['./items']" class="px-4 py-2 rounded bg-green-100 hover:bg-green-200 text-sm font-medium">
+        View Items
+      </a>
     }
 
     @if (examSig.status === 'published') {
-    <a [routerLink]="['./takers']" class="px-4 py-2 rounded bg-blue-100 hover:bg-blue-200 text-sm font-medium" >
-      View Takers
-    </a>
+      <a [routerLink]="['./takers']" class="px-4 py-2 rounded bg-blue-100 hover:bg-blue-200 text-sm font-medium" >
+        View Takers
+      </a>
     }
   </div>
 
-  <!-- TOS Display -->
   @if (examSig?.tos?.length) {
     <div class="mt-8 space-y-4">
       <div class="rounded-lg border bg-white p-4">
@@ -205,19 +205,8 @@
     </div>
   }
 
-  <div class="space-y-8">
-    <router-outlet/>
+    <div class="space-y-8">
+      <router-outlet/>
+    </div>
   </div>
-  }
-
-  @if(!examSig) {
-  <div class="p-10 border border-dashed rounded-lg text-center bg-white">
-    <p class="text-gray-600 font-medium mb-2">Exam not found</p>
-    <a routerLink="/teacher/exams" class="text-sm text-blue-600 hover:underline">
-      Return to exams list
-    </a>
-  </div>
-  }
-
-</div>
 }

@@ -18,9 +18,7 @@ export interface ExamSession {
   isActive: boolean;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class ExamActivityService {
   private http = inject(HttpClient);
 
@@ -53,11 +51,7 @@ export class ExamActivityService {
       .subscribe({
         next: (response) => {
           this.examActivityEvents.set(response.data);
-          this.currentSession.set({
-            takenExamId,
-            studentId: response.data[0]?.student_id || 0,
-            isActive: true,
-          });
+          console.log(response.data);
         },
         error: (error) => {
           console.error('Failed to fetch user sessions:', error);

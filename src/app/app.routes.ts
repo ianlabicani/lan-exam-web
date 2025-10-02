@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { isTeacherGuard } from './teacher/guards/is-teacher-guard';
 import { isStudentGuard } from './student/guards/is-student.guard';
 import { teacherServices } from './teacher/services/teacher.services';
+import studentProviders from './student/services/student.providers';
+import { routes as studentRoutes } from './student/student.routes';
 
 export const routes: Routes = [
   {
@@ -22,11 +24,5 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./teacher/teacher.routes').then((m) => m.routes),
   },
-  {
-    path: 'student',
-    canActivate: [isStudentGuard],
-    loadComponent: () => import('./student/student').then((c) => c.Student),
-    loadChildren: () =>
-      import('./student/student.routes').then((m) => m.routes),
-  },
+  ...studentRoutes,
 ];

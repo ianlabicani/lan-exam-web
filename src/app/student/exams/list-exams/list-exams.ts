@@ -1,9 +1,11 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ITakenExamAnswer } from '../../services/student-exam.service';
-import { Exam } from '../../../teacher/services/exam.service';
+
 import { Router, RouterLink } from '@angular/router';
 import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { ExamService } from '../../services/exam.service';
+import { Exam } from '../../models/exam';
 
 @Component({
   selector: 'app-list-exams',
@@ -14,38 +16,29 @@ import { HttpClient } from '@angular/common/http';
 export class ListExams implements OnInit {
   router = inject(Router);
   http = inject(HttpClient);
+  examSvc = inject(ExamService);
 
-  exams = signal<NewExam[]>([]);
+  exams = signal<Exam[]>([]);
 
   ngOnInit(): void {
     this.getExams();
   }
 
   getExams() {
-    return this.http
-      .get<{ data: NewExam[] }>('http://127.0.0.1:8000/api/student/exams')
-      .subscribe({
-        next: (res) => {
-          this.exams.set(res.data);
-        },
-      });
+    this.examSvc.getAll().subscribe({
+      next: (res) => {
+        this.exams.set(res.data);
+        console.log(res);
+      },
+    });
   }
 
   takeExam(examId: number) {
-    this.http
-      .post<{ data: NewTakenExam }>(
-        `http://127.0.0.1:8000/api/student/exams/${examId}/take`,
-        {}
-      )
-      .subscribe({
-        next: (res) => {
-          this.router.navigate([
-            '/student/taken-exams',
-            res.data.id,
-            'continue',
-          ]);
-        },
-      });
+    this.examSvc.takeExam(examId).subscribe({
+      next: (res) => {
+        this.router.navigate(['/student/taken-exams', res.data.id, 'continue']);
+      },
+    });
   }
 
   cardIcon(exam: Exam): { bg: string; icon: string; color: string } {
@@ -72,52 +65,4 @@ export class ListExams implements OnInit {
         };
     }
   }
-}
-
-export interface NewExam {
-  id: number;
-  title: string;
-  description: string;
-  starts_at: Date;
-  ends_at: Date;
-  year: string;
-  sections: string[];
-  status: string;
-  total_points: number;
-  tos: To[];
-  created_at: Date;
-  updated_at: Date;
-  taken_exam?: NewTakenExam;
-}
-
-export interface To {
-  topic: string;
-  outcomes: string[];
-  time_allotment: number;
-  no_of_items: number;
-  distribution: Distribution;
-}
-
-export interface Distribution {
-  easy: Difficult;
-  moderate: Difficult;
-  difficult: Difficult;
-}
-
-export interface Difficult {
-  allocation: number;
-  placement: string[];
-}
-
-interface NewTakenExam {
-  id: number;
-  exam_id: number;
-  user_id: number;
-  started_at: string;
-  submitted_at?: string | null;
-  total_points?: number;
-  updated_at: string;
-  created_at: string;
-  answers?: ITakenExamAnswer[];
-  exam?: Exam;
 }

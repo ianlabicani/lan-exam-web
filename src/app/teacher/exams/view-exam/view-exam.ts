@@ -23,7 +23,7 @@ export class ViewExam implements OnInit {
   viewExamSvc = inject(ViewExamService);
   route = inject(ActivatedRoute);
 
-  loadingSig = signal(true);
+  loading = signal(true);
   errorMsg = signal<string | null>(null);
 
   faArrowLeft = faArrowLeft;
@@ -57,15 +57,15 @@ export class ViewExam implements OnInit {
   }
 
   getExam(id: number) {
-    this.loadingSig.set(true);
+    this.loading.set(true);
     this.viewExamSvc.show(id).subscribe({
       next: (res) => {
-        this.loadingSig.set(false);
+        this.loading.set(false);
         this.viewExamSvc.exam.set(res.data);
       },
       error: (err) => {
         this.errorMsg.set(err?.error?.message || 'Failed to load exam');
-        this.loadingSig.set(false);
+        this.loading.set(false);
       },
     });
   }
