@@ -8,6 +8,14 @@ import {
   faFileAlt,
   faPlayCircle,
   faClipboard,
+  faHourglassHalf,
+  faEdit,
+  faArchive,
+  faSpinner,
+  faInfoCircle,
+  faGraduationCap,
+  faClock,
+  faTag,
 } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
@@ -25,18 +33,28 @@ export class ListExams implements OnInit {
   fasFileAlt = faFileAlt;
   fasPlayCircle = faPlayCircle;
   fasClipboard = faClipboard;
+  faHourglassHalf = faHourglassHalf;
+  fasEdit = faEdit;
+  fasArchive = faArchive;
+  faSpinner = faSpinner;
+  fasInfoCircle = faInfoCircle;
+  fasGraduationCap = faGraduationCap;
+  fasClock = faClock;
+  fasTag = faTag;
 
   exams = signal<Exam[]>([]);
+  isLoading = signal(true);
 
   ngOnInit(): void {
     this.getExams();
   }
 
   getExams() {
+    this.isLoading.set(true);
     this.examSvc.getAll().subscribe({
       next: (res) => {
         this.exams.set(res.data);
-        console.log(res);
+        this.isLoading.set(false);
       },
     });
   }
