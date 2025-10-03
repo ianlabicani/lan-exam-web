@@ -3,6 +3,7 @@
 @let events = sessionEvents();
 @let summary = eventSummary();
 @let timeRemainingSig = timeRemaining();
+@let timeProgressPercentageSig = timeProgressPercentage();
 
 <!-- Activity Monitoring Toggle Button -->
 @if (takenExamSig?.submitted_at == null) {
@@ -166,14 +167,14 @@
         <div class="flex items-center gap-3">
           <span class="text-lg font-bold"
                 [ngClass]="{
-                  'text-green-600': timeProgressPercentage() < 50,
-                  'text-amber-600': timeProgressPercentage() >= 50 && timeProgressPercentage() < 80,
-                  'text-red-600': timeProgressPercentage() >= 80
+                  'text-green-600': timeProgressPercentageSig < 50,
+                  'text-amber-600': timeProgressPercentageSig >= 50 && timeProgressPercentageSig < 80,
+                  'text-red-600': timeProgressPercentageSig >= 80
                 }">
             {{ timeRemainingDisplay() }}
           </span>
           <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
-            {{ timeProgressPercentage() | number:'1.0-0' }}%
+            {{ timeProgressPercentageSig | number:'1.0-0' }}%
           </span>
         </div>
       </div>
@@ -181,11 +182,11 @@
       <!-- Progress Bar -->
       <div class="relative w-full h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
         <div class="absolute top-0 left-0 h-full transition-all duration-1000 ease-linear rounded-full bg-gradient-to-r from-green-400 to-green-600"
-             [style.width.%]="timeProgressPercentage()"
+             [style.width.%]="timeProgressPercentageSig"
              [ngClass]="{
-               'from-green-400 to-green-600': timeProgressPercentage() < 50,
-               'from-amber-400 to-amber-600': timeProgressPercentage() >= 50 && timeProgressPercentage() < 80,
-               'from-red-400 to-red-600 animate-pulse': timeProgressPercentage() >= 80
+               'from-green-400 to-green-600': timeProgressPercentageSig < 50,
+               'from-amber-400 to-amber-600': timeProgressPercentageSig >= 50 && timeProgressPercentageSig < 80,
+               'from-red-400 to-red-600 animate-pulse': timeProgressPercentageSig >= 80
              }">
           <!-- Shimmer effect -->
           <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-shimmer"></div>
