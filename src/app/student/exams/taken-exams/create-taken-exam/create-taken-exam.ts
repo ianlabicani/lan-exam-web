@@ -39,13 +39,14 @@ export class CreateTakenExam implements OnInit, OnDestroy {
 
   submitting = signal(false);
   error = signal<string | null>(null);
-
   answers = signal<Record<string, any>>({});
-  private essayDebounceHandles: Record<string, any> = {};
-  private countdownInterval?: number;
-
   takenExam = signal<TakenExam | null>(null);
   currentTime = signal(new Date());
+  examItems = signal<IExamItem[]>([]);
+  showEventPanel = signal(false);
+
+  private essayDebounceHandles: Record<string, any> = {};
+  private countdownInterval?: number;
 
   timeRemaining = computed(() => {
     const takenExam = this.takenExam();
@@ -82,61 +83,54 @@ export class CreateTakenExam implements OnInit, OnDestroy {
     const seconds = this.timeRemaining();
     const takenExam = this.takenExam();
 
-    if (!takenExam || !takenExam.exam) return 0;
+    if (!takenExam?.exam) return 0;
 
-    // Calculate based on time elapsed vs total exam duration
     const studentStartTime = new Date(takenExam.started_at);
     const endTime = new Date(takenExam.exam.ends_at);
-
     const totalDurationSeconds = Math.floor(
       (endTime.getTime() - studentStartTime.getTime()) / 1000
     );
 
-    // Prevent division by zero
-    if (totalDurationSeconds <= 0) return 100;
+    // Prevent division by zero or handle expired time
+    if (totalDurationSeconds <= 0 || seconds <= 0)
+      return seconds <= 0 ? 100 : 0;
 
-    // If time has expired, return 100 (bar is full)
-    if (seconds <= 0) return 100;
-
-    // Calculate elapsed time
+    // Calculate elapsed time percentage
     const elapsedSeconds = totalDurationSeconds - seconds;
-
-    // Calculate percentage: (time elapsed / total duration) * 100
     const percentage = (elapsedSeconds / totalDurationSeconds) * 100;
 
-    // Ensure percentage is between 0 and 100
     return Math.max(0, Math.min(100, percentage));
   });
 
-  progressBarColor = computed(() => {
+  // Color state based on progress
+  progressColorState = computed(() => {
     const percentage = this.timeProgressPercentage();
-    // Reversed: < 50% is green (early in exam), > 80% is red (almost done)
-    if (percentage < 50) return 'bg-green-500';
-    if (percentage < 80) return 'bg-amber-500';
-    return 'bg-red-500';
+    if (percentage < 50) return 'green';
+    if (percentage < 80) return 'amber';
+    return 'red';
   });
 
   wasSubmitted = computed(() => this.takenExam()?.submitted_at !== null);
-  examItems = signal<IExamItem[]>([]);
 
   // Activity tracking
   sessionEvents = this.examActivityService.examActivityEvents$;
-  showEventPanel = signal(false);
   eventSummary = computed(() => {
     const events = this.sessionEvents();
+    const tabSwitches = events.filter(
+      (e) => e.event_type === 'tab_hidden' || e.event_type === 'tab_visible'
+    ).length;
+    const windowSwitches = events.filter(
+      (e) => e.event_type === 'window_blur' || e.event_type === 'window_focus'
+    ).length;
+
     return {
       totalEvents: events.length,
-      tabSwitches: events.filter(
-        (e) => e.event_type === 'tab_hidden' || e.event_type === 'tab_visible'
-      ).length,
-      windowSwitches: events.filter(
-        (e) => e.event_type === 'window_blur' || e.event_type === 'window_focus'
-      ).length,
+      tabSwitches,
+      windowSwitches,
       questionsAnswered: events.filter(
         (e) => e.event_type === 'question_answered'
       ).length,
-      lastActivity:
-        events.length > 0 ? events[events.length - 1].created_at : undefined,
+      lastActivity: events[events.length - 1]?.created_at,
     };
   });
 
@@ -295,40 +289,34 @@ export class CreateTakenExam implements OnInit, OnDestroy {
 
   getActivityTrend(): 'active' | 'moderate' {
     const events = this.sessionEvents();
-    const recentEvents = events.filter((e) => {
-      const eventTime = new Date(e.created_at!);
-      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-      return eventTime > fiveMinutesAgo;
-    });
+    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
 
-    const warningCount = recentEvents.filter(
-      (e) => this.getEventSeverity(e.event_type) === 'warning'
-    ).length;
+    const recentWarnings = events.filter((e) => {
+      const eventTime = new Date(e.created_at!).getTime();
+      return (
+        eventTime > fiveMinutesAgo &&
+        this.getEventSeverity(e.event_type) === 'warning'
+      );
+    }).length;
 
-    if (warningCount > 3) return 'moderate';
-    return 'active';
+    return recentWarnings > 3 ? 'moderate' : 'active';
   }
 
   getSessionDuration(): string {
-    const events = this.sessionEvents();
-    const startEvent = events.find(
+    const startEvent = this.sessionEvents().find(
       (e) => e.event_type === 'exam_session_started'
     );
-
     if (!startEvent?.created_at) return '0 minutes';
 
-    const startTime = new Date(startEvent.created_at);
-    const now = new Date();
-    const diffMs = now.getTime() - startTime.getTime();
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffMinutes = Math.floor(
+      (Date.now() - new Date(startEvent.created_at).getTime()) / 60000
+    );
 
-    if (diffMinutes < 60) {
-      return `${diffMinutes} minutes`;
-    } else {
-      const hours = Math.floor(diffMinutes / 60);
-      const minutes = diffMinutes % 60;
-      return `${hours}h ${minutes}m`;
-    }
+    if (diffMinutes < 60) return `${diffMinutes} minutes`;
+
+    const hours = Math.floor(diffMinutes / 60);
+    const minutes = diffMinutes % 60;
+    return `${hours}h ${minutes}m`;
   }
 
   answeredCount() {
@@ -336,9 +324,9 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   }
 
   submit() {
-    if (this.wasSubmitted() || !this.takenExam() || this.submitting()) return;
+    const takenExam = this.takenExam();
+    if (this.wasSubmitted() || !takenExam || this.submitting()) return;
 
-    const takenExam = this.takenExam()!;
     const totalQuestions = this.examItems().length;
     const answeredCount = this.answeredCount();
 
@@ -360,12 +348,13 @@ export class CreateTakenExam implements OnInit, OnDestroy {
     const ops = pendingIds.map((id) => {
       const handle = this.essayDebounceHandles[id];
       if (handle) clearTimeout(handle);
+
       const item = this.examItems().find((i) => String(i.id) === id);
       if (!item) return of(null);
-      const value = this.answers()[id];
+
       return this.http.post(
         `${environment.apiBaseUrl}/student/taken-exams/${takenExam.id}/answers`,
-        { exam_item_id: id, type: item.type, answer: value }
+        { exam_item_id: id, type: item.type, answer: this.answers()[id] }
       );
     });
 
