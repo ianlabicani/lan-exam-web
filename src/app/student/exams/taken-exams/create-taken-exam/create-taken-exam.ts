@@ -34,13 +34,88 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   studentExamItemService = inject(StudentExamItemService);
   examActivityService = inject(ExamActivityLogService);
 
+  // Expose Math for template
+  Math = Math;
+
   submitting = signal(false);
   error = signal<string | null>(null);
 
   answers = signal<Record<string, any>>({});
   private essayDebounceHandles: Record<string, any> = {};
+  private countdownInterval?: number;
 
   takenExam = signal<TakenExam | null>(null);
+  currentTime = signal(new Date());
+
+  timeRemaining = computed(() => {
+    const takenExam = this.takenExam();
+    if (!takenExam || !takenExam.exam) return 0;
+    if (takenExam.submitted_at) return 0;
+
+    const now = this.currentTime();
+    const endTime = new Date(takenExam.exam.ends_at);
+    const diffMs = endTime.getTime() - now.getTime();
+
+    if (diffMs <= 0) return 0;
+    return Math.floor(diffMs / 1000); // Return seconds instead of minutes
+  });
+
+  timeRemainingDisplay = computed(() => {
+    const seconds = this.timeRemaining();
+    if (seconds <= 0) return 'Time expired';
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${secs}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${secs}s`;
+    } else {
+      return `${secs}s`;
+    }
+  });
+
+  // Progress bar calculations
+  timeProgressPercentage = computed(() => {
+    const seconds = this.timeRemaining();
+    const takenExam = this.takenExam();
+
+    if (!takenExam || !takenExam.exam) return 0;
+
+    // Calculate based on time elapsed vs total exam duration
+    const studentStartTime = new Date(takenExam.started_at);
+    const endTime = new Date(takenExam.exam.ends_at);
+
+    const totalDurationSeconds = Math.floor(
+      (endTime.getTime() - studentStartTime.getTime()) / 1000
+    );
+
+    // Prevent division by zero
+    if (totalDurationSeconds <= 0) return 100;
+
+    // If time has expired, return 100 (bar is full)
+    if (seconds <= 0) return 100;
+
+    // Calculate elapsed time
+    const elapsedSeconds = totalDurationSeconds - seconds;
+
+    // Calculate percentage: (time elapsed / total duration) * 100
+    const percentage = (elapsedSeconds / totalDurationSeconds) * 100;
+
+    // Ensure percentage is between 0 and 100
+    return Math.max(0, Math.min(100, percentage));
+  });
+
+  progressBarColor = computed(() => {
+    const percentage = this.timeProgressPercentage();
+    // Reversed: < 50% is green (early in exam), > 80% is red (almost done)
+    if (percentage < 50) return 'bg-green-500';
+    if (percentage < 80) return 'bg-amber-500';
+    return 'bg-red-500';
+  });
+
   wasSubmitted = computed(() => this.takenExam()?.submitted_at !== null);
   examItems = signal<IExamItem[]>([]);
 
@@ -83,6 +158,9 @@ export class CreateTakenExam implements OnInit, OnDestroy {
 
         // Setup activity monitoring after exam is loaded
         this.setupActivityMonitoring();
+
+        // Start countdown timer
+        this.startCountdownTimer();
       },
       error: (err) => {
         this.error.set(err.message);
@@ -91,6 +169,31 @@ export class CreateTakenExam implements OnInit, OnDestroy {
 
     // Fetch user sessions
     this.examActivityService.fetchUserSessions(takenExamId);
+  }
+
+  private startCountdownTimer(): void {
+    // Only start if exam is not submitted
+    if (this.wasSubmitted()) return;
+
+    // Update current time every second
+    this.countdownInterval = window.setInterval(() => {
+      this.currentTime.set(new Date());
+
+      // Auto-submit if time expires
+      if (this.timeRemaining() <= 0 && !this.wasSubmitted()) {
+        this.autoSubmitOnTimeExpired();
+      }
+    }, 1000);
+  }
+
+  private autoSubmitOnTimeExpired(): void {
+    if (this.submitting()) return;
+
+    this.logActivity(
+      'exam_auto_submitted',
+      'Time expired - auto submitting exam'
+    );
+    this.submit();
   }
 
   private setupActivityMonitoring(): void {
@@ -172,6 +275,7 @@ export class CreateTakenExam implements OnInit, OnDestroy {
       exam_session_started: '🎯 Exam Started',
       exam_session_ended: '✅ Exam Ended',
       exam_submitted: '📤 Exam Submitted',
+      exam_auto_submitted: '⏰ Auto-Submitted (Time Expired)',
       tab_hidden: '👁️ Tab Hidden',
       tab_visible: '👁️ Tab Visible',
       window_blur: '🔄 Window Lost Focus',
@@ -280,6 +384,11 @@ export class CreateTakenExam implements OnInit, OnDestroy {
     );
     window.removeEventListener('blur', this.handleWindowBlur);
     window.removeEventListener('focus', this.handleWindowFocus);
+
+    // Clear countdown interval
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
 
     // Stop exam session
     this.examActivityService.stopExamSession();

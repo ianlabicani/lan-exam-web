@@ -2,6 +2,7 @@
 @let examItemsSig = examItems();
 @let events = sessionEvents();
 @let summary = eventSummary();
+@let timeRemainingSig = timeRemaining();
 
 <!-- Activity Monitoring Toggle Button -->
 @if (takenExamSig?.submitted_at == null) {
@@ -149,6 +150,72 @@
       [total]="examItemsSig.length"
     />
   </app-exam-header>
+
+  <!-- Time Remaining Progress Bar -->
+  @if (!wasSubmitted() && timeRemainingSig > 0) {
+    <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+      <!-- Header with Time Display -->
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <svg class="size-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span class="text-sm font-medium text-gray-700">Time Remaining</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-lg font-bold"
+                [ngClass]="{
+                  'text-green-600': timeProgressPercentage() < 50,
+                  'text-amber-600': timeProgressPercentage() >= 50 && timeProgressPercentage() < 80,
+                  'text-red-600': timeProgressPercentage() >= 80
+                }">
+            {{ timeRemainingDisplay() }}
+          </span>
+          <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+            {{ timeProgressPercentage() | number:'1.0-0' }}%
+          </span>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="relative w-full h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+        <div class="absolute top-0 left-0 h-full transition-all duration-1000 ease-linear rounded-full bg-gradient-to-r from-green-400 to-green-600"
+             [style.width.%]="timeProgressPercentage()"
+             [ngClass]="{
+               'from-green-400 to-green-600': timeProgressPercentage() < 50,
+               'from-amber-400 to-amber-600': timeProgressPercentage() >= 50 && timeProgressPercentage() < 80,
+               'from-red-400 to-red-600 animate-pulse': timeProgressPercentage() >= 80
+             }">
+          <!-- Shimmer effect -->
+          <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-shimmer"></div>
+        </div>
+      </div>
+
+      <!-- Warning Message for Low Time -->
+      @if (timeRemainingSig <= 60) {
+        <div class="mt-3 flex items-center gap-2 text-xs text-red-600 bg-red-50 px-3 py-2 rounded-md border border-red-200">
+          <svg class="size-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <span class="font-medium">Less than 1 minute remaining! Exam will auto-submit when time expires.</span>
+        </div>
+      }
+    </div>
+  }
+
+  @if (timeRemainingSig === 0 && !wasSubmitted()) {
+    <div class="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 mb-4">
+      <div class="flex items-center gap-2">
+        <svg class="size-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span class="text-sm font-bold text-red-700">Time has expired! Submitting exam...</span>
+      </div>
+    </div>
+  }
 
   @if (examItemsSig.length) {
   <div class="space-y-6">
