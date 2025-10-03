@@ -14,6 +14,12 @@ import { StudentExamItemService } from '../../../services/student-exam-item.serv
 import { ExamHeader } from './exam-header/exam-header';
 import { ExamProgress } from './exam-progress/exam-progress';
 import { ExamQuestion } from './exam-question/exam-question';
+import { ExamTimer, type ExamTimerData } from './exam-timer/exam-timer';
+import {
+  ActivityMonitor,
+  type ActivityEvent,
+  type ActivitySummary,
+} from './activity-monitor/activity-monitor';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../../../environments/environment.development';
 import { TakenExamService } from '../../../services/taken-exam.service';
@@ -21,7 +27,14 @@ import { ExamActivityLogService } from '../../../services/exam-activity-log.serv
 
 @Component({
   selector: 'app-create-taken-exam',
-  imports: [ExamHeader, ExamProgress, ExamQuestion, CommonModule],
+  imports: [
+    ExamHeader,
+    ExamProgress,
+    ExamQuestion,
+    ExamTimer,
+    ActivityMonitor,
+    CommonModule,
+  ],
   templateUrl: './create-taken-exam.html',
   styleUrl: './create-taken-exam.css',
 })
@@ -41,73 +54,49 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   error = signal<string | null>(null);
   answers = signal<Record<string, any>>({});
   takenExam = signal<TakenExam | null>(null);
-  currentTime = signal(new Date());
   examItems = signal<IExamItem[]>([]);
   showEventPanel = signal(false);
 
   private essayDebounceHandles: Record<string, any> = {};
-  private countdownInterval?: number;
 
-  timeRemaining = computed(() => {
-    const takenExam = this.takenExam();
-    if (!takenExam || !takenExam.exam) return 0;
-    if (takenExam.submitted_at) return 0;
+  // Computed properties for child components
+  examTimerData = computed<ExamTimerData | null>(() => {
+    const exam = this.takenExam();
+    if (!exam?.exam) return null;
 
-    const now = this.currentTime();
-    const endTime = new Date(takenExam.exam.ends_at);
-    const diffMs = endTime.getTime() - now.getTime();
-
-    if (diffMs <= 0) return 0;
-    return Math.floor(diffMs / 1000); // Return seconds instead of minutes
+    return {
+      startedAt: exam.started_at,
+      endsAt: exam.exam.ends_at,
+      submittedAt: exam.submitted_at,
+    };
   });
 
-  timeRemainingDisplay = computed(() => {
-    const seconds = this.timeRemaining();
-    if (seconds <= 0) return 'Time expired';
-
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m ${secs}s`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${secs}s`;
-    } else {
-      return `${secs}s`;
-    }
+  activityEvents = computed<ActivityEvent[]>(() => {
+    return this.sessionEvents().map((e) => ({
+      event_type: e.event_type,
+      details: e.details,
+      created_at: e.created_at,
+    }));
   });
 
-  // Progress bar calculations
-  timeProgressPercentage = computed(() => {
-    const seconds = this.timeRemaining();
-    const takenExam = this.takenExam();
+  activitySummary = computed<ActivitySummary>(() => {
+    const events = this.sessionEvents();
+    const tabSwitches = events.filter(
+      (e) => e.event_type === 'tab_hidden' || e.event_type === 'tab_visible'
+    ).length;
+    const windowSwitches = events.filter(
+      (e) => e.event_type === 'window_blur' || e.event_type === 'window_focus'
+    ).length;
 
-    if (!takenExam?.exam) return 0;
-
-    const studentStartTime = new Date(takenExam.started_at);
-    const endTime = new Date(takenExam.exam.ends_at);
-    const totalDurationSeconds = Math.floor(
-      (endTime.getTime() - studentStartTime.getTime()) / 1000
-    );
-
-    // Prevent division by zero or handle expired time
-    if (totalDurationSeconds <= 0 || seconds <= 0)
-      return seconds <= 0 ? 100 : 0;
-
-    // Calculate elapsed time percentage
-    const elapsedSeconds = totalDurationSeconds - seconds;
-    const percentage = (elapsedSeconds / totalDurationSeconds) * 100;
-
-    return Math.max(0, Math.min(100, percentage));
-  });
-
-  // Color state based on progress
-  progressColorState = computed(() => {
-    const percentage = this.timeProgressPercentage();
-    if (percentage < 50) return 'green';
-    if (percentage < 80) return 'amber';
-    return 'red';
+    return {
+      totalEvents: events.length,
+      tabSwitches,
+      windowSwitches,
+      questionsAnswered: events.filter(
+        (e) => e.event_type === 'question_answered'
+      ).length,
+      lastActivity: events[events.length - 1]?.created_at,
+    };
   });
 
   wasSubmitted = computed(() => this.takenExam()?.submitted_at !== null);
@@ -152,9 +141,6 @@ export class CreateTakenExam implements OnInit, OnDestroy {
 
         // Setup activity monitoring after exam is loaded
         this.setupActivityMonitoring();
-
-        // Start countdown timer
-        this.startCountdownTimer();
       },
       error: (err) => {
         this.error.set(err.message);
@@ -165,23 +151,9 @@ export class CreateTakenExam implements OnInit, OnDestroy {
     this.examActivityService.fetchUserSessions(takenExamId);
   }
 
-  private startCountdownTimer(): void {
-    // Only start if exam is not submitted
-    if (this.wasSubmitted()) return;
-
-    // Update current time every second
-    this.countdownInterval = window.setInterval(() => {
-      this.currentTime.set(new Date());
-
-      // Auto-submit if time expires
-      if (this.timeRemaining() <= 0 && !this.wasSubmitted()) {
-        this.autoSubmitOnTimeExpired();
-      }
-    }, 1000);
-  }
-
-  private autoSubmitOnTimeExpired(): void {
-    if (this.submitting()) return;
+  // Handle time expiration from ExamTimer component
+  onTimeExpired(): void {
+    if (this.submitting() || this.wasSubmitted()) return;
 
     this.logActivity(
       'exam_auto_submitted',
@@ -264,61 +236,6 @@ export class CreateTakenExam implements OnInit, OnDestroy {
     this.showEventPanel.update((show) => !show);
   }
 
-  getEventTypeDisplay(eventType: string): string {
-    const eventTypeMap: Record<string, string> = {
-      exam_session_started: '🎯 Exam Started',
-      exam_session_ended: '✅ Exam Ended',
-      exam_submitted: '📤 Exam Submitted',
-      exam_auto_submitted: '⏰ Auto-Submitted (Time Expired)',
-      tab_hidden: '👁️ Tab Hidden',
-      tab_visible: '👁️ Tab Visible',
-      window_blur: '🔄 Window Lost Focus',
-      window_focus: '🔄 Window Gained Focus',
-      exam_page_loaded: '📄 Exam Page Loaded',
-      previous_answers_loaded: '📄 Previous Answers Loaded',
-    };
-    return eventTypeMap[eventType] || `📝 ${eventType}`;
-  }
-
-  getEventSeverity(eventType: string): 'normal' | 'warning' | 'danger' {
-    if (eventType.includes('tab_hidden') || eventType.includes('window_blur')) {
-      return 'warning';
-    }
-    return 'normal';
-  }
-
-  getActivityTrend(): 'active' | 'moderate' {
-    const events = this.sessionEvents();
-    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
-
-    const recentWarnings = events.filter((e) => {
-      const eventTime = new Date(e.created_at!).getTime();
-      return (
-        eventTime > fiveMinutesAgo &&
-        this.getEventSeverity(e.event_type) === 'warning'
-      );
-    }).length;
-
-    return recentWarnings > 3 ? 'moderate' : 'active';
-  }
-
-  getSessionDuration(): string {
-    const startEvent = this.sessionEvents().find(
-      (e) => e.event_type === 'exam_session_started'
-    );
-    if (!startEvent?.created_at) return '0 minutes';
-
-    const diffMinutes = Math.floor(
-      (Date.now() - new Date(startEvent.created_at).getTime()) / 60000
-    );
-
-    if (diffMinutes < 60) return `${diffMinutes} minutes`;
-
-    const hours = Math.floor(diffMinutes / 60);
-    const minutes = diffMinutes % 60;
-    return `${hours}h ${minutes}m`;
-  }
-
   answeredCount() {
     return Object.keys(this.answers()).length;
   }
@@ -373,11 +290,6 @@ export class CreateTakenExam implements OnInit, OnDestroy {
     );
     window.removeEventListener('blur', this.handleWindowBlur);
     window.removeEventListener('focus', this.handleWindowFocus);
-
-    // Clear countdown interval
-    if (this.countdownInterval) {
-      clearInterval(this.countdownInterval);
-    }
 
     // Stop exam session
     this.examActivityService.stopExamSession();
