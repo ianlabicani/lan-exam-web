@@ -1,66 +1,288 @@
-<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-	<div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
-		<div class="flex items-center justify-between mb-4">
-			<h3 class="text-lg font-semibold">Edit Item</h3>
-			<button (click)="onClose()" class="text-gray-600">✕</button>
-		</div>
+<!-- Modal Backdrop -->
+<div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 max-h-screen overflow-y-auto">
+  <!-- Modal Container -->
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl my-8">
+    <!-- Header -->
+    <div class="sticky top-0 bg-gradient-to-r from-blue-600 to-cyan-600 text-white p-6 rounded-t-xl flex items-center justify-between">
+      <div>
+        <h3 class="text-2xl font-bold">Edit Item</h3>
+        <p class="text-blue-100 text-sm mt-1">Update the question and settings</p>
+      </div>
+      <button
+        type="button"
+        (click)="onClose()"
+        class="text-white hover:text-gray-200 transition text-2xl font-bold"
+      >
+        ×
+      </button>
+    </div>
 
-		<form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
-			<!-- type is fixed; we use the input item's type for conditional fields -->
-			<div>
-				<label class="block text-sm text-gray-700 mb-1">Question</label>
-				<textarea formControlName="question" rows="3" class="w-full border rounded p-2"></textarea>
-			</div>
+    <!-- Form -->
+    <form [formGroup]="form" (ngSubmit)="save()" class="p-6 space-y-6">
+      <!-- Question -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-question-circle text-blue-600 mr-2"></i>Question *
+        </label>
+        <textarea
+          formControlName="question"
+          rows="4"
+          required
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+          placeholder="Enter the question text..."
+        ></textarea>
+        @if (form.get('question')?.invalid && form.get('question')?.touched) {
+          <p class="text-red-500 text-sm mt-2">
+            <i class="fas fa-exclamation-circle mr-1"></i>
+            Question is required (minimum 3 characters).
+          </p>
+        }
+      </div>
 
-			<div>
-				<label class="block text-sm text-gray-700 mb-1">Points</label>
-				<input type="number" formControlName="points" class="w-24 border rounded p-1" />
-			</div>
+      <!-- Points -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-star text-blue-600 mr-2"></i>Points *
+        </label>
+        <input
+          type="number"
+          formControlName="points"
+          min="1"
+          required
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+        />
+        @if (form.get('points')?.invalid && form.get('points')?.touched) {
+          <p class="text-red-500 text-sm mt-2">
+            <i class="fas fa-exclamation-circle mr-1"></i>
+            Must be at least 1 point.
+          </p>
+        }
+      </div>
 
-			<!-- MCQ options -->
-			@if (itemInput().type === 'mcq') {
-				<div formArrayName="options">
-					<label class="block text-sm text-gray-700 mb-1">Options</label>
-					@for (opt of options.controls; track $index) {
-						<div [formGroupName]="$index" class="flex items-center gap-2 mb-2">
-						  <button
-						  type="button"
-						  (click)="setCorrectOption($index)"
-						  class="w-6 h-6 rounded-full inline-flex items-center justify-center text-center leading-none border"
-						  [class.bg-green-500]="options.at($index).get('correct')?.value"
-						  [ngClass]="{'text-white': options.at($index).get('correct')?.value}">
-						    {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[$index] }}
-						  </button>
-							<input formControlName="text" class="flex-1 border rounded p-1" />
-							<button type="button" (click)="removeOption($index)" class="text-red-600">Remove</button>
-						</div>
-					}
-					<button type="button" (click)="addOption()" class="text-xs px-2 py-1 bg-blue-500 text-white rounded">+ Add Option</button>
-				</div>
-			}
+      <!-- MCQ Options -->
+      @if (itemInput().type === 'mcq') {
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="text-sm font-medium text-gray-700">
+              <i class="fas fa-list text-blue-600 mr-2"></i>Answer Options * (Min {{MIN_OPTIONS}} / Max {{MAX_OPTIONS}})
+            </label>
+            <button
+              type="button"
+              (click)="addOption()"
+              [disabled]="options.length >= MAX_OPTIONS"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm font-medium"
+            >
+              <i class="fas fa-plus mr-2"></i>Add Option
+            </button>
+          </div>
 
-			<!-- True/False -->
-			@if (itemInput().type === 'truefalse') {
-				<div>
-					<label class="block text-sm text-gray-700 mb-1">Correct Answer</label>
-					<select formControlName="answer" class="border rounded p-1">
-						<option [ngValue]="true">True</option>
-						<option [ngValue]="false">False</option>
-					</select>
-				</div>
-			}
+          <div class="space-y-3" formArrayName="options">
+            @for (opt of options.controls; track $index; let i = $index) {
+              <div
+                class="p-4 rounded-lg border-2 transition flex items-start gap-3"
+                [class.border-blue-300]="opt.value.correct"
+                [class.bg-blue-50]="opt.value.correct"
+                [class.border-gray-300]="!opt.value.correct"
+                [formGroup]="asFormGroup(opt)"
+              >
+                <!-- Option Label -->
+                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-semibold text-gray-700 text-sm">
+                  {{ String.fromCharCode(65 + i) }}
+                </div>
 
-			<!-- Essay -->
-			@if (itemInput().type === 'essay') {
-				<div>
-					<label class="block text-sm text-gray-700 mb-1">Expected Answer</label>
-					<textarea formControlName="expected_answer" rows="3" class="w-full border rounded p-2"></textarea>
-				</div>
-			}
-			<div class="flex justify-end gap-2">
-				<button type="button" (click)="onClose()" class="px-3 py-1 rounded border">Cancel</button>
-				<button type="submit" class="px-3 py-1 rounded bg-blue-600 text-white">Save</button>
-			</div>
-		</form>
-	</div>
+                <!-- Option Input -->
+                <div class="flex-1">
+                  <input
+                    type="text"
+                    formControlName="text"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    [placeholder]="'Option ' + String.fromCharCode(65 + i)"
+                  />
+                </div>
+
+                <!-- Correct Answer Checkbox -->
+                <div class="flex items-center gap-3">
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      formControlName="correct"
+                      class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span class="text-sm font-medium text-gray-700">Correct</span>
+                  </label>
+                  <button
+                    type="button"
+                    (click)="removeOption(i)"
+                    [disabled]="options.length <= MIN_OPTIONS"
+                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    title="Remove option"
+                  >
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+          <p class="text-xs text-gray-500">
+            <i class="fas fa-info-circle mr-1"></i>
+            Select at least one correct answer.
+          </p>
+        </div>
+      }
+
+      <!-- True/False -->
+      @if (itemInput().type === 'truefalse') {
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-toggle-on text-blue-600 mr-2"></i>Correct Answer *
+          </label>
+          <select
+            formControlName="answer"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+          >
+            <option value="">Select an answer</option>
+            <option value="true">True</option>
+            <option value="false">False</option>
+          </select>
+        </div>
+      }
+
+      <!-- Short Answer / Fill Blank -->
+      @if (itemInput().type === 'shortanswer' || itemInput().type === 'fillblank') {
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-keyboard text-blue-600 mr-2"></i>Expected Answer *
+          </label>
+          <textarea
+            formControlName="expected_answer"
+            rows="3"
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+            placeholder="Enter the expected answer..."
+          ></textarea>
+          @if (form.get('expected_answer')?.invalid && form.get('expected_answer')?.touched) {
+            <p class="text-red-500 text-sm mt-2">
+              <i class="fas fa-exclamation-circle mr-1"></i>
+              Expected answer is required.
+            </p>
+          }
+        </div>
+      }
+
+      <!-- Essay / Rubric -->
+      @if (itemInput().type === 'essay') {
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-lightbulb text-blue-600 mr-2"></i>Grading Rubric / Key Points *
+          </label>
+          <textarea
+            formControlName="expected_answer"
+            rows="4"
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+            placeholder="Outline the key points, criteria, or rubric for grading..."
+          ></textarea>
+          <p class="text-xs text-gray-500 mt-1">
+            <i class="fas fa-info-circle mr-1"></i>
+            This will guide you when manually grading responses
+          </p>
+          @if (form.get('expected_answer')?.invalid && form.get('expected_answer')?.touched) {
+            <p class="text-red-500 text-sm mt-2">
+              <i class="fas fa-exclamation-circle mr-1"></i>
+              Rubric is required.
+            </p>
+          }
+        </div>
+      }
+
+      <!-- Matching Pairs -->
+      @if (itemInput().type === 'matching') {
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="text-sm font-medium text-gray-700">
+              <i class="fas fa-arrows-alt-h text-blue-600 mr-2"></i>Matching Pairs *
+            </label>
+            <button
+              type="button"
+              (click)="addPair()"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+            >
+              <i class="fas fa-plus mr-2"></i>Add Pair
+            </button>
+          </div>
+
+          <div class="space-y-3" formArrayName="pairs">
+            @for (pair of pairs.controls; track $index; let i = $index) {
+              <div
+                class="p-4 rounded-lg border border-gray-300 flex items-start gap-3"
+                [formGroup]="asFormGroup(pair)"
+              >
+                <!-- Left Column -->
+                <div class="flex-1">
+                  <label class="text-xs font-medium text-gray-500 mb-1 block">Left Item</label>
+                  <input
+                    type="text"
+                    formControlName="left"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    placeholder="Item to match..."
+                  />
+                </div>
+
+                <!-- Right Column -->
+                <div class="flex-1">
+                  <label class="text-xs font-medium text-gray-500 mb-1 block">Right Item</label>
+                  <input
+                    type="text"
+                    formControlName="right"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    placeholder="Corresponding match..."
+                  />
+                </div>
+
+                <!-- Remove Button -->
+                <div class="flex items-end">
+                  <button
+                    type="button"
+                    (click)="removePair(i)"
+                    [disabled]="pairs.length <= 1"
+                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    title="Remove pair"
+                  >
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Error Message -->
+      @if (errorMessage()) {
+        <div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-start gap-3">
+          <i class="fas fa-exclamation-triangle mt-0.5 flex-shrink-0"></i>
+          <div>{{ errorMessage() }}</div>
+        </div>
+      }
+
+      <!-- Actions -->
+      <div class="flex justify-end gap-3 pt-4 border-t">
+        <button
+          type="button"
+          (click)="onClose()"
+          class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="form.invalid || isSaving() || (itemInput().type === 'mcq' && !hasAnyCorrect())"
+          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium"
+        >
+          <i class="fas fa-save mr-2"></i>
+          {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

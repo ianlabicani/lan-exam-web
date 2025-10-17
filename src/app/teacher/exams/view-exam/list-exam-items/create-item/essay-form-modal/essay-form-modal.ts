@@ -52,18 +52,11 @@ export class EssayFormModal {
     const newItem = this.essayForm.getRawValue();
     const examId = this.examId();
 
-    this.listExamItemsSvc
-      .store(examId, { ...newItem, level: this.level() })
+    this.viewExamSvc
+      .createItem(examId, { ...newItem, level: this.level() })
       .subscribe({
         next: (res) => {
           this.essayForm.reset();
-          this.viewExamSvc.exam.update((prev) => {
-            if (!prev) return prev;
-            return {
-              ...prev,
-              total_points: prev.total_points + res.data.points,
-            };
-          });
           this.isSaving.set(false);
           this.closeModal.emit();
         },

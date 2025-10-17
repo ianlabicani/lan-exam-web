@@ -10,6 +10,8 @@ export class ListExamItemsService {
   private http = inject(HttpClient);
 
   private items = signal<ExamItem[]>([]);
+  private currentExamId = signal<number | null>(null);
+
   items$ = computed(() => this.items());
   easyItems$ = computed(() =>
     this.items().filter((item) => item.level === 'easy')
@@ -21,7 +23,12 @@ export class ListExamItemsService {
     this.items().filter((item) => item.level === 'difficult')
   );
 
+  setCurrentExamId(examId: number) {
+    this.currentExamId.set(examId);
+  }
+
   index(examId: number) {
+    this.currentExamId.set(examId);
     return this.http
       .get<{ data: ExamItem[] }>(
         `${environment.apiBaseUrl}/teacher/exams/${examId}/items`
@@ -34,6 +41,7 @@ export class ListExamItemsService {
   }
 
   store(examId: number, payload: any) {
+    this.currentExamId.set(examId);
     return this.http
       .post<{ data: ExamItem }>(
         `${environment.apiBaseUrl}/teacher/exams/${examId}/items`,
@@ -47,9 +55,14 @@ export class ListExamItemsService {
   }
 
   update(examItem: ExamItem) {
+    const examId = this.currentExamId();
+    if (!examId) {
+      throw new Error('No exam ID set. Call index() or store() first.');
+    }
+
     return this.http
-      .patch<{ data: ExamItem }>(
-        `${environment.apiBaseUrl}/teacher/exams/items/${examItem.id}`,
+      .put<{ data: ExamItem }>(
+        `${environment.apiBaseUrl}/teacher/exams/${examId}/items/${examItem.id}`,
         examItem
       )
       .pipe(
@@ -62,9 +75,14 @@ export class ListExamItemsService {
   }
 
   delete(itemId: number) {
+    const examId = this.currentExamId();
+    if (!examId) {
+      throw new Error('No exam ID set. Call index() or store() first.');
+    }
+
     return this.http
       .delete<{ data: boolean }>(
-        `${environment.apiBaseUrl}/teacher/exams/items/${itemId}`
+        `${environment.apiBaseUrl}/teacher/exams/${examId}/items/${itemId}`
       )
       .pipe(
         tap(() => {

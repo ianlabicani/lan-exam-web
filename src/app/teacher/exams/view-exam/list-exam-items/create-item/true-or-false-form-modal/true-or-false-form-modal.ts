@@ -10,6 +10,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../../environments/environment.development';
 import { ExamItem, ListExamItemsService } from '../../list-exam-items.service';
+import { ViewExamService } from '../../../view-exam.service';
 
 @Component({
   selector: 'app-true-or-false-form-modal',
@@ -21,6 +22,7 @@ export class TrueOrFalseFormModal {
   fb = inject(FormBuilder);
   http = inject(HttpClient);
   listExamItemsSvc = inject(ListExamItemsService);
+  viewExamSvc = inject(ViewExamService);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();
   examId = input.required<number>();
@@ -44,17 +46,20 @@ export class TrueOrFalseFormModal {
     this.isSaving.set(true);
     this.errorMessage.set(null);
 
+    // The answer field expects a STRING: 'true' or 'false'
+    const answerValue = String(this.tfForm.value.answer);
+
     const payload = {
       type: 'truefalse',
       question: this.tfForm.value.question!,
-      expected_answer: this.tfForm.value.answer!,
+      answer: answerValue,
       points: this.tfForm.value.points!,
       level: this.level(),
     };
 
     const examId = this.examId();
-    this.listExamItemsSvc.store(examId, payload).subscribe({
-      next: (_) => {
+    this.viewExamSvc.createItem(examId, payload).subscribe({
+      next: (res) => {
         this.tfForm.reset({ question: '', answer: 'true', points: 1 });
         this.isSaving.set(false);
         this.closeModal.emit();

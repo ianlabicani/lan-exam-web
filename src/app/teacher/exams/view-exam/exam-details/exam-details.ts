@@ -35,7 +35,7 @@ import { ViewExamService } from '../view-exam.service';
 export class ExamDetails {
   private viewExamSvc = inject(ViewExamService);
 
-  exam = computed(() => this.viewExamSvc.exam());
+  exam = computed(() => this.viewExamSvc.viewingExam());
 
   // FontAwesome icons
   faInfoCircle = faInfoCircle;

@@ -85,7 +85,7 @@ export class ViewExam implements OnInit {
   faDatabase = faDatabase;
 
   // Computed signals
-  exam = this.viewExamSvc.exam;
+  exam = this.viewExamSvc.viewingExam;
   statusBadgeClass = computed(() => {
     const exam = this.exam();
     if (!exam) return 'bg-gray-100 text-gray-700';
@@ -135,7 +135,7 @@ export class ViewExam implements OnInit {
     this.saving.set(true);
     this.viewExamSvc.updateStatus(examId, status as any).subscribe({
       next: (exam) => {
-        this.viewExamSvc.exam.set(exam);
+        this.viewExamSvc.setCurrentViewingExam(exam);
         this.saving.set(false);
         this.closeStatusModal();
       },
@@ -164,7 +164,7 @@ export class ViewExam implements OnInit {
     this.saving.set(true);
     this.viewExamSvc.updateStatus(examId, status).subscribe({
       next: (exam) => {
-        this.viewExamSvc.exam.set(exam);
+        this.viewExamSvc.setCurrentViewingExam(exam);
         this.saving.set(false);
       },
       error: (err) => {
@@ -179,7 +179,7 @@ export class ViewExam implements OnInit {
     this.viewExamSvc.show(id).subscribe({
       next: (res) => {
         this.loading.set(false);
-        this.viewExamSvc.exam.set(res.data.exam);
+        this.viewExamSvc.setCurrentViewingExam(res.data.exam);
       },
       error: (err) => {
         this.errorMsg.set(err?.error?.message || 'Failed to load exam');

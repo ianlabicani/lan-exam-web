@@ -17,6 +17,7 @@ import { FillBlankFormModal } from './create-item/fill-blank-form-modal/fill-bla
 import { ShortAnswerFormModal } from './create-item/short-answer-form-modal/short-answer-form-modal';
 import { MatchingFormModal } from './create-item/matching-form-modal/matching-form-modal';
 import { ViewExamService } from '../view-exam.service';
+import { AddQuestionModal } from './add-question-modal/add-question-modal';
 
 @Component({
   selector: 'app-teacher-list-exam-items',
@@ -35,6 +36,7 @@ import { ViewExamService } from '../view-exam.service';
     FillBlankFormModal,
     ShortAnswerFormModal,
     MatchingFormModal,
+    AddQuestionModal,
   ],
   templateUrl: './list-exam-items.html',
   styleUrl: './list-exam-items.css',
@@ -48,6 +50,21 @@ export class ListExamItems implements OnInit {
   isUpdateModalOpenSig = signal(false);
   selectedForUpdateSig = signal<ExamItem | null>(null);
   isDeleteModalOpenSig = signal(false);
+
+  // Add question modal states by difficulty level
+  addQuestionModalLevel = signal<'easy' | 'moderate' | 'difficult' | null>(
+    null
+  );
+  selectedQuestionType = signal<
+    | 'mcq'
+    | 'truefalse'
+    | 'essay'
+    | 'shortanswer'
+    | 'matching'
+    | 'fillblank'
+    | null
+  >(null);
+
   // easy modals
   isEasyTOFModalOpen = signal(false);
   isEasyEssayModalOpen = signal(false);
@@ -120,11 +137,103 @@ export class ListExamItems implements OnInit {
   }
 
   onItemSaved(examItem: ExamItem) {
-    this.listExamItemsSvc.update(examItem).subscribe({
-      next: (res) => {
+    this.viewExamSvc.updateItem(examItem).subscribe({
+      next: () => {
         this.closeUpdateModal();
       },
+      error: (err) => {
+        console.error('Error updating item:', err);
+      },
     });
+  }
+
+  openAddQuestionModal(level: 'easy' | 'moderate' | 'difficult') {
+    this.addQuestionModalLevel.set(level);
+  }
+
+  closeAddQuestionModal() {
+    this.addQuestionModalLevel.set(null);
+    this.selectedQuestionType.set(null);
+  }
+
+  onQuestionTypeSelected(
+    type:
+      | 'mcq'
+      | 'truefalse'
+      | 'essay'
+      | 'shortanswer'
+      | 'matching'
+      | 'fillblank'
+  ) {
+    this.selectedQuestionType.set(type);
+    const level = this.addQuestionModalLevel();
+    this.closeAddQuestionModal();
+
+    // Open the appropriate modal based on type and level
+    if (level === 'easy') {
+      switch (type) {
+        case 'mcq':
+          this.isEasyMcqModalOpen.set(true);
+          break;
+        case 'truefalse':
+          this.isEasyTOFModalOpen.set(true);
+          break;
+        case 'essay':
+          this.isEasyEssayModalOpen.set(true);
+          break;
+        case 'shortanswer':
+          this.isEasyShortAnswerModalOpen.set(true);
+          break;
+        case 'matching':
+          this.isEasyMatchingModalOpen.set(true);
+          break;
+        case 'fillblank':
+          this.isEasyFillBlankModalOpen.set(true);
+          break;
+      }
+    } else if (level === 'moderate') {
+      switch (type) {
+        case 'mcq':
+          this.isModerateMcqModalOpen.set(true);
+          break;
+        case 'truefalse':
+          this.isModerateTOFModalOpen.set(true);
+          break;
+        case 'essay':
+          this.isModerateEssayModalOpen.set(true);
+          break;
+        case 'shortanswer':
+          this.isModerateShortAnswerModalOpen.set(true);
+          break;
+        case 'matching':
+          this.isModerateMatchingModalOpen.set(true);
+          break;
+        case 'fillblank':
+          this.isModerateFillBlankModalOpen.set(true);
+          break;
+      }
+    } else if (level === 'difficult') {
+      switch (type) {
+        case 'mcq':
+          this.isDifficultMcqModalOpen.set(true);
+          break;
+        case 'truefalse':
+          this.isDifficultTOFModalOpen.set(true);
+          break;
+        case 'essay':
+          this.isDifficultEssayModalOpen.set(true);
+          break;
+        case 'shortanswer':
+          this.isDifficultShortAnswerModalOpen.set(true);
+          break;
+        case 'matching':
+          this.isDifficultMatchingModalOpen.set(true);
+          break;
+        case 'fillblank':
+          this.isDifficultFillBlankModalOpen.set(true);
+          break;
+      }
+    }
   }
 }
 

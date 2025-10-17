@@ -1,4 +1,5 @@
-import { Exam, ExamService } from './../../../../services/exam.service';
+import { Exam } from './../../../../services/exam.service';
+import { ViewExamService } from '../../view-exam.service';
 import { Component, input, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ExamItem, ListExamItemsService } from '../list-exam-items.service';
@@ -15,7 +16,7 @@ export class DeleteItem {
   close = output<void>();
 
   examItemsSvc = inject(ListExamItemsService);
-  examService = inject(ExamService);
+  viewExamSvc = inject(ViewExamService);
 
   deleting = false;
   error: string | null = null;
@@ -26,17 +27,10 @@ export class DeleteItem {
     this.deleting = true;
     this.error = null;
 
-    this.examItemsSvc.delete(item.id).subscribe({
+    this.viewExamSvc.deleteItem(item.id).subscribe({
       next: (res) => {
         this.deleting = false;
         this.deleted.emit(item);
-        this.examService.viewingExam.update((prev: Exam | null) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            total_points: (prev.total_points ?? 0) - item.points,
-          };
-        });
       },
       error: (err) => {
         this.deleting = false;
