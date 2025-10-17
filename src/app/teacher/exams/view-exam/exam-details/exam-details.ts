@@ -1,4 +1,9 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  inject,
+  ChangeDetectionStrategy,
+  computed,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
@@ -17,7 +22,7 @@ import {
   faDatabase,
   faCheck,
 } from '@fortawesome/free-solid-svg-icons';
-import type { Exam } from '../../../services/exam.service';
+import { ViewExamService } from '../view-exam.service';
 
 @Component({
   selector: 'app-exam-details',
@@ -28,7 +33,9 @@ import type { Exam } from '../../../services/exam.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExamDetails {
-  exam = input.required<Exam>();
+  private viewExamSvc = inject(ViewExamService);
+
+  exam = computed(() => this.viewExamSvc.exam());
 
   // FontAwesome icons
   faInfoCircle = faInfoCircle;

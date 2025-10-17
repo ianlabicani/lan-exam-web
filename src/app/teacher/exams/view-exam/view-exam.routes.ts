@@ -9,7 +9,8 @@ export const routes: Routes = [
   },
   {
     path: 'overview',
-    loadComponent: () => import('./overview/overview').then((c) => c.Overview),
+    loadComponent: () =>
+      import('./exam-details/exam-details').then((c) => c.ExamDetails),
   },
   {
     path: 'items',

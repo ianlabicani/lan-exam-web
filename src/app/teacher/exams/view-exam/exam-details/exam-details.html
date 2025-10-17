@@ -1,4 +1,8 @@
-<div class="space-y-6">
+@let examSig = exam();
+
+
+@if (examSig) {
+  <div class="space-y-6">
   <!-- Exam Information -->
   <div class="bg-gray-50 rounded-lg p-6">
     <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -12,9 +16,9 @@
           <fa-icon [icon]="faGraduationCap" class="text-sm"></fa-icon>Year Level(s)
         </dt>
         <dd class="text-lg font-semibold text-gray-900">
-          @if(exam().year && exam().year.length > 0) {
+          @if(examSig.year && examSig.year.length > 0) {
             <div class="flex flex-wrap gap-2">
-              @for (y of exam().year; track $index) {
+              @for (y of examSig.year; track $index) {
                 <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded-full">
                   Year {{ y }}
                 </span>
@@ -32,9 +36,9 @@
           <fa-icon [icon]="faUsers" class="text-sm"></fa-icon>Section(s)
         </dt>
         <dd class="text-lg font-semibold text-gray-900">
-          @if(exam().sections && (exam().sections ?? []).length > 0) {
+          @if(examSig.sections && (examSig.sections ?? []).length > 0) {
             <div class="flex flex-wrap gap-2">
-              @for (s of exam().sections; track $index) {
+              @for (s of examSig.sections; track $index) {
                 <span class="px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-full uppercase">
                   {{ s }}
                 </span>
@@ -52,7 +56,7 @@
           <fa-icon [icon]="faCalendar" class="text-sm"></fa-icon>Start Date & Time
         </dt>
         <dd class="text-lg font-semibold text-gray-900">
-          {{ exam().starts_at ? (exam().starts_at | date:'EEEE, MMMM d, y - h:mm a') : 'Not set' }}
+          {{ examSig.starts_at ? (examSig.starts_at | date:'EEEE, MMMM d, y - h:mm a') : 'Not set' }}
         </dd>
       </div>
 
@@ -62,7 +66,7 @@
           <fa-icon [icon]="faCalendarTimes" class="text-sm"></fa-icon>End Date & Time
         </dt>
         <dd class="text-lg font-semibold text-gray-900">
-          {{ exam().ends_at ? (exam().ends_at | date:'EEEE, MMMM d, y - h:mm a') : 'Not set' }}
+          {{ examSig.ends_at ? (examSig.ends_at | date:'EEEE, MMMM d, y - h:mm a') : 'Not set' }}
         </dd>
       </div>
 
@@ -72,8 +76,8 @@
           <fa-icon [icon]="faClock" class="text-sm"></fa-icon>Duration
         </dt>
         <dd class="text-lg font-semibold text-gray-900">
-          @if(exam().starts_at && exam().ends_at) {
-            {{ calculateDuration(exam().starts_at, exam().ends_at) }} minutes
+          @if(examSig.starts_at && examSig.ends_at) {
+            {{ calculateDuration(examSig.starts_at, examSig.ends_at) }} minutes
           } @else {
             Not calculated
           }
@@ -86,20 +90,20 @@
           <fa-icon [icon]="faStar" class="text-sm"></fa-icon>Total Points
         </dt>
         <dd class="text-lg font-semibold text-gray-900">
-          {{ exam().total_points }} points
+          {{ examSig.total_points }} points
         </dd>
       </div>
     </dl>
   </div>
 
   <!-- Table of Specifications -->
-  @if(exam().tos && (exam().tos ?? []).length > 0) {
+  @if(examSig.tos && (examSig.tos ?? []).length > 0) {
     <div class="bg-gray-50 rounded-lg p-6">
       <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
         <fa-icon [icon]="faTable" class="text-indigo-600"></fa-icon>Table of Specifications
       </h3>
       <div class="space-y-4">
-        @for (topic of exam().tos; track $index) {
+        @for (topic of examSig.tos; track $index) {
           <div class="bg-white rounded-lg p-4 border border-gray-200">
             <!-- Topic Header -->
             <div class="flex items-start justify-between mb-3">
@@ -185,12 +189,14 @@
     <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <dt class="text-sm font-medium text-gray-500">Created On</dt>
-        <dd class="text-sm text-gray-900 mt-1">{{ exam().created_at | date:'MMMM d, y h:mm a' }}</dd>
+        <dd class="text-sm text-gray-900 mt-1">{{ examSig.created_at | date:'MMMM d, y h:mm a' }}</dd>
       </div>
       <div>
         <dt class="text-sm font-medium text-gray-500">Exam ID</dt>
-        <dd class="text-sm text-gray-900 mt-1">#{{ exam().id }}</dd>
+        <dd class="text-sm text-gray-900 mt-1">#{{ examSig.id }}</dd>
       </div>
     </dl>
   </div>
 </div>
+}
+
