@@ -4,8 +4,12 @@ import { routes as examTakerRoutes } from './taken-exams/taken-exams.routes';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'items',
+    redirectTo: 'overview',
     pathMatch: 'full',
+  },
+  {
+    path: 'overview',
+    loadComponent: () => import('./overview/overview').then((c) => c.Overview),
   },
   {
     path: 'items',

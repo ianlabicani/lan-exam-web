@@ -1,7 +1,6 @@
 @let examSig = exam();
 @let loadingSig = loading();
 @let errorMsgSig = errorMsg();
-@let activeTabSig = activeTab();
 @let showTabsSig = showTabs();
 
 @if (loadingSig) {
@@ -126,60 +125,38 @@
         <div class="bg-white rounded-t-lg shadow-sm border border-gray-200 overflow-hidden">
           <div class="border-b border-gray-200">
             <nav class="flex">
-              <button
-                type="button"
-                (click)="activeTab.set('overview')"
-                [class]="'flex-1 px-6 py-4 text-sm font-medium transition border-b-2 ' + (activeTabSig === 'overview' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')">
+              <a
+                [routerLink]="['overview']"
+                routerLinkActive="border-indigo-500 text-indigo-600"
+                class="flex-1 px-6 py-4 text-sm font-medium transition border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor-pointer text-center">
                 Overview
-              </button>
-              <button
-                type="button"
-                (click)="activeTab.set('items')"
-                [class]="'flex-1 px-6 py-4 text-sm font-medium transition border-b-2 ' + (activeTabSig === 'items' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')">
+              </a>
+              <a
+                [routerLink]="['items']"
+                routerLinkActive="border-indigo-500 text-indigo-600"
+                class="flex-1 px-6 py-4 text-sm font-medium transition border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor-pointer text-center">
                 Questions
-              </button>
-              <button
-                type="button"
-                (click)="activeTab.set('takers')"
-                [class]="'flex-1 px-6 py-4 text-sm font-medium transition border-b-2 ' + (activeTabSig === 'takers' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')">
+              </a>
+              <a
+                [routerLink]="['takers']"
+                routerLinkActive="border-indigo-500 text-indigo-600"
+                class="flex-1 px-6 py-4 text-sm font-medium transition border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor-pointer text-center">
                 Takers
-              </button>
-              <button
-                type="button"
-                (click)="activeTab.set('analytics')"
-                [class]="'flex-1 px-6 py-4 text-sm font-medium transition border-b-2 ' + (activeTabSig === 'analytics' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')">
+              </a>
+              <a
+                [routerLink]="['analytics']"
+                routerLinkActive="border-indigo-500 text-indigo-600"
+                class="flex-1 px-6 py-4 text-sm font-medium transition border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor-pointer text-center">
                 Analytics
-              </button>
+              </a>
             </nav>
           </div>
 
           <!-- Tab Content -->
           <div class="p-6">
-            <!-- Overview Tab -->
-            @if (activeTabSig === 'overview') {
-              <app-exam-details [exam]="examSig" />
-            }
-
-            <!-- Items/Questions Tab -->
-            @if (activeTabSig === 'items') {
-              <div class="space-y-4">
-                <router-outlet></router-outlet>
-              </div>
-            }
-
-            <!-- Takers Tab -->
-            @if (activeTabSig === 'takers') {
-              <div class="space-y-4">
-                <router-outlet></router-outlet>
-              </div>
-            }
-
-            <!-- Analytics Tab -->
-            @if (activeTabSig === 'analytics') {
-              <div class="space-y-4">
-                <router-outlet></router-outlet>
-              </div>
-            }
+            <div class="space-y-4">
+              <router-outlet></router-outlet>
+            </div>
           </div>
         </div>
       } @else {

@@ -6,7 +6,12 @@ import {
   ChangeDetectionStrategy,
   computed,
 } from '@angular/core';
-import { RouterLink, RouterOutlet, ActivatedRoute } from '@angular/router';
+import {
+  RouterLink,
+  RouterOutlet,
+  ActivatedRoute,
+  RouterLinkActive,
+} from '@angular/router';
 import { DatePipe, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -32,18 +37,17 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { ViewExamService } from './view-exam.service';
-import { ExamDetails } from './exam-details/exam-details';
 
 @Component({
   selector: 'app-view-exam',
   imports: [
     RouterLink,
+    RouterLinkActive,
     DatePipe,
     FormsModule,
     RouterOutlet,
     FaIconComponent,
     CommonModule,
-    ExamDetails,
   ],
   templateUrl: './view-exam.html',
   styleUrl: './view-exam.css',
