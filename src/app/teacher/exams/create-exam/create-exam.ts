@@ -3,9 +3,7 @@ import {
   OnInit,
   inject,
   signal,
-  computed,
   ChangeDetectionStrategy,
-  effect,
 } from '@angular/core';
 import {
   FormArray,
@@ -64,11 +62,25 @@ export class CreateExam implements OnInit {
   protected sectionOptions = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
   protected yearOptions = [1, 2, 3, 4];
 
+  // Helper to get current datetime in ISO format for datetime-local input
+  private getCurrentDatetimeLocal(): string {
+    const now = new Date();
+    // Format: YYYY-MM-DDTHH:mm (required by datetime-local)
+    return now.toISOString().slice(0, 16);
+  }
+
+  // Helper to get future datetime (2 hours from now)
+  private getFutureDatetimeLocal(): string {
+    const future = new Date();
+    future.setHours(future.getHours() + 2);
+    return future.toISOString().slice(0, 16);
+  }
+
   examForm = this.fb.nonNullable.group({
     title: ['', Validators.required],
     description: [''],
-    starts_at: [''],
-    ends_at: [''],
+    starts_at: [this.getCurrentDatetimeLocal(), Validators.required],
+    ends_at: [this.getFutureDatetimeLocal(), Validators.required],
     year: [1 as 1 | 2 | 3 | 4, Validators.required],
 
     // sections keyed by letter so template binds by value, not index
@@ -220,19 +232,24 @@ export class CreateExam implements OnInit {
     this.savingSig.set(true);
 
     const raw = this.examForm.getRawValue();
+
     // Map boolean selections to their letter codes
     const selectedSections = Object.entries(
       this.sections.getRawValue() as Record<string, boolean>
     )
       .filter(([_, checked]) => !!checked)
-      .map(([letter]) => letter);
+      .map(([letter]) => letter.toLowerCase());
+
+    // Year must be sent as an array
+    const yearArray = [raw.year];
+
     const payload = {
       title: raw.title,
       description: raw.description,
       starts_at: new Date(raw.starts_at).toISOString(),
       ends_at: new Date(raw.ends_at).toISOString(),
-      year: String(raw.year),
-      sections: selectedSections.join(','),
+      year: yearArray, // Send as array
+      sections: selectedSections, // Already an array
       status: raw.status,
       total_points: 0,
       tos: (this.tos.getRawValue() as any[]).map((t) => ({
