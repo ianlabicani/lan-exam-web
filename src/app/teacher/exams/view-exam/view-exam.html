@@ -37,85 +37,173 @@
 
       <!-- Page Header -->
       <div class="mb-8">
-        <div class="flex items-center justify-between mb-6">
-          <a routerLink="/teacher/exams" class="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition">
-            <fa-icon [icon]="faArrowLeft" class="text-lg"></fa-icon>
-            <span>Back to Exams</span>
+        <div class="flex items-center space-x-4 mb-4">
+          <!-- Back Button -->
+          <a routerLink="/teacher/exams" class="text-gray-600 hover:text-gray-900 transition">
+            <fa-icon [icon]="faArrowLeft" class="text-xl"></fa-icon>
           </a>
-          @if(examSig.status === 'draft') {
-            <span class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">Draft (editable)</span>
-          } @else {
-            <span class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">Read Only</span>
-          }
-        </div>
 
-        <!-- Title and Status -->
-        <div class="flex items-center gap-3 mb-4">
-          <h1 class="text-3xl font-bold text-gray-900">{{ examSig.title }}</h1>
-          <span
-            [class]="'px-3 py-1 text-xs font-semibold rounded-full tracking-wide uppercase ' + statusBadgeClass()">
-            {{ examSig.status }}
-          </span>
-        </div>
+          <!-- Main Content -->
+          <div class="flex-1">
+            <!-- Title and Status Badge -->
+            <div class="flex items-center space-x-3 mb-3">
+              <h1 class="text-3xl font-bold text-gray-900">{{ examSig.title }}</h1>
 
-        <p class="text-gray-600 max-w-prose mb-4">{{ examSig.description }}</p>
+            <!-- Status Badge with Icon -->
+              @if(examSig.status === 'draft') {
+                <span class="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-semibold rounded-full inline-flex items-center gap-1">
+                  <fa-icon [icon]="faPencilAlt" class="text-xs"></fa-icon>
+                  <span>Draft</span>
+                </span>
+              } @else if(examSig.status === 'active') {
+                <span class="px-3 py-1 bg-blue-100 text-blue-700 text-sm font-semibold rounded-full inline-flex items-center gap-1">
+                  <fa-icon [icon]="faClipboardCheck" class="text-xs"></fa-icon>
+                  <span>Active</span>
+                </span>
+              } @else if(examSig.status === 'published') {
+                <span class="px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-full inline-flex items-center gap-1">
+                  <fa-icon [icon]="faCheckCircle" class="text-xs"></fa-icon>
+                  <span>Published</span>
+                </span>
+              } @else if(examSig.status === 'archived') {
+                <span class="px-3 py-1 bg-red-100 text-red-700 text-sm font-semibold rounded-full inline-flex items-center gap-1">
+                  <fa-icon [icon]="faArchive" class="text-xs"></fa-icon>
+                  <span>Archived</span>
+                </span>
+              }
+            </div>
 
-        <!-- Meta Information -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div class="bg-white rounded-lg shadow-sm p-3 border border-gray-200">
-            <p class="text-xs text-gray-500 font-semibold">Starts</p>
-            <p class="text-sm font-medium text-gray-900">{{ examSig.starts_at | date:'medium' }}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-sm p-3 border border-gray-200">
-            <p class="text-xs text-gray-500 font-semibold">Ends</p>
-            <p class="text-sm font-medium text-gray-900">{{ examSig.ends_at | date:'medium' }}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-sm p-3 border border-gray-200">
-            <p class="text-xs text-gray-500 font-semibold">Total Points</p>
-            <p class="text-sm font-medium text-gray-900">{{ examSig.total_points }}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-sm p-3 border border-gray-200">
-            <p class="text-xs text-gray-500 font-semibold">Years & Sections</p>
-            <p class="text-sm font-medium text-gray-900">
-              Year {{ examSig.year | json }} | Section {{ examSig.sections | json }}
-            </p>
-          </div>
-        </div>
+            <!-- Description -->
+            <p class="text-gray-600 mt-2">{{ examSig.description }}</p>
 
-        <!-- Action Buttons -->
-        <div class="flex items-center gap-3">
-          @if (examSig.status === 'draft') {
+            <!-- Date and Time Summary -->
+            <div class="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-700">
+              @if(examSig.starts_at) {
+                <div class="flex items-center gap-2">
+                  <fa-icon [icon]="faCalendar" class="text-indigo-600"></fa-icon>
+                  <span class="font-medium">{{ examSig.starts_at | date: 'MMM dd, yyyy' }}</span>
+                </div>
+              }
+              @if(examSig.starts_at) {
+                <div class="flex items-center gap-2">
+                  <fa-icon [icon]="faClock" class="text-blue-600"></fa-icon>
+                  <span class="font-medium">{{ examSig.starts_at | date: 'h:mm a' }} - {{ examSig.ends_at | date: 'h:mm a' }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Year and Sections Summary -->
+            <div class="flex flex-wrap items-center gap-3 mt-3">
+              @if(examSig.year && examSig.year.length > 0) {
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-medium text-gray-500 uppercase">
+                    <fa-icon [icon]="faGraduationCap" class="mr-1"></fa-icon>Year:
+                  </span>
+                  @for(y of examSig.year; track $index) {
+                    <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded">
+                      {{ y }}
+                    </span>
+                  }
+                </div>
+              }
+
+              @if(examSig.sections && examSig.sections.length > 0) {
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-medium text-gray-500 uppercase">
+                    <fa-icon [icon]="faChalkboardUser" class="mr-1"></fa-icon>Section:
+                  </span>
+                  @for(section of examSig.sections; track $index) {
+                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded uppercase">
+                      {{ section }}
+                    </span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex space-x-2">
             <button
               type="button"
-              (click)="updateStatus(examSig.id, 'active')"
-              [disabled]="saving() || examSig.total_points <= 0"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
-              <fa-icon [icon]="faCheckCircle"></fa-icon>
-              {{ saving() ? 'Activating...' : 'Activate Exam' }}
+              (click)="openStatusModal()"
+              class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200 inline-flex items-center gap-2">
+              <fa-icon [icon]="faSync"></fa-icon>
+              <span>Update Status</span>
             </button>
-          }
 
-          @if (examSig.status === 'active') {
-            <button
-              type="button"
-              (click)="updateStatus(examSig.id, 'published')"
-              [disabled]="saving()"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
-              <fa-icon [icon]="faCheckCircle"></fa-icon>
-              {{ saving() ? 'Publishing...' : 'Publish Exam' }}
-            </button>
-          }
+            @if(examSig.status === 'draft') {
+              <a
+                [routerLink]="['/teacher/exams', examSig.id, 'edit']"
+                class="px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 transition duration-200 inline-flex items-center gap-2">
+                <fa-icon [icon]="faEdit"></fa-icon>
+                <span>Edit</span>
+              </a>
 
-          @if (examSig.status === 'published') {
-            <button
-              type="button"
-              (click)="updateStatus(examSig.id, 'archived')"
-              [disabled]="saving()"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
-              <fa-icon [icon]="faTimes"></fa-icon>
-              {{ saving() ? 'Archiving...' : 'Archive Exam' }}
-            </button>
-          }
+              <button
+                type="button"
+                (click)="confirmDelete(examSig.id)"
+                class="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition duration-200 inline-flex items-center gap-2">
+                <fa-icon [icon]="faTrash"></fa-icon>
+                <span>Delete</span>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Overview -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Questions -->
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 text-sm font-medium">Total Questions</p>
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ totalQuestions() }}</p>
+            </div>
+            <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+              <fa-icon [icon]="faQuestionCircle" class="text-xl text-blue-600"></fa-icon>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Takers -->
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500 hover:shadow-lg transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 text-sm font-medium">Total Takers</p>
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ totalTakers() }}</p>
+            </div>
+            <div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+              <fa-icon [icon]="faUsers" class="text-xl text-green-600"></fa-icon>
+            </div>
+          </div>
+        </div>
+
+        <!-- Completed -->
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500 hover:shadow-lg transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 text-sm font-medium">Completed</p>
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ completedCount() }}</p>
+            </div>
+            <div class="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+              <fa-icon [icon]="faCheckCircle" class="text-xl text-purple-600"></fa-icon>
+            </div>
+          </div>
+        </div>
+
+        <!-- Average Score -->
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-indigo-500 hover:shadow-lg transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 text-sm font-medium">Average Score</p>
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ averageScore() > 0 ? averageScore() : '--' }}</p>
+            </div>
+            <div class="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+              <fa-icon [icon]="faChartLine" class="text-xl text-indigo-600"></fa-icon>
+            </div>
+          </div>
         </div>
       </div>
 

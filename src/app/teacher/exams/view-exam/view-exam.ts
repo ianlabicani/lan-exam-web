@@ -12,7 +12,7 @@ import {
   ActivatedRoute,
   RouterLinkActive,
 } from '@angular/router';
-import { DatePipe, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   faArrowLeft,
@@ -34,6 +34,16 @@ import {
   faCog,
   faCheck,
   faDatabase,
+  faQuestionCircle,
+  faChartLine,
+  faPencilAlt,
+  faClipboardCheck,
+  faHourglassHalf,
+  faLock,
+  faArchive,
+  faEdit,
+  faTrash,
+  faChalkboardUser,
 } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { ViewExamService } from './view-exam.service';
@@ -43,7 +53,6 @@ import { ViewExamService } from './view-exam.service';
   imports: [
     RouterLink,
     RouterLinkActive,
-    DatePipe,
     FormsModule,
     RouterOutlet,
     FaIconComponent,
@@ -83,6 +92,16 @@ export class ViewExam implements OnInit {
   faCog = faCog;
   faCheck = faCheck;
   faDatabase = faDatabase;
+  faQuestionCircle = faQuestionCircle;
+  faChartLine = faChartLine;
+  faPencilAlt = faPencilAlt;
+  faClipboardCheck = faClipboardCheck;
+  faHourglassHalf = faHourglassHalf;
+  faLock = faLock;
+  faArchive = faArchive;
+  faEdit = faEdit;
+  faTrash = faTrash;
+  faChalkboardUser = faChalkboardUser;
 
   // Computed signals
   exam = this.viewExamSvc.viewingExam;
@@ -101,6 +120,30 @@ export class ViewExam implements OnInit {
       default:
         return 'bg-gray-100 text-gray-700';
     }
+  });
+
+  // Stats computed signals
+  totalQuestions = computed(() => {
+    const exam = this.exam();
+    return exam?.items?.length ?? 0;
+  });
+
+  totalTakers = computed(() => {
+    const exam = this.exam();
+    // TODO: Calculate from taken_exams when available
+    return 0;
+  });
+
+  completedCount = computed(() => {
+    const exam = this.exam();
+    // TODO: Calculate from taken_exams when available
+    return 0;
+  });
+
+  averageScore = computed(() => {
+    const exam = this.exam();
+    // TODO: Calculate from taken_exams when available
+    return 0;
   });
 
   showTabs = signal(true);
@@ -192,5 +235,13 @@ export class ViewExam implements OnInit {
     const start = new Date(startDate);
     const end = new Date(endDate);
     return Math.round((end.getTime() - start.getTime()) / 60000); // Convert ms to minutes
+  }
+
+  confirmDelete(examId: number): void {
+    const confirmed = confirm('Are you sure you want to delete this exam?');
+    if (confirmed) {
+      // TODO: Implement delete exam method in service
+      console.log('Deleting exam:', examId);
+    }
   }
 }
