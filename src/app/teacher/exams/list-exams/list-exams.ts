@@ -127,8 +127,10 @@ export class ListExams implements OnInit {
 
         this.exams.set(examsWithDuration);
         this.filteredExams.set(examsWithDuration);
-        this.totalExams.set(examsWithDuration.length);
-        this.totalPages.set(1);
+        this.totalExams.set(res.meta?.total || examsWithDuration.length);
+        this.totalPages.set(
+          Math.ceil((res.meta?.total || examsWithDuration.length) / this.pageSize())
+        );
         this.loading.set(false);
       },
       error: (err) => {
@@ -177,7 +179,10 @@ export class ListExams implements OnInit {
       url += `?${queryString.toString()}`;
     }
 
-    return this.http.get<{ data: GetExamsData[] }>(url);
+    return this.http.get<{
+      data: GetExamsData[];
+      meta?: { total: number; current_page: number; per_page: number };
+    }>(url);
   }
 
   applyFilters() {

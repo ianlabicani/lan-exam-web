@@ -86,7 +86,9 @@ export class ListExamItems implements OnInit {
 
   getExamItems(examId: number) {
     this.listExamItemsSvc.index(examId).subscribe({
-      next: (res) => {},
+      next: (res) => {
+        console.log(res);
+      },
       error: (err) => {
         console.error('Error fetching exam items:', err);
       },

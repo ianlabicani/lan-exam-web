@@ -12,7 +12,7 @@ export class ViewExamService {
   exam = signal<Exam | null>(null);
 
   show(id: number) {
-    return this.http.get<{ data: Exam }>(
+    return this.http.get<{ data: { exam: Exam } }>(
       `${environment.apiBaseUrl}/teacher/exams/${id}`
     );
   }
