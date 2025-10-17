@@ -1,7 +1,7 @@
 @let examSig = viewExamSvc.exam();
 @let loadingSig = loading();
 @let errorMsgSig = errorMsg();
-
+@let activeTabSig = activeTab();
 
 @if (loadingSig) {
   <span class="p-10 text-center text-gray-500">Loading exam...</span>
@@ -26,6 +26,7 @@
 
 @if(examSig) {
   <div class="space-y-6 container mx-auto mt-10 px-6">
+    <!-- Header -->
     <div class="flex justify-between">
       <a routerLink="/teacher/exams" class="px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium">
         <fa-icon [icon]="faArrowLeft" class="mr-1"></fa-icon>
@@ -38,175 +39,312 @@
       }
     </div>
 
-  <div class="bg-white rounded-lg shadow-sm border p-6 space-y-6">
-    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-      <div>
-        <div class="flex items-center gap-3 mb-2">
-          <h1 class="text-2xl font-bold text-gray-900">{{ examSig.title }}</h1>
-          <span
-            class="px-2 py-0.5 text-xs font-semibold rounded-full tracking-wide uppercase"
-            [ngClass]="{
-              'bg-blue-100 text-blue-700': examSig.status === 'active',
-              'bg-green-100 text-green-700': examSig.status === 'published',
-              'bg-gray-100 text-gray-700': examSig.status === 'draft',
-              'bg-yellow-100 text-yellow-700': examSig.status === 'archived'
-            }">
-            {{ examSig.status }}
-          </span>
+    <!-- Exam Details Card -->
+    <div class="bg-white rounded-lg shadow-sm border p-6 space-y-6">
+      <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-3 mb-2">
+            <h1 class="text-2xl font-bold text-gray-900">{{ examSig.title }}</h1>
+            <span
+              class="px-2 py-0.5 text-xs font-semibold rounded-full tracking-wide uppercase"
+              [ngClass]="{
+                'bg-blue-100 text-blue-700': examSig.status === 'active',
+                'bg-green-100 text-green-700': examSig.status === 'published',
+                'bg-gray-100 text-gray-700': examSig.status === 'draft',
+                'bg-yellow-100 text-yellow-700': examSig.status === 'archived'
+              }">
+              {{ examSig.status }}
+            </span>
+          </div>
+          <p class="text-sm text-gray-600 max-w-prose">{{ examSig.description }}</p>
+          <div class="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
+            <span>Starts: {{ examSig.starts_at | date:'medium' }}</span>
+            <span>Ends: {{ examSig.ends_at | date:'medium' }}</span>
+            <span>Created: {{ examSig.created_at | date:'short' }}</span>
+            <span>Updated: {{ examSig.updated_at | date:'short' }}</span>
+            <span>Year {{ examSig.year }}</span>
+            <span class="flex items-center gap-1">
+              <span>Sections:</span>
+              @if (examSig.sections?.length) {
+                <span class="flex flex-wrap gap-1">
+                  @for (s of examSig.sections; track $index) {
+                    <span
+                      class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 uppercase">
+                      {{ s }}
+                    </span>
+                  }
+                </span>
+              } @else if (examSig.section) {
+                <span
+                  class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 uppercase">
+                  {{ examSig.section }}
+                </span>
+              }
+            </span>
+          </div>
+          <p class="mt-2 text-sm font-medium text-gray-700">
+            Points: <span class="font-semibold">{{ examSig.total_points }}</span>
+          </p>
         </div>
-        <p class="text-sm text-gray-600 max-w-prose">{{ examSig.description }}</p>
-        <div class="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
-          <span>Starts: {{ examSig.starts_at | date:'medium' }}</span>
-          <span>Ends: {{ examSig.ends_at | date:'medium' }}</span>
-          <span>Created: {{ examSig.created_at | date:'short' }}</span>
-          <span>Updated: {{ examSig.updated_at | date:'short' }}</span>
-          <span>Year {{ examSig.year }}</span>
-          <span class="flex items-center gap-1">
-            <span>Sections:</span>
-            @if (examSig.sections?.length) {
-              <span class="flex flex-wrap gap-1">
-                @for (s of examSig.sections; track $index) {
-                  <span
-                    class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 uppercase">
-                    {{ s }}
-                  </span>
-                }
-              </span>
-            } @else if (examSig.section) {
-              <span
-                class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 uppercase">
-                {{ examSig.section }}
-              </span>
-            }
-          </span>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2 self-start">
+          @if (examSig.status == 'draft') {
+            <button
+              type="button"
+              class="px-4 py-2 rounded bg-green-600 text-white text-sm font-medium disabled:opacity-50"
+              [ngClass]="{ 'opacity-50 cursor-not-allowed': examSig.total_points <= 0 }"
+              [disabled]="loadingSig || examSig.total_points <= 0"
+              (click)="updateStatus(examSig.id, 'active')">
+              Activate Exam
+            </button>
+          }
+
+          @if (examSig.status == 'active') {
+            <button
+              type="button"
+              class="px-4 py-2 rounded bg-green-600 text-white text-sm font-medium disabled:opacity-50"
+              [disabled]="loadingSig"
+              (click)="updateStatus(examSig.id, 'published')">
+              Publish Exam
+            </button>
+          }
+
+          @if (examSig.status == 'published') {
+            <button
+              type="button"
+              class="px-4 py-2 rounded bg-red-600 text-white text-sm font-medium disabled:opacity-50"
+              [disabled]="loadingSig"
+              (click)="updateStatus(examSig.id, 'archived')">
+              Archive Exam
+            </button>
+          }
         </div>
-        <p class="mt-2 text-sm font-medium text-gray-700">
-          Points: <span class="font-semibold">{{ examSig.total_points }}</span>
-        </p>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="flex items-center gap-2 self-start">
-        @if (examSig.status == 'draft') {
-          <button
-            type="button"
-            class="px-4 py-2 rounded bg-green-600 text-white text-sm font-medium disabled:opacity-50"
-            [ngClass]="{ 'opacity-50 cursor-not-allowed': examSig.total_points <= 0 }"
-            [disabled]="loadingSig || examSig.total_points <= 0"
-            (click)="updateStatus(examSig.id, 'active')">
-            Activate Exam
-          </button>
-        }
-
-        @if (examSig.status == 'active') {
-          <button
-            type="button"
-            class="px-4 py-2 rounded bg-green-600 text-white text-sm font-medium disabled:opacity-50"
-            [disabled]="loadingSig"
-            (click)="updateStatus(examSig.id, 'published')">
-            Publish Exam
-          </button>
-        }
-
-        @if (examSig.status == 'published') {
-          <button
-            type="button"
-            class="px-4 py-2 rounded bg-red-600 text-white text-sm font-medium disabled:opacity-50"
-            [disabled]="loadingSig"
-            (click)="updateStatus(examSig.id, 'archived')">
-            Archive Exam
-          </button>
-        }
       </div>
     </div>
-  </div>
 
-  <div class="flex gap-4 mt-6">
-    @if (examSig.status === 'published') {
-      <a [routerLink]="['./items']" class="px-4 py-2 rounded bg-green-100 hover:bg-green-200 text-sm font-medium">
-        View Items
-      </a>
-    }
+    <!-- Tab Navigation -->
+    @if (examSig.status === 'published' || examSig.status === 'active') {
+      <div class="bg-white rounded-lg shadow-sm border">
+        <div class="flex border-b">
+          <button
+            type="button"
+            (click)="activeTab.set('overview')"
+            [class.border-b-2]="activeTabSig === 'overview'"
+            [class.border-indigo-600]="activeTabSig === 'overview'"
+            [class.text-indigo-600]="activeTabSig === 'overview'"
+            class="flex-1 px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 transition"
+          >
+            Overview
+          </button>
+          <button
+            type="button"
+            (click)="activeTab.set('items')"
+            [class.border-b-2]="activeTabSig === 'items'"
+            [class.border-indigo-600]="activeTabSig === 'items'"
+            [class.text-indigo-600]="activeTabSig === 'items'"
+            class="flex-1 px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 transition"
+          >
+            Questions
+          </button>
+          <button
+            type="button"
+            (click)="activeTab.set('grading')"
+            [class.border-b-2]="activeTabSig === 'grading'"
+            [class.border-indigo-600]="activeTabSig === 'grading'"
+            [class.text-indigo-600]="activeTabSig === 'grading'"
+            class="flex-1 px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 transition"
+          >
+            Grading
+          </button>
+          <button
+            type="button"
+            (click)="activeTab.set('analytics')"
+            [class.border-b-2]="activeTabSig === 'analytics'"
+            [class.border-indigo-600]="activeTabSig === 'analytics'"
+            [class.text-indigo-600]="activeTabSig === 'analytics'"
+            class="flex-1 px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 transition"
+          >
+            Analytics
+          </button>
+        </div>
 
-    @if (examSig.status === 'published') {
-      <a [routerLink]="['./takers']" class="px-4 py-2 rounded bg-blue-100 hover:bg-blue-200 text-sm font-medium" >
-        View Takers
-      </a>
-    }
-  </div>
+        <!-- Tab Content -->
+        <div class="p-6">
+          <!-- Overview Tab -->
+          @if (activeTabSig === 'overview') {
+            @if (examSig?.tos?.length) {
+              <div class="space-y-4">
+                <div class="flex items-center gap-2 mb-4">
+                  <h3 class="text-lg font-semibold text-gray-800">Table of Specifications</h3>
+                  <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+                    {{ examSig.tos!.length }}
+                  </span>
+                </div>
+                @for (t of examSig.tos; track $index) {
+                  <div class="rounded-lg border bg-gray-50 p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                      <h4 class="text-base font-semibold text-gray-800">Topic: <span class="font-normal">{{ t.topic }}</span></h4>
+                    </div>
+                    @if (t.outcomes.length) {
+                      <div>
+                        <p class="text-xs font-semibold text-gray-600 mb-1">Outcomes</p>
+                        <ul class="list-disc pl-5 text-sm text-gray-700 space-y-0.5">
+                          @for (o of t.outcomes; track $index) {
+                            <li>{{ o }}</li>
+                          }
+                        </ul>
+                      </div>
+                    }
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                      <div><span class="text-gray-500">Time Allotment:</span> <span class="font-medium text-gray-800">{{ t.time_allotment }}</span></div>
+                      <div><span class="text-gray-500">No. of Items:</span> <span class="font-medium text-gray-800">{{ t.no_of_items }}</span></div>
+                    </div>
 
-  @if (examSig?.tos?.length) {
-    <div class="mt-8 space-y-4">
-      <div class="rounded-lg border bg-white p-4">
-        <h3 class="text-lg font-semibold text-gray-800">Table of Specifications</h3>
-      </div>
-      @for (t of examSig.tos; track $index) {
-        <div class="rounded-lg border bg-white p-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <h4 class="text-base font-semibold text-gray-800">Topic: <span class="font-normal">{{ t.topic }}</span></h4>
-          </div>
-          @if (t.outcomes.length) {
-            <div>
-              <p class="text-xs font-semibold text-gray-600 mb-1">Outcomes</p>
-              <ul class="list-disc pl-5 text-sm text-gray-700 space-y-0.5">
-                @for (o of t.outcomes; track $index) {
-                  <li>{{ o }}</li>
+                    @if (t.distribution) {
+                      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <!-- Easy -->
+                        <div class="rounded border p-3 bg-white">
+                          <p class="text-xs font-semibold text-gray-700 mb-2">Easy</p>
+                          <p class="text-xs text-gray-600 mb-1">Allocation: <span class="font-medium text-gray-800">{{ t.distribution.easy.allocation }}</span></p>
+                          @if (t.distribution.easy.placement.length) {
+                            <div class="flex flex-wrap gap-1">
+                              @for (p of t.distribution.easy.placement; track $index) {
+                                <span class="px-2 py-0.5 rounded bg-gray-100 border text-xs">{{ p }}</span>
+                              }
+                            </div>
+                          }
+                        </div>
+                        <!-- Moderate -->
+                        <div class="rounded border p-3 bg-white">
+                          <p class="text-xs font-semibold text-gray-700 mb-2">Moderate</p>
+                          <p class="text-xs text-gray-600 mb-1">Allocation: <span class="font-medium text-gray-800">{{ t.distribution.moderate.allocation }}</span></p>
+                          @if (t.distribution.moderate.placement.length) {
+                            <div class="flex flex-wrap gap-1">
+                              @for (p of t.distribution.moderate.placement; track $index) {
+                                <span class="px-2 py-0.5 rounded bg-gray-100 border text-xs">{{ p }}</span>
+                              }
+                            </div>
+                          }
+                        </div>
+                        <!-- Difficult -->
+                        <div class="rounded border p-3 bg-white">
+                          <p class="text-xs font-semibold text-gray-700 mb-2">Difficult</p>
+                          <p class="text-xs text-gray-600 mb-1">Allocation: <span class="font-medium text-gray-800">{{ t.distribution.difficult.allocation }}</span></p>
+                          @if (t.distribution.difficult.placement.length) {
+                            <div class="flex flex-wrap gap-1">
+                              @for (p of t.distribution.difficult.placement; track $index) {
+                                <span class="px-2 py-0.5 rounded bg-gray-100 border text-xs">{{ p }}</span>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
                 }
-              </ul>
+              </div>
+            } @else {
+              <p class="text-gray-500 text-center py-8">No table of specifications available</p>
+            }
+          }
+
+          <!-- Items/Questions Tab -->
+          @if (activeTabSig === 'items') {
+            <div class="space-y-4">
+              <router-outlet/>
             </div>
           }
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <div><span class="text-gray-500">Time Allotment:</span> <span class="font-medium text-gray-800">{{ t.time_allotment }}</span></div>
-            <div><span class="text-gray-500">No. of Items:</span> <span class="font-medium text-gray-800">{{ t.no_of_items }}</span></div>
-          </div>
 
-          @if (t.distribution) {
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <!-- Easy -->
-              <div class="rounded border p-3 bg-gray-50">
-                <p class="text-xs font-semibold text-gray-700 mb-2">Easy</p>
-                <p class="text-xs text-gray-600 mb-1">Allocation: <span class="font-medium text-gray-800">{{ t.distribution.easy.allocation }}</span></p>
-                @if (t.distribution.easy.placement.length) {
-                  <div class="flex flex-wrap gap-1">
-                    @for (p of t.distribution.easy.placement; track $index) {
-                      <span class="px-2 py-0.5 rounded bg-white border text-xs">{{ p }}</span>
+          <!-- Grading Tab -->
+          @if (activeTabSig === 'grading') {
+            <div class="space-y-4">
+              <router-outlet/>
+            </div>
+          }
+
+          <!-- Analytics Tab -->
+          @if (activeTabSig === 'analytics') {
+            <div class="space-y-4">
+              <router-outlet/>
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <!-- No tabs for draft exams -->
+      @if (examSig?.tos?.length) {
+        <div class="bg-white rounded-lg shadow-sm border p-6 space-y-4">
+          <div class="flex items-center gap-2 mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Table of Specifications</h3>
+            <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+              {{ examSig.tos!.length }}
+            </span>
+          </div>
+          @for (t of examSig.tos; track $index) {
+            <div class="rounded-lg border bg-gray-50 p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="text-base font-semibold text-gray-800">Topic: <span class="font-normal">{{ t.topic }}</span></h4>
+              </div>
+              @if (t.outcomes.length) {
+                <div>
+                  <p class="text-xs font-semibold text-gray-600 mb-1">Outcomes</p>
+                  <ul class="list-disc pl-5 text-sm text-gray-700 space-y-0.5">
+                    @for (o of t.outcomes; track $index) {
+                      <li>{{ o }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <div><span class="text-gray-500">Time Allotment:</span> <span class="font-medium text-gray-800">{{ t.time_allotment }}</span></div>
+                <div><span class="text-gray-500">No. of Items:</span> <span class="font-medium text-gray-800">{{ t.no_of_items }}</span></div>
+              </div>
+
+              @if (t.distribution) {
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <!-- Easy -->
+                  <div class="rounded border p-3 bg-white">
+                    <p class="text-xs font-semibold text-gray-700 mb-2">Easy</p>
+                    <p class="text-xs text-gray-600 mb-1">Allocation: <span class="font-medium text-gray-800">{{ t.distribution.easy.allocation }}</span></p>
+                    @if (t.distribution.easy.placement.length) {
+                      <div class="flex flex-wrap gap-1">
+                        @for (p of t.distribution.easy.placement; track $index) {
+                          <span class="px-2 py-0.5 rounded bg-gray-100 border text-xs">{{ p }}</span>
+                        }
+                      </div>
                     }
                   </div>
-                }
-              </div>
-              <!-- Moderate -->
-              <div class="rounded border p-3 bg-gray-50">
-                <p class="text-xs font-semibold text-gray-700 mb-2">Moderate</p>
-                <p class="text-xs text-gray-600 mb-1">Allocation: <span class="font-medium text-gray-800">{{ t.distribution.moderate.allocation }}</span></p>
-                @if (t.distribution.moderate.placement.length) {
-                  <div class="flex flex-wrap gap-1">
-                    @for (p of t.distribution.moderate.placement; track $index) {
-                      <span class="px-2 py-0.5 rounded bg-white border text-xs">{{ p }}</span>
+                  <!-- Moderate -->
+                  <div class="rounded border p-3 bg-white">
+                    <p class="text-xs font-semibold text-gray-700 mb-2">Moderate</p>
+                    <p class="text-xs text-gray-600 mb-1">Allocation: <span class="font-medium text-gray-800">{{ t.distribution.moderate.allocation }}</span></p>
+                    @if (t.distribution.moderate.placement.length) {
+                      <div class="flex flex-wrap gap-1">
+                        @for (p of t.distribution.moderate.placement; track $index) {
+                          <span class="px-2 py-0.5 rounded bg-gray-100 border text-xs">{{ p }}</span>
+                        }
+                      </div>
                     }
                   </div>
-                }
-              </div>
-              <!-- Difficult -->
-              <div class="rounded border p-3 bg-gray-50">
-                <p class="text-xs font-semibold text-gray-700 mb-2">Difficult</p>
-                <p class="text-xs text-gray-600 mb-1">Allocation: <span class="font-medium text-gray-800">{{ t.distribution.difficult.allocation }}</span></p>
-                @if (t.distribution.difficult.placement.length) {
-                  <div class="flex flex-wrap gap-1">
-                    @for (p of t.distribution.difficult.placement; track $index) {
-                      <span class="px-2 py-0.5 rounded bg-white border text-xs">{{ p }}</span>
+                  <!-- Difficult -->
+                  <div class="rounded border p-3 bg-white">
+                    <p class="text-xs font-semibold text-gray-700 mb-2">Difficult</p>
+                    <p class="text-xs text-gray-600 mb-1">Allocation: <span class="font-medium text-gray-800">{{ t.distribution.difficult.allocation }}</span></p>
+                    @if (t.distribution.difficult.placement.length) {
+                      <div class="flex flex-wrap gap-1">
+                        @for (p of t.distribution.difficult.placement; track $index) {
+                          <span class="px-2 py-0.5 rounded bg-gray-100 border text-xs">{{ p }}</span>
+                        }
+                      </div>
                     }
                   </div>
-                }
-              </div>
+                </div>
+              }
             </div>
           }
         </div>
       }
-    </div>
-  }
-
-    <div class="space-y-8">
-      <router-outlet/>
-    </div>
+    }
   </div>
 }

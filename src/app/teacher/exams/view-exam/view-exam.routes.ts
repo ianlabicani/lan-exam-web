@@ -12,5 +12,17 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./list-exam-items/list-exam-items').then((c) => c.ListExamItems),
   },
+  {
+    path: 'grading',
+    loadComponent: () =>
+      import('./taken-exams/list-taken-exams/list-taken-exams').then(
+        (c) => c.ListTakenExams
+      ),
+  },
+  {
+    path: 'analytics',
+    loadComponent: () =>
+      import('./analytics/analytics').then((c) => c.AnalyticsComponent),
+  },
   ...examTakerRoutes,
 ];

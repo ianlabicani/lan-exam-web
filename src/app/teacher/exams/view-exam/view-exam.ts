@@ -1,4 +1,10 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  signal,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { RouterLink, RouterOutlet, ActivatedRoute } from '@angular/router';
 import { DatePipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,6 +24,7 @@ import { ViewExamService } from './view-exam.service';
   ],
   templateUrl: './view-exam.html',
   styleUrl: './view-exam.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewExam implements OnInit {
   viewExamSvc = inject(ViewExamService);
@@ -25,6 +32,9 @@ export class ViewExam implements OnInit {
 
   loading = signal(true);
   errorMsg = signal<string | null>(null);
+  activeTab = signal<'overview' | 'items' | 'grading' | 'analytics'>(
+    'overview'
+  );
 
   faArrowLeft = faArrowLeft;
 

@@ -1,29 +1,81 @@
-<nav class="bg-white shadow-sm">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<nav class="bg-white shadow-md">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between h-16 items-center">
-      <div class="flex items-center gap-6">
-        <a routerLink="/teacher/dashboard" class="text-lg font-semibold text-gray-900">LAN Exam</a>
-
-        <div class="hidden md:flex items-center space-x-2">
-          <a routerLink="/teacher/dashboard"
-            class="px-3 py-2 text-sm text-gray-700 hover:text-gray-900 rounded-md">Dashboard</a>
-          <a routerLink="/teacher/exams"
-            class="px-3 py-2 text-sm text-gray-700 hover:text-gray-900 rounded-md">Exams</a>
-        </div>
+      <!-- Logo -->
+      <div class="flex items-center gap-2">
+        <a routerLink="/teacher/dashboard" class="flex items-center gap-2 font-bold text-lg text-indigo-600 hover:text-indigo-700">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+          </svg>
+          <span>CBEMS</span>
+        </a>
       </div>
 
-      <div class="flex items-center gap-3">
-        <app-logout-button></app-logout-button>
-        <div class="md:hidden">
-          <button class="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="Open menu">
-            <svg class="h-6 w-6 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+      <!-- Desktop Navigation -->
+      <div class="hidden md:flex items-center space-x-1">
+        <a
+          routerLink="/teacher/dashboard"
+          routerLinkActive="bg-indigo-100 text-indigo-600"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-100 rounded-md transition duration-150">
+          Dashboard
+        </a>
+        <a
+          routerLink="/teacher/exams"
+          routerLinkActive="bg-indigo-100 text-indigo-600"
+          [routerLinkActiveOptions]="{ exact: false }"
+          class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-100 rounded-md transition duration-150">
+          Exams
+        </a>
+        <a
+          routerLink="/teacher/exams/create"
+          class="px-3 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition duration-150">
+          + New Exam
+        </a>
+      </div>
+
+      <!-- Right Section -->
+      <div class="flex items-center gap-4">
+        <!-- User Menu on Desktop -->
+        <div class="hidden md:flex items-center gap-3">
+          <app-logout-button></app-logout-button>
         </div>
+
+        <!-- Mobile Menu Toggle -->
+        <button
+          (click)="toggleMobileMenu()"
+          class="md:hidden p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          aria-label="Toggle menu">
+          <fa-icon [icon]="mobileMenuOpen() ? faTimes : faBars" class="h-6 w-6 text-gray-700"></fa-icon>
+        </button>
       </div>
     </div>
+
+    <!-- Mobile Navigation -->
+    @if (mobileMenuOpen()) {
+    <div class="md:hidden border-t border-gray-200 py-3 space-y-2">
+      <a
+        routerLink="/teacher/dashboard"
+        (click)="closeMobileMenu()"
+        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">
+        Dashboard
+      </a>
+      <a
+        routerLink="/teacher/exams"
+        (click)="closeMobileMenu()"
+        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">
+        Exams
+      </a>
+      <a
+        routerLink="/teacher/exams/create"
+        (click)="closeMobileMenu()"
+        class="block px-3 py-2 text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md">
+        + New Exam
+      </a>
+      <div class="pt-3 border-t border-gray-200">
+        <app-logout-button></app-logout-button>
+      </div>
+    </div>
+    }
   </div>
 </nav>
