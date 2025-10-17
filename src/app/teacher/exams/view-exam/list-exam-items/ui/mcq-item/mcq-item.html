@@ -1,54 +1,52 @@
 @let itemSig = item();
 
-<div class="rounded-lg border border-blue-600 bg-white shadow-sm p-4 space-y-4">
+<div class="rounded-xl border-2 border-green-200 bg-white shadow-md hover:shadow-lg hover:border-green-300 transition p-6 space-y-4">
   <!-- Header -->
   <div class="flex items-center justify-between">
-    <span
-      class="bg-blue-100 text-blue-700 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
-    >
-      MCQ
-    </span>
-    <span class="text-xs text-gray-500">{{ itemSig.points }} pts</span>
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+        <fa-icon [icon]="faCheckSquare" class="text-green-600"></fa-icon>
+      </div>
+      <span class="bg-green-100 text-green-700 text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full">
+        MCQ
+      </span>
+    </div>
+    <span class="text-sm font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-lg">{{ itemSig.points }} pts</span>
   </div>
 
   <!-- Question -->
-  <p class="text-sm font-semibold text-gray-800">
-    {{ itemSig.question }}
-  </p>
+  <div>
+    <p class="text-sm font-semibold text-gray-900">{{ itemSig.question }}</p>
+  </div>
 
   <!-- Options -->
-  <ul class="space-y-2">
+  <div class="space-y-2">
     @for (opt of itemSig.options; track $index) {
-      <li
-        class="flex items-center gap-2 px-3 py-2 rounded-md border"
-        [ngClass]="{
-          'border-green-400 bg-green-50': opt.correct,
-          'border-gray-200 bg-gray-50': !opt.correct
-        }"
+      <div
+        class="flex items-start gap-3 p-3 rounded-lg border-2 transition"
+        [class.border-green-300]="opt.correct"
+        [class.bg-green-50]="opt.correct"
+        [class.border-gray-200]="!opt.correct"
+        [class.bg-white]="!opt.correct"
       >
-        <span
-          class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold"
-          [ngClass]="{
-            'bg-green-500 text-white': opt.correct,
-            'bg-gray-300 text-gray-700': !opt.correct
-          }"
+        <div
+          class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
+          [class.bg-green-600]="opt.correct"
+          [class.bg-gray-400]="!opt.correct"
         >
           {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[$index] }}
-        </span>
-        <span
-          class="text-sm"
-          [class.text-green-700.font-medium]="opt.correct"
-        >
-          {{ opt.text }}
-        </span>
+        </div>
+        <div class="flex-1">
+          <p class="text-sm" [class.text-green-700.font-semibold]="opt.correct" [class.text-gray-700]="!opt.correct">
+            {{ opt.text }}
+          </p>
+        </div>
         @if (opt.correct) {
-          <span
-            class="ml-auto text-[11px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium"
-          >
-            Correct
+          <span class="flex-shrink-0 px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold flex items-center gap-1">
+            <fa-icon [icon]="faCheck"></fa-icon>Correct
           </span>
         }
-      </li>
+      </div>
     }
-  </ul>
+  </div>
 </div>

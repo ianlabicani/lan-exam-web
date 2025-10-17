@@ -47,7 +47,7 @@ export class TrueOrFalseFormModal {
     const payload = {
       type: 'truefalse',
       question: this.tfForm.value.question!,
-      answer: this.tfForm.value.answer!,
+      expected_answer: this.tfForm.value.answer!,
       points: this.tfForm.value.points!,
       level: this.level(),
     };

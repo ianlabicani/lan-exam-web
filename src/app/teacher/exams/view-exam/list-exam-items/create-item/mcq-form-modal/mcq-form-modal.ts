@@ -37,6 +37,7 @@ export class McqFormModal implements OnInit {
   openModal = output<void>();
   closeModal = output<void>();
 
+  readonly String = String;
   readonly MIN_OPTIONS = 2;
   readonly MAX_OPTIONS = 6;
 

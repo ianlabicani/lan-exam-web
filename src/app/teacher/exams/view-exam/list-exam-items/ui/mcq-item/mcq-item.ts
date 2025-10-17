@@ -5,15 +5,19 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { NgClass } from '@angular/common';
 import { ExamItem } from '../../list-exam-items.service';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faCheckSquare, faCheck } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-mcq-item',
-  imports: [ReactiveFormsModule, NgClass],
+  imports: [ReactiveFormsModule, FontAwesomeModule],
   templateUrl: './mcq-item.html',
   styleUrls: ['./mcq-item.css'],
 })
 export class McqItem {
   item = input.required<ExamItem>();
+
+  faCheckSquare = faCheckSquare;
+  faCheck = faCheck;
 }

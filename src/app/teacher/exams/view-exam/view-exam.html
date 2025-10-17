@@ -140,9 +140,9 @@
               </button>
               <button
                 type="button"
-                (click)="activeTab.set('grading')"
-                [class]="'flex-1 px-6 py-4 text-sm font-medium transition border-b-2 ' + (activeTabSig === 'grading' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')">
-                Grading
+                (click)="activeTab.set('takers')"
+                [class]="'flex-1 px-6 py-4 text-sm font-medium transition border-b-2 ' + (activeTabSig === 'takers' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')">
+                Takers
               </button>
               <button
                 type="button"
@@ -205,19 +205,19 @@
                             <!-- Easy -->
                             <div class="rounded-lg border border-gray-300 p-4 bg-white hover:border-green-300 hover:bg-green-50 transition">
                               <p class="text-sm font-semibold text-gray-900 mb-2">Easy</p>
-                              <p class="text-xs text-gray-600">Allocation: <span class="font-bold text-gray-900">{{ t.distribution.easy?.allocation || 0 }}</span></p>
+                              <p class="text-xs text-gray-600">Allocation: <span class="font-bold text-gray-900">{{ t.distribution.easy.allocation }}</span></p>
                             </div>
 
                             <!-- Moderate -->
                             <div class="rounded-lg border border-gray-300 p-4 bg-white hover:border-yellow-300 hover:bg-yellow-50 transition">
                               <p class="text-sm font-semibold text-gray-900 mb-2">Moderate</p>
-                              <p class="text-xs text-gray-600">Allocation: <span class="font-bold text-gray-900">{{ t.distribution.moderate?.allocation || 0 }}</span></p>
+                              <p class="text-xs text-gray-600">Allocation: <span class="font-bold text-gray-900">{{ t.distribution.moderate.allocation }}</span></p>
                             </div>
 
                             <!-- Difficult -->
                             <div class="rounded-lg border border-gray-300 p-4 bg-white hover:border-red-300 hover:bg-red-50 transition">
                               <p class="text-sm font-semibold text-gray-900 mb-2">Difficult</p>
-                              <p class="text-xs text-gray-600">Allocation: <span class="font-bold text-gray-900">{{ t.distribution.difficult?.allocation || 0 }}</span></p>
+                              <p class="text-xs text-gray-600">Allocation: <span class="font-bold text-gray-900">{{ t.distribution.difficult.allocation }}</span></p>
                             </div>
                           </div>
                         </div>
@@ -239,8 +239,8 @@
               </div>
             }
 
-            <!-- Grading Tab -->
-            @if (activeTabSig === 'grading') {
+            <!-- Takers Tab -->
+            @if (activeTabSig === 'takers') {
               <div class="space-y-4">
                 <router-outlet></router-outlet>
               </div>

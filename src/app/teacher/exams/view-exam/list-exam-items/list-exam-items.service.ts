@@ -35,13 +35,13 @@ export class ListExamItemsService {
 
   store(examId: number, payload: any) {
     return this.http
-      .post<{ item: ExamItem }>(
+      .post<{ data: ExamItem }>(
         `${environment.apiBaseUrl}/teacher/exams/${examId}/items`,
         payload
       )
       .pipe(
         tap((res) => {
-          this.items.update((prev) => [...prev, res.item]);
+          this.items.update((prev) => [...prev, res.data]);
         })
       );
   }

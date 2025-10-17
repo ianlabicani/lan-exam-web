@@ -61,7 +61,7 @@ export class EssayFormModal {
             if (!prev) return prev;
             return {
               ...prev,
-              total_points: prev.total_points + res.item.points,
+              total_points: prev.total_points + res.data.points,
             };
           });
           this.isSaving.set(false);

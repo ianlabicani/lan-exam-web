@@ -1,4 +1,12 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import {
+  Component,
+  inject,
+  input,
+  output,
+  signal,
+  computed,
+  effect,
+} from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -6,12 +14,13 @@ import {
   Validators,
 } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 import { environment } from '../../../../../../../environments/environment.development';
 import { ExamItem, ListExamItemsService } from '../../list-exam-items.service';
 
 @Component({
   selector: 'app-matching-form-modal',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './matching-form-modal.html',
   styleUrl: './matching-form-modal.css',
 })
@@ -28,10 +37,14 @@ export class MatchingFormModal {
 
   isSaving = signal(false);
   errorMessage = signal<string | null>(null);
+  pairCount = signal(2);
 
   form = this.fb.nonNullable.group({
     question: ['', [Validators.required, Validators.minLength(3)]],
-    points: [1, [Validators.required, Validators.min(1)]],
+    points: [
+      { value: 2, disabled: true },
+      [Validators.required, Validators.min(1)],
+    ],
     pairs: this.fb.array(this.initialPairs()),
   });
 
@@ -43,6 +56,14 @@ export class MatchingFormModal {
     return this.form.get('pairs') as FormArray;
   }
 
+  constructor() {
+    // Auto-update points when pairs change
+    effect(() => {
+      const pairCount = this.pairCount();
+      this.form.get('points')?.setValue(pairCount, { emitEvent: false });
+    });
+  }
+
   createPair() {
     return this.fb.nonNullable.group({
       left: ['', Validators.required],
@@ -52,11 +73,13 @@ export class MatchingFormModal {
 
   addPair() {
     this.pairs.push(this.createPair());
+    this.pairCount.set(this.pairs.length);
   }
 
   removePair(i: number) {
     if (this.pairs.length <= 2) return;
     this.pairs.removeAt(i);
+    this.pairCount.set(this.pairs.length);
   }
 
   onSubmit() {
@@ -72,16 +95,17 @@ export class MatchingFormModal {
     const payload = {
       type: 'matching',
       question: this.form.value.question!,
-      points: this.form.value.points!,
+      points: this.pairCount(),
       pairs: this.form.value.pairs!,
       level: this.level(),
     };
 
     this.listExamItemsSvc.store(examId, payload).subscribe({
       next: (_) => {
-        this.form.reset({ question: '', points: 1 });
+        this.form.reset({ question: '', points: 2 });
         while (this.pairs.length) this.pairs.removeAt(0);
         this.initialPairs().forEach((p) => this.pairs.push(p));
+        this.pairCount.set(2);
         this.isSaving.set(false);
         this.closeModal.emit();
       },

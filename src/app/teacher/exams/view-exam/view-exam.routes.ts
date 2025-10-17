@@ -13,7 +13,7 @@ export const routes: Routes = [
       import('./list-exam-items/list-exam-items').then((c) => c.ListExamItems),
   },
   {
-    path: 'grading',
+    path: 'takers',
     loadComponent: () =>
       import('./taken-exams/list-taken-exams/list-taken-exams').then(
         (c) => c.ListTakenExams

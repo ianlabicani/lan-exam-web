@@ -1,61 +1,156 @@
 @if (isModalOpen()) {
-  <div class="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 relative">
-      <button class="absolute top-3 right-3 text-gray-500 hover:text-gray-700" (click)="closeModal.emit()">✕</button>
-      <h2 class="text-xl font-semibold mb-4">Add Multiple Choice Question</h2>
+  <!-- Modal Backdrop -->
+  <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 max-h-screen overflow-y-auto">
+    <!-- Modal Container -->
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl my-8">
+      <!-- Header -->
+      <div class="sticky top-0 bg-gradient-to-r from-green-600 to-emerald-600 text-white p-6 rounded-t-xl flex items-center justify-between">
+        <div>
+          <h3 class="text-2xl font-bold">Multiple Choice Question</h3>
+          <p class="text-green-100 text-sm mt-1">Create a question with multiple answer options</p>
+        </div>
+        <button
+          type="button"
+          (click)="closeModal.emit()"
+          class="text-white hover:text-gray-200 transition text-2xl font-bold"
+        >
+          ×
+        </button>
+      </div>
 
-      <form [formGroup]="mcqForm" (ngSubmit)="onSubmit()" class="space-y-4">
+      <!-- Form -->
+      <form [formGroup]="mcqForm" (ngSubmit)="onSubmit()" class="p-6 space-y-6">
         <!-- Question -->
-        <div class="space-y-1">
-          <label class="block text-sm font-medium text-gray-700">Question<span class="text-red-500">*</span></label>
-          <input type="text" class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" formControlName="question" placeholder="Enter the question" />
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-question-circle text-green-600 mr-2"></i>Question *
+          </label>
+          <input
+            type="text"
+            formControlName="question"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+            placeholder="Enter your multiple choice question..."
+          />
           @if (mcqForm.get('question')?.invalid && mcqForm.get('question')?.touched) {
-            <p class="text-red-500 text-sm mt-1">Question is required (min 3 chars).</p>
+            <p class="text-red-500 text-sm mt-2">
+              <i class="fas fa-exclamation-circle mr-1"></i>
+              Question is required (minimum 3 characters).
+            </p>
           }
         </div>
 
         <!-- Points -->
-        <div class="space-y-1">
-          <label class="block text-sm font-medium text-gray-700">Points<span class="text-red-500">*</span></label>
-          <input type="number" min="1" class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" formControlName="points" />
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-star text-green-600 mr-2"></i>Points *
+          </label>
+          <input
+            type="number"
+            formControlName="points"
+            min="1"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+          />
           @if (mcqForm.get('points')?.invalid && mcqForm.get('points')?.touched) {
-            <p class="text-red-500 text-sm mt-1">Must be at least 1 point.</p>
+            <p class="text-red-500 text-sm mt-2">
+              <i class="fas fa-exclamation-circle mr-1"></i>
+              Must be at least 1 point.
+            </p>
           }
         </div>
 
         <!-- Options -->
-        <div class="space-y-2">
+        <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <label class="text-sm font-medium text-gray-700">Options<span class="text-red-500">*</span></label>
-            <button type="button" (click)="addOption()" class="px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50" [disabled]="options.length >= MAX_OPTIONS">Add</button>
+            <label class="text-sm font-medium text-gray-700">
+              <i class="fas fa-list text-green-600 mr-2"></i>Answer Options * (Min {{MIN_OPTIONS}} / Max {{MAX_OPTIONS}})
+            </label>
+            <button
+              type="button"
+              (click)="addOption()"
+              [disabled]="options.length >= MAX_OPTIONS"
+              class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm font-medium"
+            >
+              <i class="fas fa-plus mr-2"></i>Add Option
+            </button>
           </div>
-          <div class="space-y-2">
+
+          <div class="space-y-3">
             @for (opt of options.controls; track $index; let i = $index) {
-              <div class="flex flex-col sm:flex-row sm:items-center gap-2 p-2 rounded border border-gray-200 w-full" [class.bg-green-100]="opt.value.correct" [formGroup]="opt">
-                <input type="text" class="flex-1 rounded border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" formControlName="text" placeholder="Option {{i+1}}" />
-                <div class="flex items-center gap-3 sm:w-auto w-full justify-between sm:justify-start">
-                  <label class="flex items-center gap-1 text-xs text-gray-600 select-none">
-                    <input type="checkbox" formControlName="correct" class="rounded" />
-                    Correct
+              <div
+                class="p-4 rounded-lg border-2 transition flex items-start gap-3"
+                [class.border-green-300]="opt.value.correct"
+                [class.bg-green-50]="opt.value.correct"
+                [class.border-gray-300]="!opt.value.correct"
+                [formGroup]="opt"
+              >
+                <!-- Option Label -->
+                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-semibold text-gray-700 text-sm">
+                  {{ String.fromCharCode(65 + i) }}
+                </div>
+
+                <!-- Option Input -->
+                <div class="flex-1">
+                  <input
+                    type="text"
+                    formControlName="text"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                    [placeholder]="'Option ' + String.fromCharCode(65 + i)"
+                  />
+                </div>
+
+                <!-- Correct Answer Checkbox -->
+                <div class="flex items-center gap-3">
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      formControlName="correct"
+                      class="w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                    />
+                    <span class="text-sm font-medium text-gray-700">Correct</span>
                   </label>
-                  <button type="button" (click)="removeOption(i)" class="text-red-600 bg-red-50 hover:bg-red-100 p-1 rounded" [disabled]="options.length <= MIN_OPTIONS">Remove</button>
+                  <button
+                    type="button"
+                    (click)="removeOption(i)"
+                    [disabled]="options.length <= MIN_OPTIONS"
+                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    title="Remove option"
+                  >
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
                 </div>
               </div>
             }
-            <p class="text-[11px] text-gray-500">Min {{MIN_OPTIONS}} options; max {{MAX_OPTIONS}}. Check at least one correct.</p>
           </div>
+          <p class="text-xs text-gray-500">
+            <i class="fas fa-info-circle mr-1"></i>
+            Select at least one correct answer. Mark the correct option(s) with the checkbox.
+          </p>
         </div>
 
-        <!-- Error -->
+        <!-- Error Message -->
         @if (errorMessage()) {
-          <div class="text-sm text-red-600">{{ errorMessage() }}</div>
+          <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-start gap-3">
+            <i class="fas fa-exclamation-triangle mt-0.5 flex-shrink-0"></i>
+            <div>{{ errorMessage() }}</div>
+          </div>
         }
 
         <!-- Actions -->
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" (click)="closeModal.emit()" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancel</button>
-          <button type="submit" [disabled]="mcqForm.invalid || isSaving() || !hasAnyCorrect()" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50">
-            @if (!isSaving()) { <span>Save</span> } @else { <span>Saving...</span> }
+        <div class="flex justify-end gap-3 pt-4 border-t">
+          <button
+            type="button"
+            (click)="closeModal.emit()"
+            class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="mcqForm.invalid || isSaving() || !hasAnyCorrect()"
+            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium"
+          >
+            <i class="fas fa-save mr-2"></i>
+            {{ isSaving() ? 'Saving...' : 'Save Question' }}
           </button>
         </div>
       </form>

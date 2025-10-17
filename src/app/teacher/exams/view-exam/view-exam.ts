@@ -7,7 +7,7 @@ import {
   computed,
 } from '@angular/core';
 import { RouterLink, RouterOutlet, ActivatedRoute } from '@angular/router';
-import { DatePipe, NgClass, CommonModule } from '@angular/common';
+import { DatePipe, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   faArrowLeft,
@@ -27,7 +27,6 @@ import { ViewExamService } from './view-exam.service';
     FormsModule,
     RouterOutlet,
     FaIconComponent,
-    NgClass,
     CommonModule,
   ],
   templateUrl: './view-exam.html',
@@ -41,9 +40,7 @@ export class ViewExam implements OnInit {
   loading = signal(true);
   saving = signal(false);
   errorMsg = signal<string | null>(null);
-  activeTab = signal<'overview' | 'items' | 'grading' | 'analytics'>(
-    'overview'
-  );
+  activeTab = signal<'overview' | 'items' | 'takers' | 'analytics'>('overview');
   showStatusModal = signal(false);
   selectedStatus = signal<string | null>(null);
 
