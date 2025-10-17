@@ -1,15 +1,33 @@
-import { faSpinner } from '@fortawesome/free-solid-svg-icons';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import {
+  faSpinner,
+  faGraduationCap,
+  faEnvelope,
+  faLock,
+  faEye,
+  faEyeSlash,
+  faSignInAlt,
+  faArrowLeft,
+  faCheckCircle,
+  faExclamationCircle,
+} from '@fortawesome/free-solid-svg-icons';
+import {
+  Component,
+  inject,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, FaIconComponent],
+  imports: [ReactiveFormsModule, FontAwesomeModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Login implements OnInit {
   protected formBuilder = inject(FormBuilder);
@@ -23,7 +41,19 @@ export class Login implements OnInit {
 
   protected isSigningInSig = signal(false);
   protected errorMessageSig = signal<string | null>(null);
-  protected faSpinner = faSpinner;
+  protected showPasswordSig = signal(false);
+
+  // FontAwesome icons
+  protected readonly faSpinner = faSpinner;
+  protected readonly faGraduationCap = faGraduationCap;
+  protected readonly faEnvelope = faEnvelope;
+  protected readonly faLock = faLock;
+  protected readonly faEye = faEye;
+  protected readonly faEyeSlash = faEyeSlash;
+  protected readonly faSignInAlt = faSignInAlt;
+  protected readonly faArrowLeft = faArrowLeft;
+  protected readonly faCheckCircle = faCheckCircle;
+  protected readonly faExclamationCircle = faExclamationCircle;
 
   ngOnInit(): void {
     const currentUser = this.authService.currentUser();
@@ -36,8 +66,14 @@ export class Login implements OnInit {
     }
   }
 
-  protected onSubmit() {
+  protected togglePassword(): void {
+    this.showPasswordSig.update((value) => !value);
+  }
+
+  protected onSubmit(): void {
     this.isSigningInSig.set(true);
+    this.errorMessageSig.set(null);
+
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       this.isSigningInSig.set(false);
@@ -48,7 +84,6 @@ export class Login implements OnInit {
     this.authService.login(email, password).subscribe({
       next: (authUser) => {
         this.authService.setLanExamUser(authUser);
-        this.router.navigate(['/student/dashboard']);
         this.isSigningInSig.set(false);
 
         if (authUser.roles.includes('teacher')) {

@@ -1,0 +1,198 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  <!-- Header -->
+  <header class="bg-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <fa-icon [icon]="faGraduationCap" class="text-4xl text-indigo-600"></fa-icon>
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">CBEMS</h1>
+            <p class="text-sm text-gray-600">Computer-Based Examination and Monitoring System</p>
+          </div>
+        </div>
+        <div class="flex space-x-4">
+          <a routerLink="/login" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200 font-medium">
+            <fa-icon [icon]="faSignInAlt" class="mr-2"></fa-icon>Login
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-16">
+      <h2 class="text-5xl font-bold text-gray-900 mb-4">
+        Welcome to CBEMS
+      </h2>
+      <p class="text-xl text-gray-700 max-w-3xl mx-auto">
+        A comprehensive web-based examination management platform for conducting, scheduling, and monitoring student examinations in real time with advanced activity tracking.
+      </p>
+    </div>
+
+    <!-- User Roles -->
+    <div class="grid md:grid-cols-3 gap-8 mb-16">
+      <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition duration-300 border-t-4 border-blue-500">
+        <div class="text-center">
+          <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <fa-icon [icon]="faChalkboardTeacher" class="text-3xl text-blue-600"></fa-icon>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">Teacher</h3>
+          <p class="text-gray-600">Create and manage exams, track student performance, and grade submissions efficiently.</p>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition duration-300 border-t-4 border-green-500">
+        <div class="text-center">
+          <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <fa-icon [icon]="faUserGraduate" class="text-3xl text-green-600"></fa-icon>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">Student</h3>
+          <p class="text-gray-600">Take exams, view results, and track your academic progress in a secure environment.</p>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition duration-300 border-t-4 border-purple-500">
+        <div class="text-center">
+          <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <fa-icon [icon]="faUserShield" class="text-3xl text-purple-600"></fa-icon>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">Administrator</h3>
+          <p class="text-gray-600">Oversee system operations, manage users, and ensure smooth platform functionality.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Core Features -->
+    <div class="bg-white rounded-xl shadow-lg p-8 mb-16">
+      <h3 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+        <fa-icon [icon]="faStar" class="text-yellow-500 mr-3"></fa-icon>Core Features
+      </h3>
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Authentication -->
+        <div class="flex items-start space-x-4">
+          <div class="bg-indigo-100 p-3 rounded-lg flex-shrink-0">
+            <fa-icon [icon]="faLock" class="text-2xl text-indigo-600"></fa-icon>
+          </div>
+          <div>
+            <h4 class="text-xl font-bold text-gray-900 mb-2">Secure Authentication</h4>
+            <p class="text-gray-600">Robust user authentication system with session management and role-based access control.</p>
+          </div>
+        </div>
+
+        <!-- Monitoring -->
+        <div class="flex items-start space-x-4">
+          <div class="bg-red-100 p-3 rounded-lg flex-shrink-0">
+            <fa-icon [icon]="faEye" class="text-2xl text-red-600"></fa-icon>
+          </div>
+          <div>
+            <h4 class="text-xl font-bold text-gray-900 mb-2">Real-Time Monitoring</h4>
+            <p class="text-gray-600">Advanced activity tracking monitors tab changes, visibility, focus, and idle time during exams.</p>
+          </div>
+        </div>
+
+        <!-- Exam Management -->
+        <div class="flex items-start space-x-4">
+          <div class="bg-green-100 p-3 rounded-lg flex-shrink-0">
+            <fa-icon [icon]="faTasks" class="text-2xl text-green-600"></fa-icon>
+          </div>
+          <div>
+            <h4 class="text-xl font-bold text-gray-900 mb-2">Comprehensive Exam Management</h4>
+            <p class="text-gray-600">Create exams with multiple question types including MCQ, True/False, Essay, Matching, and more.</p>
+          </div>
+        </div>
+
+        <!-- Scheduling -->
+        <div class="flex items-start space-x-4">
+          <div class="bg-blue-100 p-3 rounded-lg flex-shrink-0">
+            <fa-icon [icon]="faCalendarAlt" class="text-2xl text-blue-600"></fa-icon>
+          </div>
+          <div>
+            <h4 class="text-xl font-bold text-gray-900 mb-2">Smart Scheduling</h4>
+            <p class="text-gray-600">Automated exam publishing based on schedules with precise timing and duration controls.</p>
+          </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="flex items-start space-x-4">
+          <div class="bg-purple-100 p-3 rounded-lg flex-shrink-0">
+            <fa-icon [icon]="faChartLine" class="text-2xl text-purple-600"></fa-icon>
+          </div>
+          <div>
+            <h4 class="text-xl font-bold text-gray-900 mb-2">Interactive Dashboards</h4>
+            <p class="text-gray-600">Role-specific dashboards with analytics, performance metrics, and activity summaries.</p>
+          </div>
+        </div>
+
+        <!-- Grading -->
+        <div class="flex items-start space-x-4">
+          <div class="bg-yellow-100 p-3 rounded-lg flex-shrink-0">
+            <fa-icon [icon]="faCheckCircle" class="text-2xl text-yellow-600"></fa-icon>
+          </div>
+          <div>
+            <h4 class="text-xl font-bold text-gray-900 mb-2">Flexible Grading System</h4>
+            <p class="text-gray-600">Automated grading for objective questions with manual review options for subjective answers.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Question Types -->
+    <div class="bg-indigo-600 rounded-2xl shadow-2xl p-10 mb-16">
+      <h3 class="text-3xl font-bold mb-8 text-center text-white drop-shadow-sm">
+        <fa-icon [icon]="faListAlt" class="mr-3 text-white"></fa-icon>
+        Supported Question Types
+      </h3>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="flex items-center space-x-3 bg-indigo-500 hover:bg-indigo-400 transition rounded-xl p-5 text-white">
+          <fa-icon [icon]="faCheckSquare" class="text-3xl text-lime-300"></fa-icon>
+          <span class="font-medium">Multiple Choice</span>
+        </div>
+
+        <div class="flex items-center space-x-3 bg-indigo-500 hover:bg-indigo-400 transition rounded-xl p-5 text-white">
+          <fa-icon [icon]="faToggleOn" class="text-3xl text-cyan-300"></fa-icon>
+          <span class="font-medium">True or False</span>
+        </div>
+
+        <div class="flex items-center space-x-3 bg-indigo-500 hover:bg-indigo-400 transition rounded-xl p-5 text-white">
+          <fa-icon [icon]="faPencilAlt" class="text-3xl text-yellow-300"></fa-icon>
+          <span class="font-medium">Short Answer</span>
+        </div>
+
+        <div class="flex items-center space-x-3 bg-indigo-500 hover:bg-indigo-400 transition rounded-xl p-5 text-white">
+          <fa-icon [icon]="faLink" class="text-3xl text-orange-300"></fa-icon>
+          <span class="font-medium">Matching Type</span>
+        </div>
+
+        <div class="flex items-center space-x-3 bg-indigo-500 hover:bg-indigo-400 transition rounded-xl p-5 text-white">
+          <fa-icon [icon]="faFileAlt" class="text-3xl text-pink-300"></fa-icon>
+          <span class="font-medium">Essay</span>
+        </div>
+
+        <div class="flex items-center space-x-3 bg-indigo-500 hover:bg-indigo-400 transition rounded-xl p-5 text-white">
+          <fa-icon [icon]="faEdit" class="text-3xl text-teal-300"></fa-icon>
+          <span class="font-medium">Fill in the Blanks</span>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- CTA Section -->
+    <div class="text-center bg-white rounded-xl shadow-lg p-12">
+      <h3 class="text-3xl font-bold text-gray-900 mb-4">Ready to Get Started?</h3>
+      <p class="text-gray-600 mb-8 text-lg">Join CBEMS today and experience a modern approach to examination management.</p>
+      <a routerLink="/login" class="inline-block px-8 py-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200 font-bold text-lg shadow-lg">
+        <fa-icon [icon]="faRocket" class="mr-2"></fa-icon>Login Now
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="text-gray-400">
+        <fa-icon [icon]="faCopyright" class="mr-1"></fa-icon>{{ currentYear() }} Computer-Based Examination and Monitoring System. All rights reserved.
+      </p>
+    </div>
+  </footer>
+</div>

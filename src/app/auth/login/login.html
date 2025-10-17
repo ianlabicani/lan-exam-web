@@ -1,104 +1,116 @@
-@let isSigningIn = isSigningInSig(); @let errorMessage = errorMessageSig();
-<!-- signals -->
-<div
-  class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4"
->
-  <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-    <div class="text-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Sign In</h1>
-      <p class="text-sm text-gray-600 mt-1">
-        Welcome back! Please sign in to your account.
-      </p>
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full">
+    <!-- Logo and Header -->
+    <div class="text-center mb-8">
+      <a routerLink="/welcome" class="inline-flex items-center justify-center space-x-3 mb-6 hover:opacity-80 transition">
+        <fa-icon [icon]="faGraduationCap" class="text-5xl text-indigo-600"></fa-icon>
+        <div class="text-left">
+          <h1 class="text-3xl font-bold text-gray-900">CBEMS</h1>
+          <p class="text-xs text-gray-600">Examination System</p>
+        </div>
+      </a>
+      <h2 class="text-2xl font-bold text-gray-900">Welcome Back</h2>
+      <p class="text-gray-600 mt-2">Please sign in to your account</p>
     </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-5">
-      @if (errorMessage) {
-      <div class="rounded-md bg-red-50 p-3 text-sm text-red-700">
-        {{ errorMessage }}
+    <!-- Login Card -->
+    <div class="bg-white rounded-xl shadow-xl p-8">
+      <!-- Status Message -->
+      @if (errorMessageSig()) {
+      <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-start space-x-2">
+        <fa-icon [icon]="faExclamationCircle" class="mt-0.5 flex-shrink-0"></fa-icon>
+        <span>{{ errorMessageSig() }}</span>
       </div>
       }
 
-      <div>
-        @let email = loginForm.controls.email;
-        <label for="email" class="block text-sm font-medium text-gray-700 mb-1"
-          >Email</label
-        >
-        <input
-          type="email"
-          id="email"
-          [formControl]="email"
-          placeholder="you@example.com"
-          required
-          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          [attr.aria-invalid]="email.invalid && email.touched"
-        />
-
-        @if (email.invalid && email.touched) {
-        <p class="mt-2 text-sm text-red-600 space-y-1">
-          @if (email.errors?.['required']) {
-          <span>Email is required</span>
-          } @if (email.errors?.['email']) {
-          <span>Enter a valid email address</span>
-          }
-        </p>
-        }
-      </div>
-
-      <div>
-        @let password = loginForm.controls.password;
-        <label
-          for="password"
-          class="block text-sm font-medium text-gray-700 mb-1"
-          >Password</label
-        >
-        <input
-          type="password"
-          id="password"
-          [formControl]="password"
-          placeholder="Enter your password"
-          required
-          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          [attr.aria-invalid]="password.invalid && password.touched"
-        />
-
-        @if (password.invalid && password.touched) {
-        <div class="mt-2 text-sm text-red-600">
-          @if (password.errors?.['required']) {
-          <div>Password is required</div>
-          } @if (password.errors?.['minlength']) {
-          <div>Password must be at least 6 characters long</div>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Email Address -->
+        <div>
+          @let email = loginForm.controls.email;
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+            <fa-icon [icon]="faEnvelope" class="mr-2 text-gray-500"></fa-icon>Email Address
+          </label>
+          <input
+            id="email"
+            type="email"
+            [formControl]="email"
+            placeholder="Enter your email"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+            [class.border-red-500]="email.invalid && email.touched"
+            [attr.aria-invalid]="email.invalid && email.touched"
+          />
+          @if (email.invalid && email.touched) {
+          <p class="mt-2 text-sm text-red-600 flex items-center">
+            <fa-icon [icon]="faExclamationCircle" class="mr-1"></fa-icon>
+            @if (email.errors?.['required']) {
+              <span>Email is required</span>
+            }
+            @if (email.errors?.['email']) {
+              <span>Enter a valid email address</span>
+            }
+          </p>
           }
         </div>
-        }
-      </div>
 
-      <div class="flex items-center justify-between">
-        <!-- <div class="flex items-center">
-          <input
-            id="remember"
-            type="checkbox"
-            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-          />
-          <label for="remember" class="ml-2 block text-sm text-gray-900"
-            >Remember me</label
-          >
-        </div> -->
-        <!-- <a href="#" class="text-sm text-blue-600 hover:underline">Forgot password?</a> -->
-      </div>
+        <!-- Password -->
+        <div>
+          @let password = loginForm.controls.password;
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+            <fa-icon [icon]="faLock" class="mr-2 text-gray-500"></fa-icon>Password
+          </label>
+          <div class="relative">
+            <input
+              [type]="showPasswordSig() ? 'text' : 'password'"
+              id="password"
+              [formControl]="password"
+              placeholder="Enter your password"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+              [class.border-red-500]="password.invalid && password.touched"
+              [attr.aria-invalid]="password.invalid && password.touched"
+            />
+            <button
+              type="button"
+              (click)="togglePassword()"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition"
+              title="Toggle password visibility"
+            >
+              <fa-icon [icon]="showPasswordSig() ? faEyeSlash : faEye"></fa-icon>
+            </button>
+          </div>
+          @if (password.invalid && password.touched) {
+          <p class="mt-2 text-sm text-red-600 flex items-center">
+            <fa-icon [icon]="faExclamationCircle" class="mr-1"></fa-icon>
+            @if (password.errors?.['required']) {
+              <span>Password is required</span>
+            }
+            @if (password.errors?.['minlength']) {
+              <span>Password must be at least 6 characters long</span>
+            }
+          </p>
+          }
+        </div>
 
-      <button
-        type="submit"
-        class="cursor-pointer w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-        [disabled]="isSigningIn"
-      >
-        {{isSigningIn ? 'Signing In...' : 'Sign In'}} @if(isSigningIn) {
-        <fa-icon
-          [icon]="faSpinner"
-          class="fa-spin text-white inline-block ml-2"
-          title="Signing In..."
-        ></fa-icon>
-        }
-      </button>
-    </form>
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          [disabled]="isSigningInSig()"
+          class="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 transition duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <fa-icon [icon]="faSignInAlt"></fa-icon>
+          <span>{{ isSigningInSig() ? 'Signing In...' : 'Sign In' }}</span>
+          @if (isSigningInSig()) {
+          <fa-icon [icon]="faSpinner" class="fa-spin"></fa-icon>
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- Back to Home -->
+    <div class="text-center mt-6">
+      <a routerLink="/welcome" class="text-sm text-gray-600 hover:text-gray-900 flex items-center justify-center space-x-2 transition">
+        <fa-icon [icon]="faArrowLeft"></fa-icon>
+        <span>Back to Homepage</span>
+      </a>
+    </div>
   </div>
 </div>

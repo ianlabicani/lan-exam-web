@@ -25,4 +25,8 @@ export const routes: Routes = [
       import('./teacher/teacher.routes').then((m) => m.routes),
   },
   ...studentRoutes,
+  {
+    path: 'welcome',
+    loadComponent: () => import('./welcome/welcome').then((c) => c.Welcome),
+  },
 ];
