@@ -13,7 +13,7 @@ import {
   Validators,
   FormArray,
 } from '@angular/forms';
-import { ExamItem, MatchingPair } from '../list-exam-items.service';
+import { ExamItem, MatchingPair } from '../exam-item-state.service';
 
 @Component({
   selector: 'app-update-item',

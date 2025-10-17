@@ -2,7 +2,7 @@ import { Component, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../../environments/environment.development';
-import { ExamItem, ListExamItemsService } from '../../list-exam-items.service';
+import { ExamItem } from '../../exam-item-state.service';
 import { ViewExamService } from '../../../view-exam.service';
 
 @Component({
@@ -14,7 +14,6 @@ import { ViewExamService } from '../../../view-exam.service';
 export class ShortAnswerFormModal {
   fb = inject(FormBuilder);
   http = inject(HttpClient);
-  listExamItemsSvc = inject(ListExamItemsService);
   viewExamSvc = inject(ViewExamService);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();

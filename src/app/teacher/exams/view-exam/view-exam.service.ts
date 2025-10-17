@@ -1,7 +1,7 @@
 import { inject, Injectable, signal, computed } from '@angular/core';
 import { Exam } from '../../services/exam.service';
 import { ExamApiService } from '../services/exam-api.service';
-import { ListExamItemsService } from './list-exam-items/list-exam-items.service';
+import { ExamItemStateService } from './list-exam-items/exam-item-state.service';
 import { tap } from 'rxjs';
 
 @Injectable({
@@ -10,7 +10,7 @@ import { tap } from 'rxjs';
 export class ViewExamService {
   exam = signal<Exam | null>(null);
   api = inject(ExamApiService);
-  listItemsSvc = inject(ListExamItemsService);
+  itemsStateSvc = inject(ExamItemStateService);
   /**
    * Internal signal that holds the currently viewing exam for the feature.
    * Use the provided helper methods to update this signal instead of setting directly.
@@ -74,10 +74,10 @@ export class ViewExamService {
 
   /**
    * Create an item via the items service and update the viewing exam state.
-   * Returns the observable from ListExamItemsService.store()
+   * Returns the observable from ExamItemStateService.store()
    */
   createItem(examId: number, payload: any) {
-    return this.listItemsSvc.store(examId, payload).pipe(
+    return this.itemsStateSvc.store(examId, payload).pipe(
       tap((res) => {
         const addedPoints = res?.data?.points ?? 0;
         if (addedPoints) {
@@ -93,12 +93,12 @@ export class ViewExamService {
   /**
    * Update an item and patch viewing exam total_points by the delta.
    */
-  updateItem(item: any) {
+  updateItem(examId: number, item: any) {
     // determine previous points from local items
-    const prev = this.listItemsSvc.items$().find((it) => it.id === item.id);
+    const prev = this.itemsStateSvc.items$().find((it) => it.id === item.id);
     const prevPoints = prev?.points ?? 0;
 
-    return this.listItemsSvc.update(item).pipe(
+    return this.itemsStateSvc.update(examId, item).pipe(
       tap((res) => {
         const newPoints = res?.data?.points ?? item.points ?? 0;
         const delta = newPoints - prevPoints;
@@ -115,11 +115,11 @@ export class ViewExamService {
   /**
    * Delete an item and adjust the viewing exam total_points.
    */
-  deleteItem(itemId: number) {
-    const item = this.listItemsSvc.items$().find((it) => it.id === itemId);
+  deleteItem(examId: number, itemId: number) {
+    const item = this.itemsStateSvc.items$().find((it) => it.id === itemId);
     const points = item?.points ?? 0;
 
-    return this.listItemsSvc.delete(itemId).pipe(
+    return this.itemsStateSvc.delete(examId, itemId).pipe(
       tap(() => {
         if (points) {
           this.patchViewingExam({

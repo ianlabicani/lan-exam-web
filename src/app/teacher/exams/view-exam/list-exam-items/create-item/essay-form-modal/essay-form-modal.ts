@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { environment } from '../../../../../../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
 import { ViewExamService } from '../../../view-exam.service';
-import { ExamItem, ListExamItemsService } from '../../list-exam-items.service';
+import { ExamItem } from '../../exam-item-state.service';
 
 @Component({
   selector: 'app-essay-form-modal',
@@ -15,7 +15,6 @@ export class EssayFormModal {
   viewExamSvc = inject(ViewExamService);
   fb = inject(FormBuilder);
   http = inject(HttpClient);
-  listExamItemsSvc = inject(ListExamItemsService);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();
   close = output<void>();

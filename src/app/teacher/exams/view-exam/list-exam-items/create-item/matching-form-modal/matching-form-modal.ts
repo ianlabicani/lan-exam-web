@@ -16,7 +16,7 @@ import {
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../../../../../environments/environment.development';
-import { ExamItem, ListExamItemsService } from '../../list-exam-items.service';
+import { ExamItem } from '../../exam-item-state.service';
 import { ViewExamService } from '../../../view-exam.service';
 
 @Component({
@@ -28,7 +28,6 @@ import { ViewExamService } from '../../../view-exam.service';
 export class MatchingFormModal {
   fb = inject(FormBuilder);
   http = inject(HttpClient);
-  listExamItemsSvc = inject(ListExamItemsService);
   viewExamSvc = inject(ViewExamService);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();

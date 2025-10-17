@@ -1,4 +1,4 @@
-import { ExamItem, ListExamItemsService } from './list-exam-items.service';
+import { ExamItem, ExamItemStateService } from './exam-item-state.service';
 import { ActivatedRoute } from '@angular/router';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { McqItem } from './ui/mcq-item/mcq-item';
@@ -45,7 +45,7 @@ export class ListExamItems implements OnInit {
   http = inject(HttpClient);
   activatedRoute = inject(ActivatedRoute);
   viewExamSvc = inject(ViewExamService);
-  listExamItemsSvc = inject(ListExamItemsService);
+  itemsStateSvc = inject(ExamItemStateService);
 
   isUpdateModalOpenSig = signal(false);
   selectedForUpdateSig = signal<ExamItem | null>(null);
@@ -92,7 +92,7 @@ export class ListExamItems implements OnInit {
   isModerateOpen = signal(true);
   isDifficultOpen = signal(true);
 
-  items = this.listExamItemsSvc.items$;
+  items = this.itemsStateSvc.items$;
 
   ngOnInit(): void {
     const examId: number =
@@ -102,7 +102,7 @@ export class ListExamItems implements OnInit {
   }
 
   getExamItems(examId: number) {
-    this.listExamItemsSvc.index(examId).subscribe({
+    this.itemsStateSvc.index(examId).subscribe({
       next: (res) => {
         console.log(res);
       },
@@ -137,7 +137,12 @@ export class ListExamItems implements OnInit {
   }
 
   onItemSaved(examItem: ExamItem) {
-    this.viewExamSvc.updateItem(examItem).subscribe({
+    const examId = this.viewExamSvc.getViewingExamSnapshot()?.id;
+    if (!examId) {
+      console.error('No exam ID available');
+      return;
+    }
+    this.viewExamSvc.updateItem(examId, examItem).subscribe({
       next: () => {
         this.closeUpdateModal();
       },

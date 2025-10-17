@@ -2,7 +2,7 @@ import { Exam } from './../../../../services/exam.service';
 import { ViewExamService } from '../../view-exam.service';
 import { Component, input, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ExamItem, ListExamItemsService } from '../list-exam-items.service';
+import { ExamItem } from '../exam-item-state.service';
 
 @Component({
   selector: 'app-delete-item',
@@ -12,10 +12,10 @@ import { ExamItem, ListExamItemsService } from '../list-exam-items.service';
 })
 export class DeleteItem {
   itemInput = input.required<ExamItem>();
+  exam = input.required<Exam>();
   deleted = output<ExamItem>();
   close = output<void>();
 
-  examItemsSvc = inject(ListExamItemsService);
   viewExamSvc = inject(ViewExamService);
 
   deleting = false;
@@ -23,11 +23,12 @@ export class DeleteItem {
 
   confirmDelete() {
     const item = this.itemInput();
-    if (!item) return;
+    const exam = this.exam();
+    if (!item || !exam) return;
     this.deleting = true;
     this.error = null;
 
-    this.viewExamSvc.deleteItem(item.id).subscribe({
+    this.viewExamSvc.deleteItem(exam.id, item.id).subscribe({
       next: (res) => {
         this.deleting = false;
         this.deleted.emit(item);
