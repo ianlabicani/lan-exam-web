@@ -1,0 +1,196 @@
+<div class="space-y-6">
+  <!-- Exam Information -->
+  <div class="bg-gray-50 rounded-lg p-6">
+    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+      <fa-icon [icon]="faInfoCircle" class="text-indigo-600"></fa-icon>
+      Exam Information
+    </h3>
+    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Year Level(s) -->
+      <div>
+        <dt class="text-sm font-medium text-gray-500 mb-1 flex items-center gap-1">
+          <fa-icon [icon]="faGraduationCap" class="text-sm"></fa-icon>Year Level(s)
+        </dt>
+        <dd class="text-lg font-semibold text-gray-900">
+          @if(exam().year && exam().year.length > 0) {
+            <div class="flex flex-wrap gap-2">
+              @for (y of exam().year; track $index) {
+                <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded-full">
+                  Year {{ y }}
+                </span>
+              }
+            </div>
+          } @else {
+            <span class="text-gray-400">Not specified</span>
+          }
+        </dd>
+      </div>
+
+      <!-- Section(s) -->
+      <div>
+        <dt class="text-sm font-medium text-gray-500 mb-1 flex items-center gap-1">
+          <fa-icon [icon]="faUsers" class="text-sm"></fa-icon>Section(s)
+        </dt>
+        <dd class="text-lg font-semibold text-gray-900">
+          @if(exam().sections && (exam().sections ?? []).length > 0) {
+            <div class="flex flex-wrap gap-2">
+              @for (s of exam().sections; track $index) {
+                <span class="px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-full uppercase">
+                  {{ s }}
+                </span>
+              }
+            </div>
+          } @else {
+            <span class="text-gray-400">Not specified</span>
+          }
+        </dd>
+      </div>
+
+      <!-- Start Date & Time -->
+      <div>
+        <dt class="text-sm font-medium text-gray-500 mb-1 flex items-center gap-1">
+          <fa-icon [icon]="faCalendar" class="text-sm"></fa-icon>Start Date & Time
+        </dt>
+        <dd class="text-lg font-semibold text-gray-900">
+          {{ exam().starts_at ? (exam().starts_at | date:'EEEE, MMMM d, y - h:mm a') : 'Not set' }}
+        </dd>
+      </div>
+
+      <!-- End Date & Time -->
+      <div>
+        <dt class="text-sm font-medium text-gray-500 mb-1 flex items-center gap-1">
+          <fa-icon [icon]="faCalendarTimes" class="text-sm"></fa-icon>End Date & Time
+        </dt>
+        <dd class="text-lg font-semibold text-gray-900">
+          {{ exam().ends_at ? (exam().ends_at | date:'EEEE, MMMM d, y - h:mm a') : 'Not set' }}
+        </dd>
+      </div>
+
+      <!-- Duration -->
+      <div>
+        <dt class="text-sm font-medium text-gray-500 mb-1 flex items-center gap-1">
+          <fa-icon [icon]="faClock" class="text-sm"></fa-icon>Duration
+        </dt>
+        <dd class="text-lg font-semibold text-gray-900">
+          @if(exam().starts_at && exam().ends_at) {
+            {{ calculateDuration(exam().starts_at, exam().ends_at) }} minutes
+          } @else {
+            Not calculated
+          }
+        </dd>
+      </div>
+
+      <!-- Total Points -->
+      <div>
+        <dt class="text-sm font-medium text-gray-500 mb-1 flex items-center gap-1">
+          <fa-icon [icon]="faStar" class="text-sm"></fa-icon>Total Points
+        </dt>
+        <dd class="text-lg font-semibold text-gray-900">
+          {{ exam().total_points }} points
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  <!-- Table of Specifications -->
+  @if(exam().tos && (exam().tos ?? []).length > 0) {
+    <div class="bg-gray-50 rounded-lg p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <fa-icon [icon]="faTable" class="text-indigo-600"></fa-icon>Table of Specifications
+      </h3>
+      <div class="space-y-4">
+        @for (topic of exam().tos; track $index) {
+          <div class="bg-white rounded-lg p-4 border border-gray-200">
+            <!-- Topic Header -->
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex-1">
+                <h4 class="text-md font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <fa-icon [icon]="faBookOpen" class="text-indigo-500"></fa-icon>{{ topic.topic }}
+                </h4>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span class="text-gray-500">Time Allotment:</span>
+                    <span class="font-semibold text-gray-900 ml-2">{{ topic.time_allotment }} hours</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-500">Number of Items:</span>
+                    <span class="font-semibold text-gray-900 ml-2">{{ topic.no_of_items }} questions</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Difficulty Distribution -->
+            @if(topic.distribution) {
+              <div class="mt-3 pt-3 border-t border-gray-200">
+                <p class="text-xs font-medium text-gray-500 uppercase mb-2">Difficulty Distribution</p>
+                <div class="flex items-center space-x-3 flex-wrap">
+                  @if(topic.distribution.easy) {
+                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full flex items-center gap-1">
+                      <fa-icon [icon]="faSignal" class="text-xs"></fa-icon>Easy (30%): {{ topic.distribution.easy.allocation }}
+                    </span>
+                  }
+                  @if(topic.distribution.moderate) {
+                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full flex items-center gap-1">
+                      <fa-icon [icon]="faSignal" class="text-xs"></fa-icon>Average (50%): {{ topic.distribution.moderate.allocation }}
+                    </span>
+                  }
+                  @if(topic.distribution.difficult) {
+                    <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full flex items-center gap-1">
+                      <fa-icon [icon]="faSignal" class="text-xs"></fa-icon>Difficult (20%): {{ topic.distribution.difficult.allocation }}
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Learning Outcomes -->
+            @if(topic.outcomes && topic.outcomes.length > 0) {
+              <div class="mt-3 pt-3 border-t border-gray-200">
+                <p class="text-xs font-medium text-gray-500 uppercase mb-2">Learning Outcomes</p>
+                <ul class="list-disc list-inside space-y-1">
+                  @for (outcome of topic.outcomes; track $index) {
+                    <li class="text-sm text-gray-700">{{ outcome }}</li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Instructions -->
+  <div class="bg-gray-50 rounded-lg p-6">
+    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+      <fa-icon [icon]="faListOl" class="text-indigo-600"></fa-icon>Instructions for Students
+    </h3>
+    <p class="text-gray-700 whitespace-pre-line">No instructions provided</p>
+  </div>
+
+  <!-- Settings -->
+  <div class="bg-gray-50 rounded-lg p-6">
+    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+      <fa-icon [icon]="faCog" class="text-indigo-600"></fa-icon>Exam Settings
+    </h3>
+    <p class="text-gray-600">Exam settings will be configured during publication</p>
+  </div>
+
+  <!-- Metadata -->
+  <div class="bg-gray-50 rounded-lg p-6">
+    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+      <fa-icon [icon]="faDatabase" class="text-indigo-600"></fa-icon>Metadata
+    </h3>
+    <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Created On</dt>
+        <dd class="text-sm text-gray-900 mt-1">{{ exam().created_at | date:'MMMM d, y h:mm a' }}</dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Exam ID</dt>
+        <dd class="text-sm text-gray-900 mt-1">#{{ exam().id }}</dd>
+      </div>
+    </dl>
+  </div>
+</div>

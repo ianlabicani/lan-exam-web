@@ -15,9 +15,24 @@ import {
   faExclamationCircle,
   faTimes,
   faSync,
+  faInfoCircle,
+  faGraduationCap,
+  faUsers,
+  faCalendar,
+  faCalendarTimes,
+  faClock,
+  faStar,
+  faTable,
+  faBookOpen,
+  faSignal,
+  faListOl,
+  faCog,
+  faCheck,
+  faDatabase,
 } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { ViewExamService } from './view-exam.service';
+import { ExamDetails } from './exam-details/exam-details';
 
 @Component({
   selector: 'app-view-exam',
@@ -28,6 +43,7 @@ import { ViewExamService } from './view-exam.service';
     RouterOutlet,
     FaIconComponent,
     CommonModule,
+    ExamDetails,
   ],
   templateUrl: './view-exam.html',
   styleUrl: './view-exam.css',
@@ -49,6 +65,20 @@ export class ViewExam implements OnInit {
   faExclamationCircle = faExclamationCircle;
   faTimes = faTimes;
   faSync = faSync;
+  faInfoCircle = faInfoCircle;
+  faGraduationCap = faGraduationCap;
+  faUsers = faUsers;
+  faCalendar = faCalendar;
+  faCalendarTimes = faCalendarTimes;
+  faClock = faClock;
+  faStar = faStar;
+  faTable = faTable;
+  faBookOpen = faBookOpen;
+  faSignal = faSignal;
+  faListOl = faListOl;
+  faCog = faCog;
+  faCheck = faCheck;
+  faDatabase = faDatabase;
 
   // Computed signals
   exam = this.viewExamSvc.exam;
@@ -152,5 +182,11 @@ export class ViewExam implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  calculateDuration(startDate: Date | string, endDate: Date | string): number {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return Math.round((end.getTime() - start.getTime()) / 60000); // Convert ms to minutes
   }
 }
