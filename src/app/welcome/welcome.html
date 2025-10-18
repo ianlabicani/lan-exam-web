@@ -11,9 +11,15 @@
           </div>
         </div>
         <div class="flex space-x-4">
-          <a routerLink="/login" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200 font-medium">
-            <fa-icon [icon]="faSignInAlt" class="mr-2"></fa-icon>Login
-          </a>
+          @if (isAuthenticated()) {
+            <a [routerLink]="dashboardPath()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 font-medium">
+              <fa-icon [icon]="faChartLine" class="mr-2"></fa-icon>Go to Dashboard
+            </a>
+          } @else {
+            <a routerLink="/login" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200 font-medium">
+              <fa-icon [icon]="faSignInAlt" class="mr-2"></fa-icon>Login
+            </a>
+          }
         </div>
       </div>
     </div>

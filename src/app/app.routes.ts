@@ -8,7 +8,7 @@ import { routes as studentRoutes } from './student/student.routes';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'welcome',
     pathMatch: 'full',
   },
   {

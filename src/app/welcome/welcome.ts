@@ -1,5 +1,11 @@
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import {
+  Component,
+  signal,
+  ChangeDetectionStrategy,
+  inject,
+  computed,
+} from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   faGraduationCap,
@@ -24,6 +30,7 @@ import {
   faRocket,
   faCopyright,
 } from '@fortawesome/free-solid-svg-icons';
+import { AuthService } from '../core/services/auth.service';
 
 @Component({
   selector: 'app-welcome',
@@ -33,6 +40,9 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Welcome {
+  protected authService = inject(AuthService);
+  protected router = inject(Router);
+
   // FontAwesome icons
   protected readonly faGraduationCap = faGraduationCap;
   protected readonly faSignInAlt = faSignInAlt;
@@ -57,4 +67,22 @@ export class Welcome {
   protected readonly faCopyright = faCopyright;
 
   protected readonly currentYear = signal(new Date().getFullYear());
+
+  // Computed signal to check if user is authenticated
+  protected isAuthenticated = computed(() => {
+    const user = this.authService.currentUser();
+    return user !== null && user !== undefined;
+  });
+
+  // Computed signal to get the dashboard path based on user role
+  protected dashboardPath = computed(() => {
+    const user = this.authService.currentUser();
+    if (user?.roles?.includes('teacher')) {
+      return '/teacher/dashboard';
+    }
+    if (user?.roles?.includes('student')) {
+      return '/student/dashboard';
+    }
+    return '/';
+  });
 }
