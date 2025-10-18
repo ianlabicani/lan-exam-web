@@ -1,108 +1,185 @@
 @let examsSig = exams();
 @let isLoadingSig = isLoading();
 
-<div class="mb-8 container mx-auto">
-  <h2 class="text-xl font-semibold text-gray-900 mb-6">Available Exams</h2>
-
-  <!-- Loading State -->
-  @if (isLoadingSig) {
-    <div class="flex justify-center items-center py-20 text-gray-500">
-      <fa-icon [icon]="faSpinner" class="text-2xl mr-2" animation="spin"></fa-icon>
-      <span class="text-sm font-medium">Loading exams, please wait...</span>
+<div class="min-h-screen py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">
+        <fa-icon [icon]="faQuestionCircle" class="text-indigo-600 mr-3"></fa-icon>Available Exams
+      </h1>
+      <p class="text-gray-600">View and take your assigned exams</p>
     </div>
-  }
 
-  <!-- Empty State -->
-  @else if (!examsSig.length) {
-    <div class="border border-dashed border-gray-300 rounded-lg p-10 text-center text-gray-500 bg-white">
-      <fa-icon [icon]="fasInfoCircle" class="text-gray-400 text-3xl mb-3"></fa-icon>
-      <p class="mb-2 font-medium">No exams available for your year & section yet.</p>
-      <p class="text-sm">Please check back later.</p>
-    </div>
-  }
+    <!-- Loading State -->
+    @if (isLoadingSig) {
+      <div class="flex justify-center items-center py-20 text-gray-500">
+        <fa-icon [icon]="faSpinner" class="text-2xl mr-2" animation="spin"></fa-icon>
+        <span class="text-sm font-medium">Loading exams, please wait...</span>
+      </div>
+    }
 
-  <!-- Exam List -->
-  @else {
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      @for (exam of examsSig; track exam.id) {
-        <div class="p-5 rounded-lg border border-slate-200 bg-white shadow-sm flex flex-col justify-between">
-          <!-- Exam Info -->
-          <div>
-            <h3 class="text-lg font-semibold text-slate-800">{{ exam.title }}</h3>
-            <p class="text-sm text-slate-600 mb-2">{{ exam.description }}</p>
+    <!-- Empty State -->
+    @else if (!examsSig.length) {
+      <div class="bg-white rounded-xl shadow-md p-12 text-center">
+        <div class="bg-gray-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+          <fa-icon [icon]="fasInfoCircle" class="text-4xl text-gray-400"></fa-icon>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">No Exams Available</h3>
+        <p class="text-gray-600">There are currently no exams assigned to you.</p>
+      </div>
+    }
 
-            <div class="space-y-1 text-xs text-slate-500">
-              <p>
-                <fa-icon [icon]="fasGraduationCap" class="mr-1"></fa-icon>
-                Year & Section:
-                <span class="font-medium">{{ exam.year }}{{ exam.sections }}</span>
-              </p>
-              <p>
-                <fa-icon [icon]="fasClock" class="mr-1"></fa-icon>
-                {{ exam.starts_at | date:'short' }} → {{ exam.ends_at | date:'short' }}
-              </p>
-              <p>
-                <fa-icon [icon]="fasTag" class="mr-1"></fa-icon>
-                Status:
-                <span
-                  [ngClass]="{
-                    'text-green-600 font-medium': exam.status === 'active',
-                    'text-gray-500 italic': exam.status !== 'active'
-                  }"
-                >
-                  {{ exam.status | titlecase }}
-                </span>
-              </p>
+    <!-- Exams Grid -->
+    @else {
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        @for (exam of examsSig; track exam.id) {
+          <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition duration-300 border border-gray-200">
+            <!-- Exam Header -->
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <h3 class="text-xl font-bold mb-2">{{ exam.title }}</h3>
+                  <p class="text-indigo-100 text-sm">{{ exam.description }}</p>
+
+                  <!-- Year and Sections -->
+                  <div class="flex flex-wrap items-center gap-2 mt-3">
+                    @if (exam.year) {
+                      <div class="flex items-center gap-1">
+                        <span class="text-xs text-indigo-200">
+                          <fa-icon [icon]="fasGraduationCap"></fa-icon>
+                        </span>
+                        <span class="px-2 py-0.5 bg-white bg-opacity-90 text-indigo-700 text-xs font-semibold rounded">
+                          Year {{ exam.year }}
+                        </span>
+                      </div>
+                    }
+
+                    @if (exam.sections && exam.sections.length > 0) {
+                      <div class="flex items-center gap-1">
+                        <span class="text-xs text-indigo-200">
+                          <fa-icon [icon]="fasGraduationCap"></fa-icon>
+                        </span>
+                        @for (section of exam.sections; track section) {
+                          <span class="px-2 py-0.5 bg-white bg-opacity-90 text-indigo-700 text-xs font-semibold rounded uppercase">
+                            {{ section }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+                <div class="ml-2">
+                  @if (exam.taken_exam) {
+                    <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full flex-shrink-0 whitespace-nowrap">
+                      <fa-icon [icon]="faCheckCircle" class="mr-1"></fa-icon>Taken
+                    </span>
+                  } @else if (!isExamAvailable(exam)) {
+                    <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full flex-shrink-0 whitespace-nowrap">
+                      <fa-icon [icon]="fasClock" class="mr-1"></fa-icon>Unavailable
+                    </span>
+                  } @else {
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full flex-shrink-0 whitespace-nowrap">
+                      <fa-icon [icon]="faHourglassHalf" class="mr-1"></fa-icon>Available
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Exam Details -->
+            <div class="p-6">
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="flex items-center space-x-2 text-sm text-gray-600">
+                  <fa-icon [icon]="faQuestionCircle" class="text-indigo-600"></fa-icon>
+                  <span>{{ getTotalQuestions(exam) }} Questions</span>
+                </div>
+                <div class="flex items-center space-x-2 text-sm text-gray-600">
+                  <fa-icon [icon]="faStar" class="text-indigo-600"></fa-icon>
+                  <span>{{ exam.total_points }} Points</span>
+                </div>
+                <div class="flex items-center space-x-2 text-sm text-gray-600">
+                  <fa-icon [icon]="faCalendarAlt" class="text-indigo-600"></fa-icon>
+                  <span>{{ exam.starts_at | date:'MMM dd, yyyy' }}</span>
+                </div>
+                <div class="flex items-center space-x-2 text-sm text-gray-600">
+                  <fa-icon [icon]="fasClock" class="text-indigo-600"></fa-icon>
+                  <span>{{ exam.ends_at | date:'h:mm a' }}</span>
+                </div>
+              </div>
+
+              <!-- Time Remaining -->
+              @if (isExamAvailable(exam) && !exam.taken_exam) {
+                <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div class="flex items-center space-x-2 text-blue-800 text-sm">
+                    <fa-icon [icon]="fasClock"></fa-icon>
+                    <span class="font-semibold">Exam Duration: {{ getExamDuration(exam) }}</span>
+                  </div>
+                </div>
+                <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div class="flex items-center space-x-2 text-yellow-800 text-sm">
+                    <fa-icon [icon]="faExclamationTriangle"></fa-icon>
+                    <span class="font-semibold">Available Until: {{ getTimeRemaining(exam) }}</span>
+                  </div>
+                </div>
+              }
+
+              <!-- Score Display (if taken) -->
+              @if (exam.taken_exam && exam.taken_exam.submitted_at) {
+                <div class="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-gray-600 mb-1">Your Score</p>
+                      <p class="text-2xl font-bold text-green-700">
+                        {{ exam.taken_exam.total_points }}/{{ exam.total_points }}
+                      </p>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-sm text-gray-600 mb-1">Percentage</p>
+                      <p class="text-2xl font-bold text-green-700">
+                        {{ exam.total_points > 0 ? ((exam.taken_exam.total_points / exam.total_points) * 100).toFixed(2) : 0 }}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- Action Buttons -->
+              <div class="flex space-x-3">
+                @if (exam.taken_exam && exam.taken_exam.submitted_at) {
+                  <a
+                    [routerLink]="['/student/taken-exams', exam.taken_exam.id]"
+                    class="flex-1 px-4 py-3 bg-indigo-600 text-white text-center rounded-lg font-medium hover:bg-indigo-700 transition duration-200"
+                  >
+                    <fa-icon [icon]="faQuestionCircle" class="mr-2"></fa-icon>View Results
+                  </a>
+                } @else if (exam.taken_exam && !exam.taken_exam.submitted_at) {
+                  <a
+                    [routerLink]="['/student/taken-exams', exam.taken_exam.id, 'continue']"
+                    class="flex-1 px-4 py-3 bg-yellow-600 text-white text-center rounded-lg font-medium hover:bg-yellow-700 transition duration-200"
+                  >
+                    <fa-icon [icon]="fasPlayCircle" class="mr-2"></fa-icon>Continue Exam
+                  </a>
+                } @else if (isExamAvailable(exam)) {
+                  <a
+                    (click)="takeExam(exam.id)"
+                    class="flex-1 px-4 py-3 bg-green-600 text-white text-center rounded-lg font-medium hover:bg-green-700 transition duration-200 cursor-pointer"
+                  >
+                    <fa-icon [icon]="fasPlayCircle" class="mr-2"></fa-icon>Start Exam
+                  </a>
+                } @else {
+                  <button
+                    disabled
+                    class="flex-1 px-4 py-3 bg-gray-300 text-gray-500 text-center rounded-lg font-medium cursor-not-allowed"
+                  >
+                    <fa-icon [icon]="fasClock" class="mr-2"></fa-icon>Not Available
+                  </button>
+                }
+              </div>
             </div>
           </div>
-
-          <!-- Actions -->
-          <div class="mt-4">
-            @if (exam.taken_exam) {
-              @if (exam.taken_exam.submitted_at) {
-                <a
-                  class="w-full rounded-lg bg-green-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-green-500 transition"
-                  [routerLink]="['/student/taken-exams', exam.taken_exam.id]"
-                >
-                  <fa-icon [icon]="fasFileAlt" class="mr-2"></fa-icon>
-                  Submitted (view submission)
-                </a>
-              } @else {
-                <a
-                  class="w-full rounded-lg bg-orange-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-orange-500 transition"
-                  [routerLink]="['/student/taken-exams', exam.taken_exam.id, 'continue']"
-                >
-                  <fa-icon [icon]="fasClipboard" class="mr-2"></fa-icon>
-                  Continue Exam
-                </a>
-              }
-            } @else if (exam.status === 'active') {
-              <div class="w-full rounded-lg bg-amber-600 text-white text-sm font-medium px-4 py-2 shadow-sm">
-                <fa-icon [icon]="faHourglassHalf" class="mr-2"></fa-icon>
-                Wait for the schedule
-              </div>
-            } @else if (exam.status === 'published') {
-              <button
-                (click)="takeExam(exam.id)"
-                class="cursor-pointer w-full rounded-lg bg-indigo-600 text-white text-sm font-medium px-4 py-2 shadow-sm hover:bg-indigo-500 transition"
-              >
-                <fa-icon [icon]="fasPlayCircle" class="mr-2"></fa-icon>
-                Take Exam
-              </button>
-            } @else if (exam.status === 'draft') {
-              <div class="w-full rounded-lg bg-gray-600 text-white text-sm font-medium px-4 py-2 shadow-sm">
-                <fa-icon [icon]="fasEdit" class="mr-2"></fa-icon>
-                Exam is being created
-              </div>
-            } @else if (exam.status === 'archived') {
-              <div class="w-full rounded-lg bg-yellow-600 text-white text-sm font-medium px-4 py-2 shadow-sm">
-                <fa-icon [icon]="fasArchive" class="mr-2"></fa-icon>
-                Exam is archived
-              </div>
-            }
-          </div>
-        </div>
-      }
-    </div>
-  }
+        }
+      </div>
+    }
+  </div>
 </div>

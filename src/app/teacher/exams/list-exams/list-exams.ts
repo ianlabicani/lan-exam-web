@@ -386,6 +386,7 @@ interface GetExamsData {
   total_points: number;
   created_at: Date;
   updated_at: Date;
+  items?: any[]; // Array of exam items/questions
 
   // Additional properties for duration in minutes and display
   durationInMins?: number;
