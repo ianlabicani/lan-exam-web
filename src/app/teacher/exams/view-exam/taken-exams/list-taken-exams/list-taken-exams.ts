@@ -1,4 +1,4 @@
-import { UpperCasePipe, DatePipe, CommonModule } from '@angular/common';
+import { DatePipe, CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
   Component,
@@ -24,13 +24,7 @@ import {
 @Component({
   selector: 'app-list-taken-exams',
   standalone: true,
-  imports: [
-    UpperCasePipe,
-    DatePipe,
-    RouterLink,
-    CommonModule,
-    FontAwesomeModule,
-  ],
+  imports: [DatePipe, RouterLink, CommonModule, FontAwesomeModule],
   templateUrl: './list-taken-exams.html',
   styleUrl: './list-taken-exams.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

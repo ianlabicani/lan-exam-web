@@ -18,6 +18,7 @@ import { ShortAnswerFormModal } from './create-item/short-answer-form-modal/shor
 import { MatchingFormModal } from './create-item/matching-form-modal/matching-form-modal';
 import { ViewExamService } from '../view-exam.service';
 import { AddQuestionModal } from './add-question-modal/add-question-modal';
+import { ExamApiService } from '../../../services/exam-api.service';
 
 @Component({
   selector: 'app-teacher-list-exam-items',
@@ -45,6 +46,7 @@ export class ListExamItems implements OnInit {
   http = inject(HttpClient);
   activatedRoute = inject(ActivatedRoute);
   viewExamSvc = inject(ViewExamService);
+  examApiSvc = inject(ExamApiService);
   itemsStateSvc = inject(ExamItemStateService);
 
   isUpdateModalOpenSig = signal(false);
@@ -142,11 +144,15 @@ export class ListExamItems implements OnInit {
       console.error('No exam ID available');
       return;
     }
-    this.viewExamSvc.updateItem(examId, examItem).subscribe({
-      next: () => {
+    // Call updateItem with explicit parameters
+    const itemId = examItem.id;
+    this.examApiSvc.updateItem(examId, itemId, examItem).subscribe({
+      next: (res: any) => {
+        // Update parent state with new exam data
+        this.viewExamSvc.patchViewingExam(res.data);
         this.closeUpdateModal();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error updating item:', err);
       },
     });

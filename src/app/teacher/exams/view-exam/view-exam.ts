@@ -5,6 +5,7 @@ import {
   inject,
   ChangeDetectionStrategy,
   computed,
+  effect,
 } from '@angular/core';
 import {
   RouterLink,
@@ -47,6 +48,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { ViewExamService } from './view-exam.service';
+import { ExamApiService } from '../../services/exam-api.service';
 import { StatusUpdateModalComponent } from './status-update-modal/status-update-modal';
 
 @Component({
@@ -66,6 +68,7 @@ import { StatusUpdateModalComponent } from './status-update-modal/status-update-
 })
 export class ViewExam implements OnInit {
   viewExamSvc = inject(ViewExamService);
+  examApi = inject(ExamApiService);
   route = inject(ActivatedRoute);
 
   loading = signal(true);
@@ -178,13 +181,13 @@ export class ViewExam implements OnInit {
     }
 
     this.saving.set(true);
-    this.viewExamSvc.updateStatus(examId, statusToUpdate as any).subscribe({
-      next: () => {
-        // Service already updates the state via tap()
+    this.examApi.updateStatus(examId, statusToUpdate).subscribe({
+      next: (res: any) => {
+        this.viewExamSvc.patchViewingExam(res.data);
         this.saving.set(false);
         this.closeStatusModal();
       },
-      error: (err) => {
+      error: (err: any) => {
         this.errorMsg.set(
           err?.error?.message || 'Failed to update exam status'
         );
@@ -207,12 +210,12 @@ export class ViewExam implements OnInit {
     }
 
     this.saving.set(true);
-    this.viewExamSvc.updateStatus(examId, status).subscribe({
-      next: () => {
-        // Service already updates the state via tap()
+    this.examApi.updateStatus(examId, status).subscribe({
+      next: (res: any) => {
+        this.viewExamSvc.patchViewingExam(res.data);
         this.saving.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.errorMsg.set(err?.error?.message || 'Failed to activate exam');
         this.saving.set(false);
       },
@@ -221,12 +224,13 @@ export class ViewExam implements OnInit {
 
   getExam(id: number) {
     this.loading.set(true);
-    this.viewExamSvc.show(id).subscribe({
-      next: (res) => {
+    this.examApi.show(id).subscribe({
+      next: (res: any) => {
         this.loading.set(false);
-        this.viewExamSvc.setCurrentViewingExam(res.data.exam);
+        this.viewExamSvc.setCurrentViewingExam(res.data);
+        console.log(res.data);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.errorMsg.set(err?.error?.message || 'Failed to load exam');
         this.loading.set(false);
       },

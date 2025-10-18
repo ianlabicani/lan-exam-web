@@ -20,6 +20,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { Exam, TosTopic } from '../../../services/exam.service';
+import { Tos, ViewingExam } from '../view-exam.service';
 
 @Component({
   selector: 'app-status-update-modal',
@@ -30,7 +31,7 @@ import { Exam, TosTopic } from '../../../services/exam.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatusUpdateModalComponent {
-  exam = input<Exam | null>(null);
+  exam = input<ViewingExam | null>(null);
   isOpen = input<boolean>(false);
   isSaving = input<boolean>(false);
 
@@ -101,7 +102,7 @@ export class StatusUpdateModalComponent {
       difficult: 0,
     };
 
-    tosData.forEach((topic: TosTopic) => {
+    tosData.forEach((topic: Tos) => {
       if (topic.distribution) {
         allocations.easy += topic.distribution.easy?.allocation || 0;
         allocations.moderate += topic.distribution.moderate?.allocation || 0;

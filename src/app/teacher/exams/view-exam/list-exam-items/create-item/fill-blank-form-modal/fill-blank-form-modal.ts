@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../../environments/environment.development';
 import { ExamItem } from '../../exam-item-state.service';
 import { ViewExamService } from '../../../view-exam.service';
+import { ExamApiService } from '../../../../services/exam-api.service';
 
 @Component({
   selector: 'app-fill-blank-form-modal',
@@ -14,6 +15,7 @@ import { ViewExamService } from '../../../view-exam.service';
 export class FillBlankFormModal {
   fb = inject(FormBuilder);
   http = inject(HttpClient);
+  examApiSvc = inject(ExamApiService);
   viewExamSvc = inject(ViewExamService);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();
@@ -49,13 +51,16 @@ export class FillBlankFormModal {
       level: this.level(),
     };
 
-    this.viewExamSvc.createItem(examId, payload).subscribe({
-      next: (res) => {
+    this.examApiSvc.createItem(examId, payload).subscribe({
+      next: (res: any) => {
+        // Update parent state with new exam data
+        this.viewExamSvc.patchViewingExam(res.data);
+
         this.form.reset({ question: '', expected_answer: '', points: 1 });
         this.isSaving.set(false);
         this.closeModal.emit();
       },
-      error: (err) => {
+      error: (err: any) => {
         this.errorMessage.set(
           err?.error?.message || 'Failed to add Fill in the Blank'
         );

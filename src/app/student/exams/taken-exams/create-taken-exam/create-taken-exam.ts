@@ -9,7 +9,6 @@ import {
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { of, forkJoin } from 'rxjs';
-import { ExamService } from '../../../../teacher/services/exam.service';
 import { StudentExamItemService } from '../../../services/student-exam-item.service';
 import { ExamHeader } from './exam-header/exam-header';
 import { ExamProgress } from './exam-progress/exam-progress';
@@ -43,7 +42,6 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
   takenExamSvc = inject(TakenExamService);
-  studentExamService = inject(ExamService);
   studentExamItemService = inject(StudentExamItemService);
   examActivityService = inject(ExamActivityLogService);
 

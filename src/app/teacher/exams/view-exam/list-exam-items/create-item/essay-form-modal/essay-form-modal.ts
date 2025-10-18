@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { environment } from '../../../../../../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
 import { ViewExamService } from '../../../view-exam.service';
+import { ExamApiService } from '../../../../services/exam-api.service';
 import { ExamItem } from '../../exam-item-state.service';
 
 @Component({
@@ -13,6 +14,7 @@ import { ExamItem } from '../../exam-item-state.service';
 })
 export class EssayFormModal {
   viewExamSvc = inject(ViewExamService);
+  examApiSvc = inject(ExamApiService);
   fb = inject(FormBuilder);
   http = inject(HttpClient);
 
@@ -51,15 +53,18 @@ export class EssayFormModal {
     const newItem = this.essayForm.getRawValue();
     const examId = this.examId();
 
-    this.viewExamSvc
+    this.examApiSvc
       .createItem(examId, { ...newItem, level: this.level() })
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
+          // Update parent state with new exam data
+          this.viewExamSvc.patchViewingExam(res.data);
+
           this.essayForm.reset();
           this.isSaving.set(false);
           this.closeModal.emit();
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error creating essay item:', error);
           this.isSaving.set(false);
           this.errorMessage.set(

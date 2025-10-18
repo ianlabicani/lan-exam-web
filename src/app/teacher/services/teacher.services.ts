@@ -1,3 +1,3 @@
-import { ExamService } from './exam.service';
+import { ExamApiService } from './exam-api.service';
 
-export const teacherServices = [ExamService];
+export const teacherServices = [ExamApiService];

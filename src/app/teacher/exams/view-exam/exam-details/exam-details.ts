@@ -3,6 +3,7 @@ import {
   inject,
   ChangeDetectionStrategy,
   computed,
+  effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -35,7 +36,7 @@ import { ViewExamService } from '../view-exam.service';
 export class ExamDetails {
   private viewExamSvc = inject(ViewExamService);
 
-  exam = computed(() => this.viewExamSvc.viewingExam());
+  exam = this.viewExamSvc.viewingExam;
 
   // FontAwesome icons
   faInfoCircle = faInfoCircle;
@@ -52,6 +53,8 @@ export class ExamDetails {
   faCog = faCog;
   faDatabase = faDatabase;
   faCheck = faCheck;
+
+  constructor() {}
 
   calculateDuration(startDate: string | Date, endDate: string | Date): number {
     const start = new Date(startDate);

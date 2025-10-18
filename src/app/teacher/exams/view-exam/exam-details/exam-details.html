@@ -1,5 +1,7 @@
 @let examSig = exam();
 
+<h1>{{examSig?.title ?? 'ahbdashdf'}}</h1>
+
 
 @if (examSig) {
   <div class="space-y-6">
@@ -36,7 +38,7 @@
           <fa-icon [icon]="faUsers" class="text-sm"></fa-icon>Section(s)
         </dt>
         <dd class="text-lg font-semibold text-gray-900">
-          @if(examSig.sections && (examSig.sections ?? []).length > 0) {
+          @if(examSig.sections && (examSig.sections).length > 0) {
             <div class="flex flex-wrap gap-2">
               @for (s of examSig.sections; track $index) {
                 <span class="px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-full uppercase">
@@ -97,7 +99,7 @@
   </div>
 
   <!-- Table of Specifications -->
-  @if(examSig.tos && (examSig.tos ?? []).length > 0) {
+  @if(examSig.tos && (examSig.tos).length > 0) {
     <div class="bg-gray-50 rounded-lg p-6">
       <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
         <fa-icon [icon]="faTable" class="text-indigo-600"></fa-icon>Table of Specifications

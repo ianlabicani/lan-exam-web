@@ -216,6 +216,8 @@
         </div>
       </div>
 
+      <h1>{{exam()?.title ?? 'No title'}}</h1>
+
       <!-- Content Sections -->
       @if (showTabsSig) {
         <!-- Tab Navigation -->
@@ -267,7 +269,7 @@
             <div class="flex items-center gap-2 mb-6">
               <h2 class="text-xl font-bold text-gray-900">Table of Specifications</h2>
               <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
-                {{ examSig.tos?.length }} Topics
+                {{ examSig.tos.length }} Topics
               </span>
             </div>
 

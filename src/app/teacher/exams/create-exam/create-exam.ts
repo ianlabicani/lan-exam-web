@@ -2,7 +2,6 @@ import {
   Component,
   OnInit,
   inject,
-  signal,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import {
@@ -10,7 +9,6 @@ import {
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
-  Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -27,7 +25,7 @@ import {
   faChevronDown,
   faChevronUp,
 } from '@fortawesome/free-solid-svg-icons';
-import { ExamService } from '../../services/exam.service';
+import { CreateExamService } from './create-exam.service';
 
 @Component({
   selector: 'app-create-exam',
@@ -37,8 +35,7 @@ import { ExamService } from '../../services/exam.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateExam implements OnInit {
-  private fb = inject(FormBuilder);
-  private examService = inject(ExamService);
+  private createExamSvc = inject(CreateExamService);
   private router = inject(Router);
 
   // Icons
@@ -52,175 +49,58 @@ export class CreateExam implements OnInit {
   protected faChevronDown = faChevronDown;
   protected faChevronUp = faChevronUp;
 
-  // State signals
-  protected savingSig = signal<boolean>(false);
-  protected errorMsg = signal<string | null>(null);
-  protected durationDisplay = signal<string>('Not set');
-  protected totalItemsComputed = signal<number>(0);
-  protected expandedTopic = signal<number | null>(null);
+  // Expose service state to template
+  savingSig = this.createExamSvc.saving;
+  errorMsg = this.createExamSvc.errorMsg;
+  durationDisplay = this.createExamSvc.durationDisplay;
+  totalItemsComputed = this.createExamSvc.totalItemsComputed;
+  expandedTopic = this.createExamSvc.expandedTopic;
 
-  protected sectionOptions = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-  protected yearOptions = [1, 2, 3, 4];
+  sectionOptions = this.createExamSvc.sectionOptions;
+  yearOptions = this.createExamSvc.yearOptions;
 
-  // Helper to get current datetime in ISO format for datetime-local input
-  private getCurrentDatetimeLocal(): string {
-    const now = new Date();
-    // Format: YYYY-MM-DDTHH:mm (required by datetime-local)
-    return now.toISOString().slice(0, 16);
-  }
-
-  // Helper to get future datetime (2 hours from now)
-  private getFutureDatetimeLocal(): string {
-    const future = new Date();
-    future.setHours(future.getHours() + 2);
-    return future.toISOString().slice(0, 16);
-  }
-
-  examForm = this.fb.nonNullable.group({
-    title: ['', Validators.required],
-    description: [''],
-    starts_at: [this.getCurrentDatetimeLocal(), Validators.required],
-    ends_at: [this.getFutureDatetimeLocal(), Validators.required],
-    year: [1 as 1 | 2 | 3 | 4, Validators.required],
-
-    // sections keyed by letter so template binds by value, not index
-    sections: this.fb.nonNullable.group(
-      {},
-      { validators: Validators.required as any }
-    ),
-
-    status: 'draft' as 'draft' | 'published' | 'active' | 'archived',
-    total_points: [0, Validators.required],
-
-    tos: this.fb.array([]), // topics
-  });
+  examForm: FormGroup = this.createExamSvc.createExamForm();
 
   ngOnInit(): void {
-    // Initialize a boolean control for each available section letter
+    // Initialize sections
     const sectionsGroup = this.sections;
-    this.sectionOptions.forEach((letter) => {
-      if (!sectionsGroup.get(letter)) {
-        sectionsGroup.addControl(letter, this.fb.control(false));
-      }
-    });
+    this.createExamSvc.initializeSections(sectionsGroup);
 
     // Add initial topic
-    this.addTopic();
+    this.createExamSvc.addTopic(this.tos);
 
-    // Watch for changes in start/end times to recalculate duration
+    // Watch for changes in start/end times
     this.examForm.get('starts_at')?.valueChanges.subscribe(() => {
-      this.calculateDuration();
+      this.updateDuration();
     });
     this.examForm.get('ends_at')?.valueChanges.subscribe(() => {
-      this.calculateDuration();
+      this.updateDuration();
     });
 
-    // Watch for changes in TOS to recalculate total items
+    // Watch for changes in TOS
     this.tos.statusChanges.subscribe(() => {
-      this.recalculateTotalItems();
+      this.createExamSvc.recalculateTotalItems(this.tos);
     });
   }
 
-  /**
-   * Calculate duration between start and end times
-   */
-  private calculateDuration(): void {
+  private updateDuration(): void {
     const startsAt = this.examForm.get('starts_at')?.value;
     const endsAt = this.examForm.get('ends_at')?.value;
-
-    if (!startsAt || !endsAt) {
-      this.durationDisplay.set('Not set');
-      return;
-    }
-
-    try {
-      const start = new Date(startsAt);
-      const end = new Date(endsAt);
-      const diffMs = end.getTime() - start.getTime();
-
-      if (diffMs <= 0) {
-        this.durationDisplay.set('Invalid (end before start)');
-        return;
-      }
-
-      const diffMins = Math.floor(diffMs / 60000);
-      const hours = Math.floor(diffMins / 60);
-      const minutes = diffMins % 60;
-      const days = Math.floor(hours / 24);
-      const remainingHours = hours % 24;
-
-      const parts: string[] = [];
-      if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
-      if (remainingHours > 0)
-        parts.push(`${remainingHours} hour${remainingHours > 1 ? 's' : ''}`);
-      if (minutes > 0) parts.push(`${minutes} min${minutes > 1 ? 's' : ''}`);
-
-      this.durationDisplay.set(
-        parts.length > 0 ? parts.join(', ') : 'Less than a minute'
-      );
-    } catch (e) {
-      this.durationDisplay.set('Invalid date');
-    }
+    this.createExamSvc.calculateDuration(startsAt, endsAt);
   }
 
   /**
-   * Recalculate total items from all topics
-   */
-  private recalculateTotalItems(): void {
-    const total = (this.tos.value as any[]).reduce((sum, topic) => {
-      return sum + (parseInt(topic.no_of_items || 0) || 0);
-    }, 0);
-    this.totalItemsComputed.set(total);
-  }
-
-  /**
-   * Auto-calculate distribution based on time allotment
+   * Auto-calculate distribution based on time allotment.
    */
   protected autoCalculateDistribution(topicIndex: number): void {
-    const topic = this.tos.at(topicIndex) as FormGroup;
-    const totalTimeAllotment = (this.tos.value as any[]).reduce(
-      (sum, t) => sum + (parseFloat(t.time_allotment || 0) || 0),
-      0
-    );
-
-    if (totalTimeAllotment === 0) return;
-
-    const topicTimeAllotment = parseFloat(
-      topic.get('time_allotment')?.value || 0
-    );
-    const totalItems = parseInt(
-      this.examForm.get('tos')?.get('0')?.get('no_of_items')?.value || 0
-    );
-
-    if (totalItems <= 0) return;
-
-    const proportion = topicTimeAllotment / totalTimeAllotment;
-    const itemsForTopic = Math.round(proportion * totalItems);
-
-    // Calculate distribution: 30% easy, 50% moderate, 20% difficult
-    const distribution = topic.get('distribution') as FormGroup;
-    const easy = Math.round(itemsForTopic * 0.3);
-    const difficult = Math.round(itemsForTopic * 0.2);
-    const moderate = itemsForTopic - easy - difficult;
-
-    distribution.patchValue({
-      easy: { allocation: Math.max(0, easy) },
-      moderate: { allocation: Math.max(0, moderate) },
-      difficult: { allocation: Math.max(0, difficult) },
-    });
-
-    this.recalculateTotalItems();
+    this.createExamSvc.autoCalculateDistribution(this.examForm, topicIndex);
   }
 
   /**
-   * Toggle topic expansion for mobile/compact view
+   * Toggle topic expansion for mobile/compact view.
    */
   protected toggleTopicExpanded(index: number): void {
-    if (this.expandedTopic() === index) {
-      this.expandedTopic.set(null);
-    } else {
-      this.expandedTopic.set(index);
-    }
+    this.createExamSvc.toggleTopicExpanded(index);
   }
 
   create() {
@@ -248,8 +128,8 @@ export class CreateExam implements OnInit {
       description: raw.description,
       starts_at: new Date(raw.starts_at).toISOString(),
       ends_at: new Date(raw.ends_at).toISOString(),
-      year: yearArray, // Send as array
-      sections: selectedSections, // Already an array
+      year: yearArray,
+      sections: selectedSections,
       status: raw.status,
       total_points: 0,
       tos: (this.tos.getRawValue() as any[]).map((t) => ({
@@ -261,12 +141,12 @@ export class CreateExam implements OnInit {
       })),
     };
 
-    this.examService.store(payload).subscribe({
-      next: (res) => {
+    this.createExamSvc.createExam(payload).subscribe({
+      next: (res: any) => {
         this.savingSig.set(false);
         this.router.navigate(['/teacher/exams/', res.data.id]);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.savingSig.set(false);
         this.errorMsg.set(err?.error?.message || 'Failed to create exam');
       },
@@ -283,48 +163,25 @@ export class CreateExam implements OnInit {
   }
 
   // ========== TOPIC HELPERS ==========
-  newTopic(topicName: string = ''): FormGroup {
-    return this.fb.group({
-      topic: [topicName, Validators.required],
-      outcomes: this.fb.array<string | null>([]),
-      time_allotment: [0, Validators.required],
-      no_of_items: [0, Validators.required],
-      distribution: this.fb.group({
-        easy: this.fb.group({
-          allocation: [0, Validators.required],
-          placement: this.fb.array<string | null>([]),
-        }),
-        moderate: this.fb.group({
-          allocation: [0, Validators.required],
-          placement: this.fb.array<string | null>([]),
-        }),
-        difficult: this.fb.group({
-          allocation: [0, Validators.required],
-          placement: this.fb.array<string | null>([]),
-        }),
-      }),
-    });
-  }
-
   addTopic(topicName: string = '') {
-    this.tos.push(this.newTopic(topicName));
+    this.createExamSvc.addTopic(this.tos, topicName);
   }
 
   removeTopic(index: number) {
-    this.tos.removeAt(index);
+    this.createExamSvc.removeTopic(this.tos, index);
   }
 
   // Outcomes helpers
   getOutcomes(topicIndex: number): FormArray {
-    return (this.tos.at(topicIndex) as FormGroup).get('outcomes') as FormArray;
+    return this.createExamSvc.getOutcomes(this.tos, topicIndex);
   }
 
   addOutcome(topicIndex: number) {
-    this.getOutcomes(topicIndex).push(this.fb.control(''));
+    this.createExamSvc.addOutcome(this.tos, topicIndex);
   }
 
   removeOutcome(topicIndex: number, outcomeIndex: number) {
-    this.getOutcomes(topicIndex).removeAt(outcomeIndex);
+    this.createExamSvc.removeOutcome(this.tos, topicIndex, outcomeIndex);
   }
 
   // Placement helpers for distribution levels
@@ -332,15 +189,11 @@ export class CreateExam implements OnInit {
     topicIndex: number,
     level: 'easy' | 'moderate' | 'difficult'
   ): FormArray {
-    const dist = (this.tos.at(topicIndex) as FormGroup).get(
-      'distribution'
-    ) as FormGroup;
-    const lvl = dist.get(level) as FormGroup;
-    return lvl.get('placement') as FormArray;
+    return this.createExamSvc.getPlacement(this.tos, topicIndex, level);
   }
 
   addPlacement(topicIndex: number, level: 'easy' | 'moderate' | 'difficult') {
-    this.getPlacement(topicIndex, level).push(this.fb.control(''));
+    this.createExamSvc.addPlacement(this.tos, topicIndex, level);
   }
 
   removePlacement(
@@ -348,13 +201,19 @@ export class CreateExam implements OnInit {
     level: 'easy' | 'moderate' | 'difficult',
     placementIndex: number
   ) {
-    this.getPlacement(topicIndex, level).removeAt(placementIndex);
+    this.createExamSvc.removePlacement(
+      this.tos,
+      topicIndex,
+      level,
+      placementIndex
+    );
   }
 
   // ========== SECTION HELPERS ==========
   addSection(section: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G') {
     if (!this.sections.get(section)) {
-      this.sections.addControl(section, this.fb.control(false));
+      const fb = inject(FormBuilder);
+      this.sections.addControl(section, fb.control(false));
     }
   }
 

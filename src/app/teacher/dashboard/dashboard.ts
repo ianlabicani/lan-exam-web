@@ -15,7 +15,7 @@ import {
   faClock,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { ExamService } from '../services/exam.service';
+import { ExamApiService } from '../services/exam-api.service';
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -25,7 +25,7 @@ import { ExamService } from '../services/exam.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Dashboard implements OnInit {
-  protected examService = inject(ExamService);
+  protected examApi = inject(ExamApiService);
 
   // FontAwesome icons
   protected readonly faPlus = faPlus;
@@ -69,8 +69,10 @@ export class Dashboard implements OnInit {
 
   protected loadExams(): void {
     this.isLoading.set(true);
-    this.examService.index().subscribe({
-      next: (exams) => {
+    this.examApi.index().subscribe({
+      next: (res: any) => {
+        // ExamApiService returns { data: Exam[], meta?: {...} }
+        const exams = res.data || [];
         // Transform API data if needed
         const transformedExams = exams.map((exam: any) => ({
           ...exam,
@@ -83,7 +85,7 @@ export class Dashboard implements OnInit {
         this.generateMockActivity(transformedExams);
         this.isLoading.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.error.set('Failed to load exams');
         this.isLoading.set(false);
         console.error('Error loading exams:', err);
