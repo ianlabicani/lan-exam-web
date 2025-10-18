@@ -3,6 +3,15 @@
 @let errorMsgSig = errorMsg();
 @let showTabsSig = showTabs();
 
+<!-- Status Update Modal -->
+<app-status-update-modal
+  [exam]="examSig"
+  [isOpen]="showStatusModal()"
+  [isSaving]="saving()"
+  (closeModal)="closeStatusModal()"
+  (submitStatusUpdate)="submitStatusUpdate($event)"
+></app-status-update-modal>
+
 @if (loadingSig) {
   <div class="flex items-center justify-center min-h-screen bg-gray-50">
     <div class="space-y-3 text-center">

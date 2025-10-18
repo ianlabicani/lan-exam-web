@@ -20,21 +20,21 @@ export class ExamService {
   }
 
   store(payload: any) {
-    return this.http.post<{ exam: Exam }>(
+    return this.http.post<{ data: Exam; message: string }>(
       `${environment.apiBaseUrl}/teacher/exams`,
       payload
     );
   }
 
   update(id: number, payload: any) {
-    return this.http.patch<Exam>(
+    return this.http.patch<{ data: Exam; message: string }>(
       `${environment.apiBaseUrl}/teacher/exams/${id}`,
       payload
     );
   }
 
   updateStatus(id: number | string, status: string) {
-    return this.http.patch<Exam>(
+    return this.http.patch<{ data: Exam; message: string }>(
       `${environment.apiBaseUrl}/teacher/exams/${id}/status`,
       { status }
     );

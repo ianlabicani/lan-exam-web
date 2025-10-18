@@ -31,13 +31,6 @@ export class ViewExamService {
     this.currentViewingExam.set(exam);
   }
 
-  updateCurrentViewingExam(updates: Partial<Exam>) {
-    const current = this.currentViewingExam();
-    if (current) {
-      this.currentViewingExam.set({ ...current, ...updates });
-    }
-  }
-
   clearCurrentViewingExam() {
     this.currentViewingExam.set(null);
   }
@@ -68,65 +61,63 @@ export class ViewExamService {
     return this.currentViewingExam();
   }
 
+  /**
+   * Update status and return full exam with items.
+   */
   updateStatus(id: number | string, status: string) {
-    return this.api.updateStatus(id, status);
+    return this.api.updateStatus(id, status).pipe(
+      tap((res) => {
+        // API returns full exam with items
+        this.patchViewingExam(res.data);
+      })
+    );
   }
 
   /**
    * Create an item via the items service and update the viewing exam state.
-   * Returns the observable from ExamItemStateService.store()
+   * The API will return the updated exam with items.
    */
   createItem(examId: number, payload: any) {
     return this.itemsStateSvc.store(examId, payload).pipe(
       tap((res) => {
-        const addedPoints = res?.data?.points ?? 0;
-        if (addedPoints) {
-          this.patchViewingExam({
-            total_points:
-              (this.getViewingExamSnapshot()?.total_points ?? 0) + addedPoints,
-          });
-        }
+        // Refetch to get updated exam with all items
+        this.show(examId).subscribe({
+          next: (res) => {
+            this.setCurrentViewingExam(res.data.exam);
+          },
+        });
       })
     );
   }
 
   /**
-   * Update an item and patch viewing exam total_points by the delta.
+   * Update an item and refetch the exam to update items array and total_points.
    */
   updateItem(examId: number, item: any) {
-    // determine previous points from local items
-    const prev = this.itemsStateSvc.items$().find((it) => it.id === item.id);
-    const prevPoints = prev?.points ?? 0;
-
     return this.itemsStateSvc.update(examId, item).pipe(
-      tap((res) => {
-        const newPoints = res?.data?.points ?? item.points ?? 0;
-        const delta = newPoints - prevPoints;
-        if (delta !== 0) {
-          this.patchViewingExam({
-            total_points:
-              (this.getViewingExamSnapshot()?.total_points ?? 0) + delta,
-          });
-        }
+      tap(() => {
+        // Refetch the exam to get updated items and total_points
+        this.show(examId).subscribe({
+          next: (res) => {
+            this.setCurrentViewingExam(res.data.exam);
+          },
+        });
       })
     );
   }
 
   /**
-   * Delete an item and adjust the viewing exam total_points.
+   * Delete an item and refetch the exam to update items array and total_points.
    */
   deleteItem(examId: number, itemId: number) {
-    const item = this.itemsStateSvc.items$().find((it) => it.id === itemId);
-    const points = item?.points ?? 0;
-
     return this.itemsStateSvc.delete(examId, itemId).pipe(
       tap(() => {
-        if (points) {
-          this.patchViewingExam({
-            total_points:
-              (this.getViewingExamSnapshot()?.total_points ?? 0) - points,
-          });
-        }
+        // Refetch the exam to get updated items and total_points
+        this.show(examId).subscribe({
+          next: (res) => {
+            this.setCurrentViewingExam(res.data.exam);
+          },
+        });
       })
     );
   }

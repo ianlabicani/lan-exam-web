@@ -264,7 +264,7 @@ export class CreateExam implements OnInit {
     this.examService.store(payload).subscribe({
       next: (res) => {
         this.savingSig.set(false);
-        this.router.navigate(['/teacher/exams/', res.exam.id]);
+        this.router.navigate(['/teacher/exams/', res.data.id]);
       },
       error: (err) => {
         this.savingSig.set(false);

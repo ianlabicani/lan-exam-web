@@ -1,0 +1,51 @@
+/* Status Update Modal Styles */
+
+:host ::ng-deep {
+  /* Smooth transitions for modal appearance */
+  .fixed {
+    animation: fadeIn 0.2s ease-in-out;
+  }
+
+  .relative {
+    animation: slideUp 0.3s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Ensure proper form styling */
+form {
+  width: 100%;
+}
+
+/* Icon spin animation for loading state */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -16,8 +16,11 @@ export class ExamApiService {
     );
   }
 
-  updateStatus(id: number | string, status: string): Observable<Exam> {
-    return this.http.patch<Exam>(
+  updateStatus(
+    id: number | string,
+    status: string
+  ): Observable<{ data: Exam; message: string }> {
+    return this.http.patch<{ data: Exam; message: string }>(
       `${environment.apiBaseUrl}/teacher/exams/${id}/status`,
       { status }
     );

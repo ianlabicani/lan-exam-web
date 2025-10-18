@@ -47,6 +47,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { ViewExamService } from './view-exam.service';
+import { StatusUpdateModalComponent } from './status-update-modal/status-update-modal';
 
 @Component({
   selector: 'app-view-exam',
@@ -57,6 +58,7 @@ import { ViewExamService } from './view-exam.service';
     RouterOutlet,
     FaIconComponent,
     CommonModule,
+    StatusUpdateModalComponent,
   ],
   templateUrl: './view-exam.html',
   styleUrl: './view-exam.css',
@@ -162,12 +164,12 @@ export class ViewExam implements OnInit {
     this.selectedStatus.set(null);
   }
 
-  submitStatusUpdate(examId: number) {
-    const status = this.selectedStatus();
-    if (!status) return;
+  submitStatusUpdate(statusToUpdate: string): void {
+    const examId = this.exam()?.id;
+    if (!examId || !statusToUpdate) return;
 
     const exam = this.exam();
-    if ((exam?.total_points ?? 0) <= 0 && status === 'active') {
+    if ((exam?.total_points ?? 0) <= 0 && statusToUpdate === 'active') {
       this.errorMsg.set('Exam must have at least one item to be activated.');
       setTimeout(() => {
         this.errorMsg.set(null);
@@ -176,9 +178,9 @@ export class ViewExam implements OnInit {
     }
 
     this.saving.set(true);
-    this.viewExamSvc.updateStatus(examId, status as any).subscribe({
-      next: (exam) => {
-        this.viewExamSvc.setCurrentViewingExam(exam);
+    this.viewExamSvc.updateStatus(examId, statusToUpdate as any).subscribe({
+      next: () => {
+        // Service already updates the state via tap()
         this.saving.set(false);
         this.closeStatusModal();
       },
@@ -206,8 +208,8 @@ export class ViewExam implements OnInit {
 
     this.saving.set(true);
     this.viewExamSvc.updateStatus(examId, status).subscribe({
-      next: (exam) => {
-        this.viewExamSvc.setCurrentViewingExam(exam);
+      next: () => {
+        // Service already updates the state via tap()
         this.saving.set(false);
       },
       error: (err) => {
