@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment.development';
 import { Exam, TakenExam } from './exam.service';
+import { ExamItem } from '../exams/view-exam/view-exam.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,14 +20,14 @@ export class ExamItemApiService {
   }
 
   updateItem(examId: number | string, itemId: number | string, itemData: any) {
-    return this.http.patch<{ data: Exam; message: string }>(
+    return this.http.patch<{ data: ExamItem; message: string }>(
       `${this.apiUrl}/${examId}/items/${itemId}`,
       itemData
     );
   }
 
   deleteItem(examId: number | string, itemId: number | string) {
-    return this.http.delete<{ data: Exam; message: string }>(
+    return this.http.delete<{ data: ExamItem; message: string }>(
       `${this.apiUrl}/${examId}/items/${itemId}`
     );
   }

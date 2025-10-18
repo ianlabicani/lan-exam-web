@@ -263,7 +263,7 @@
 
   <!-- Update Modal -->
   @if (isUpdateModalOpenSig()) {
-    <app-update-item [itemInput]="selectedForUpdateSig()!" (itemSaved)="onItemSaved($event)" (close)="closeUpdateModal()"></app-update-item>
+    <app-update-item [itemInput]="selectedForUpdateSig()!" (close)="closeUpdateModal()"></app-update-item>
   }
 
   <!-- Delete Modal -->

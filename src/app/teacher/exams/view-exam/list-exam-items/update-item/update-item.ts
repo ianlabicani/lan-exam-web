@@ -13,8 +13,8 @@ import {
   Validators,
   FormArray,
 } from '@angular/forms';
-import { MatchingPair } from '../exam-item-state.service';
-import { ExamItem } from '../../view-exam.service';
+import { ExamItem, ViewExamService, Pair } from '../../view-exam.service';
+import { ExamItemApiService } from '../../../../services/exam-item-api.service';
 
 @Component({
   selector: 'app-update-item',
@@ -28,6 +28,8 @@ export class UpdateItem implements OnInit {
   close = output<void>();
 
   fb = inject(FormBuilder);
+  examItemApi = inject(ExamItemApiService);
+  viewExamSvc = inject(ViewExamService);
   isSaving = signal(false);
   errorMessage = signal<string | null>(null);
 
@@ -87,7 +89,7 @@ export class UpdateItem implements OnInit {
     });
   }
 
-  createPair(p?: MatchingPair) {
+  createPair(p?: Pair) {
     return this.fb.group({
       left: [p?.left || '', Validators.required],
       right: [p?.right || '', Validators.required],
@@ -149,10 +151,10 @@ export class UpdateItem implements OnInit {
     const raw = this.form.getRawValue();
     const it = this.itemInput();
     const itemType = it.type;
+    const examId = it.exam_id;
 
-    // Build updated object based on item type
-    const updated: any = {
-      ...it,
+    // Build payload based on item type
+    const payload: any = {
       type: itemType,
       question: raw.question,
       points: raw.points,
@@ -161,44 +163,37 @@ export class UpdateItem implements OnInit {
     // Set type-specific fields
     switch (itemType) {
       case 'truefalse':
-        // True/False uses `answer` field (as string: 'true' or 'false')
-        updated.answer = String(raw.answer);
-        updated.expected_answer = null;
+        payload.answer = String(raw.answer);
         break;
       case 'mcq':
-        // MCQ uses `options` field
-        updated.options = raw.options || [];
-        updated.answer = null;
-        updated.expected_answer = null;
+        payload.options = raw.options || [];
         break;
       case 'essay':
-        // Essay uses `expected_answer` for rubric
-        updated.expected_answer = raw.expected_answer || null;
-        updated.answer = null;
+        payload.expected_answer = raw.expected_answer || null;
         break;
       case 'fillblank':
-        // Fill Blank uses `expected_answer`
-        updated.expected_answer = raw.expected_answer || null;
-        updated.answer = null;
+        payload.expected_answer = raw.expected_answer || null;
         break;
       case 'shortanswer':
-        // Short Answer uses `expected_answer`
-        updated.expected_answer = raw.expected_answer || null;
-        updated.answer = null;
+        payload.expected_answer = raw.expected_answer || null;
         break;
       case 'matching':
-        // Matching uses `pairs` field
-        updated.pairs = raw.pairs || [];
-        updated.answer = null;
-        updated.expected_answer = null;
+        payload.pairs = raw.pairs || [];
         break;
     }
 
-    // Emit with delay to allow UI feedback
-    setTimeout(() => {
-      this.itemSaved.emit(updated as unknown as ExamItem);
-      this.isSaving.set(false);
-    }, 300);
+    this.examItemApi.updateItem(examId, it.id, payload).subscribe({
+      next: (res: { data: ExamItem }) => {
+        this.viewExamSvc.updateItem(res.data);
+        this.itemSaved.emit(res.data);
+        this.isSaving.set(false);
+        this.close.emit();
+      },
+      error: (err: any) => {
+        this.errorMessage.set(err?.error?.message || 'Failed to update item');
+        this.isSaving.set(false);
+      },
+    });
   }
 
   onClose() {

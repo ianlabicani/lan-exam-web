@@ -145,26 +145,6 @@ export class ListExamItems implements OnInit {
     this.closeDeleteModal();
   }
 
-  onItemSaved(examItem: ExamItem) {
-    const examId = this.viewExamSvc.viewingExam()?.id;
-    if (!examId) {
-      console.error('No exam ID available');
-      return;
-    }
-    // Call updateItem with explicit parameters
-    const itemId = examItem.id;
-    this.examItemApi.updateItem(examId, itemId, examItem).subscribe({
-      next: (res: any) => {
-        // Update parent state with new exam data
-        this.viewExamSvc.patchViewingExam(res.data);
-        this.closeUpdateModal();
-      },
-      error: (err: any) => {
-        console.error('Error updating item:', err);
-      },
-    });
-  }
-
   openAddQuestionModal(level: 'easy' | 'moderate' | 'difficult') {
     this.addQuestionModalLevel.set(level);
   }
