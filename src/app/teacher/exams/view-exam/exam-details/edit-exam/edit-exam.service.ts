@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ExamApiService } from '../../services/exam-api.service';
+import { ExamApiService } from '../../../../services/exam-api.service';
 
 /**
  * EditExamService manages state and logic for exam editing.

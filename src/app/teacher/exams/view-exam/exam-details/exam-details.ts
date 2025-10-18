@@ -25,7 +25,7 @@ import {
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import { ViewExamService } from '../view-exam.service';
-import { EditExam, EditExamData } from '../../edit-exam/edit-exam';
+import { EditExam, EditExamData } from './edit-exam/edit-exam';
 
 @Component({
   selector: 'app-exam-details',

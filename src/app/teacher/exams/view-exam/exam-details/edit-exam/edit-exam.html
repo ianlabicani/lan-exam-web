@@ -1,0 +1,478 @@
+<!-- Page Header (Optional) -->
+@if (showHeader()) {
+  <div class="mb-8">
+    <div class="flex items-center space-x-4 mb-4">
+      <button
+        routerLink="/teacher/exams"
+        class="text-gray-600 hover:text-gray-900 transition"
+      >
+        <fa-icon [icon]="faArrowLeft" class="text-xl"></fa-icon>
+      </button>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">
+          <fa-icon [icon]="faEdit" class="text-yellow-600 mr-3"></fa-icon>Edit Exam
+        </h1>
+        <p class="text-gray-600 mt-2">Update the exam details</p>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Error Message -->
+@if (error()) {
+  <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-lg">
+    <div class="flex">
+      <fa-icon
+        [icon]="faExclamationTriangle"
+        class="text-red-400 mt-1"
+      ></fa-icon>
+      <div class="ml-3">
+        <p class="text-sm text-red-700">{{ error() }}</p>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Edit Exam Form -->
+<form [formGroup]="examForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Basic Information Card -->
+      <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-6 border-b border-gray-200 pb-4">
+          <fa-icon [icon]="faInfoCircle" class="text-indigo-600 mr-2"></fa-icon>Basic Information
+        </h2>
+
+        <div class="space-y-6">
+          <!-- Exam Title -->
+          <div>
+            <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
+              <fa-icon [icon]="faHeading" class="mr-2 text-gray-500"></fa-icon>Exam Title *
+            </label>
+            <input
+              type="text"
+              id="title"
+              formControlName="title"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+              placeholder="e.g., Midterm Examination - Data Structures"
+            />
+            @if (examForm.get('title')?.invalid && examForm.get('title')?.touched) {
+            <p class="mt-2 text-sm text-red-600 flex items-center">
+              <fa-icon [icon]="faExclamationCircle" class="mr-1"></fa-icon>Title is required
+            </p>
+            }
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+              <fa-icon [icon]="faAlignLeft" class="mr-2 text-gray-500"></fa-icon>Description
+            </label>
+            <textarea
+              id="description"
+              formControlName="description"
+              rows="4"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+              placeholder="Provide a brief description of the exam content and objectives..."
+            ></textarea>
+          </div>
+
+          <!-- Year -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <fa-icon [icon]="faCalendar" class="mr-2 text-gray-500"></fa-icon>Year Level(s) *
+            </label>
+            <div class="grid grid-cols-4 gap-3">
+              @for (year of yearOptions; track year) {
+              <label
+                class="flex items-center space-x-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-indigo-50 transition"
+              >
+                <input
+                  type="checkbox"
+                  [value]="year"
+                  [checked]="(examForm.get('year')?.value || []).includes(year)"
+                  (change)="onYearChange($event)"
+                  class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                />
+                <span class="text-sm font-medium text-gray-700">Year {{ year }}</span>
+              </label>
+              }
+            </div>
+          </div>
+
+          <!-- Sections -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">
+              <fa-icon [icon]="faUsers" class="mr-2 text-gray-500"></fa-icon>Section(s) *
+            </label>
+            <div class="grid grid-cols-7 gap-2">
+              @for (section of sectionOptions; track section) {
+              <label
+                class="flex items-center justify-center space-x-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-indigo-50 transition"
+              >
+                <input
+                  type="checkbox"
+                  [value]="section"
+                  [checked]="(examForm.get('sections')?.value || []).includes(section)"
+                  (change)="onSectionChange($event)"
+                  class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                />
+                <span class="text-sm font-medium text-gray-700 uppercase">{{ section }}</span>
+              </label>
+              }
+            </div>
+            <p class="mt-2 text-xs text-gray-500">
+              <fa-icon [icon]="faInfoCircle" class="mr-1"></fa-icon>Select one or more sections that can take this exam
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schedule Card -->
+      <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-6 border-b border-gray-200 pb-4">
+          <fa-icon [icon]="faCalendarAlt" class="text-indigo-600 mr-2"></fa-icon>Schedule
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Start Time -->
+          <div>
+            <label for="starts_at" class="block text-sm font-medium text-gray-700 mb-2">
+              <fa-icon [icon]="faPlayCircle" class="mr-2 text-gray-500"></fa-icon>Start Date & Time *
+            </label>
+            <input
+              type="datetime-local"
+              id="starts_at"
+              formControlName="starts_at"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+            />
+            @if (examForm.get('starts_at')?.invalid && examForm.get('starts_at')?.touched) {
+            <p class="mt-2 text-sm text-red-600 flex items-center">
+              <fa-icon [icon]="faExclamationCircle" class="mr-1"></fa-icon>Start date is required
+            </p>
+            }
+          </div>
+
+          <!-- End Time -->
+          <div>
+            <label for="ends_at" class="block text-sm font-medium text-gray-700 mb-2">
+              <fa-icon [icon]="faStopCircle" class="mr-2 text-gray-500"></fa-icon>End Date & Time *
+            </label>
+            <input
+              type="datetime-local"
+              id="ends_at"
+              formControlName="ends_at"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+            />
+            @if (examForm.get('ends_at')?.invalid && examForm.get('ends_at')?.touched) {
+            <p class="mt-2 text-sm text-red-600 flex items-center">
+              <fa-icon [icon]="faExclamationCircle" class="mr-1"></fa-icon>End date is required and must be after start date
+            </p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Table of Specifications (TOS) Card -->
+      <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-6 border-b border-gray-200 pb-4">
+          <fa-icon [icon]="faTable" class="text-indigo-600 mr-2"></fa-icon>Table of Specifications (TOS)
+        </h2>
+
+        <!-- Total Items Guidance -->
+        <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-5 mb-6">
+          <label class="flex items-center gap-2 text-sm font-semibold text-indigo-900 mb-2">
+            <fa-icon [icon]="faInfoCircle" class="text-indigo-600"></fa-icon>
+            Total Items will be auto-calculated
+          </label>
+          <p class="text-xs text-indigo-700">
+            The total number of exam items will be automatically calculated based on your topics' time allotments and difficulty distributions.
+          </p>
+        </div>
+
+        <!-- Topics Form Array -->
+        <div formArrayName="tos" class="space-y-4">
+          @for (topicCtrl of tosArray.controls; track $index; let idx = $index; let isLast = $last) {
+            <div
+              [formGroupName]="idx"
+              class="border border-gray-200 rounded-lg overflow-hidden bg-white hover:shadow-md transition duration-200"
+            >
+              <!-- Topic Header -->
+              <div
+                class="flex items-center justify-between gap-3 p-4 bg-gradient-to-r from-gray-50 to-gray-100 cursor-pointer hover:from-gray-100 hover:to-gray-150 transition"
+                (click)="toggleTopicExpanded(idx)"
+              >
+                <div class="flex-1 min-w-0">
+                  <input
+                    type="text"
+                    formControlName="topic"
+                    placeholder="Enter topic name (e.g., Variables, Functions)"
+                    class="w-full text-sm font-semibold text-gray-800 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+                <div class="flex items-center gap-3 text-xs text-gray-600">
+                  <span class="px-2 py-1 bg-white rounded border border-gray-200">
+                    Items: <span class="font-bold">{{ calculateTotalItems(idx) }}</span>
+                  </span>
+                  <fa-icon [icon]="expandedTopic() === idx ? faChevronUp : faChevronDown"></fa-icon>
+                </div>
+              </div>
+
+              <!-- Topic Details (Collapsible) -->
+              @if (expandedTopic() === idx) {
+                <div class="border-t border-gray-200 p-5 space-y-5">
+                  <!-- Outcomes -->
+                  <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-gray-700">Learning Outcomes</label>
+                    <div formArrayName="outcomes" class="space-y-2">
+                      @for (out of getOutcomes(idx).controls; track $index; let oi = $index) {
+                        <div class="flex items-center gap-2">
+                          <input
+                            [formControlName]="oi"
+                            type="text"
+                            placeholder="Enter learning outcome"
+                            class="flex-1 rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                          <button
+                            type="button"
+                            (click)="removeOutcome(idx, oi)"
+                            class="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition"
+                          >
+                            <fa-icon [icon]="faTimesCircle"></fa-icon>
+                          </button>
+                        </div>
+                      }
+                      <button
+                        type="button"
+                        (click)="addOutcome(idx)"
+                        class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition flex items-center gap-1"
+                      >
+                        <fa-icon [icon]="faPlus"></fa-icon>
+                        Add Outcome
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Time Allotment & Items -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-700 mb-1">
+                        Time Allotment (minutes)
+                      </label>
+                      <input
+                        type="number"
+                        formControlName="time_allotment"
+                        (change)="autoCalculateDistribution(idx)"
+                        class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        min="0"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-700 mb-1">
+                        Number of Items
+                      </label>
+                      <input
+                        type="number"
+                        formControlName="no_of_items"
+                        (change)="autoCalculateDistribution(idx)"
+                        class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Distribution -->
+                  <div [formGroupName]="'distribution'" class="grid md:grid-cols-3 gap-3">
+                    <!-- Easy -->
+                    <div [formGroupName]="'easy'" class="rounded border border-green-200 bg-green-50 p-3 space-y-2">
+                      <p class="text-xs font-semibold text-green-800">Easy (30%)</p>
+                      <div>
+                        <label class="block text-[11px] text-green-700 font-medium">Allocation</label>
+                        <input
+                          type="number"
+                          formControlName="allocation"
+                          (change)="updateTotalItems(idx)"
+                          class="w-full rounded border border-green-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                          min="0"
+                        />
+                      </div>
+                      <div class="space-y-2" formArrayName="placement">
+                        <label class="block text-[11px] text-green-700 font-medium">Placement</label>
+                        @for (p of getPlacement(idx, 'easy').controls; track $index; let pi = $index) {
+                          <div class="flex items-center gap-2">
+                            <input
+                              [formControlName]="pi"
+                              type="text"
+                              placeholder="e.g., Item 1-5"
+                              class="w-full rounded border border-green-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-green-500"
+                            />
+                            <button
+                              type="button"
+                              (click)="removePlacement(idx, 'easy', pi)"
+                              class="px-1 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 shrink-0"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        }
+                        <button
+                          type="button"
+                          (click)="addPlacement(idx, 'easy')"
+                          class="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 w-full transition"
+                        >
+                          + Add
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Moderate -->
+                    <div [formGroupName]="'moderate'" class="rounded border border-yellow-200 bg-yellow-50 p-3 space-y-2">
+                      <p class="text-xs font-semibold text-yellow-800">Moderate (50%)</p>
+                      <div>
+                        <label class="block text-[11px] text-yellow-700 font-medium">Allocation</label>
+                        <input
+                          type="number"
+                          formControlName="allocation"
+                          (change)="updateTotalItems(idx)"
+                          class="w-full rounded border border-yellow-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                          min="0"
+                        />
+                      </div>
+                      <div class="space-y-2" formArrayName="placement">
+                        <label class="block text-[11px] text-yellow-700 font-medium">Placement</label>
+                        @for (p of getPlacement(idx, 'moderate').controls; track $index; let pi = $index) {
+                          <div class="flex items-center gap-2">
+                            <input
+                              [formControlName]="pi"
+                              type="text"
+                              placeholder="e.g., Item 6-10"
+                              class="w-full rounded border border-yellow-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                            />
+                            <button
+                              type="button"
+                              (click)="removePlacement(idx, 'moderate', pi)"
+                              class="px-1 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 shrink-0"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        }
+                        <button
+                          type="button"
+                          (click)="addPlacement(idx, 'moderate')"
+                          class="px-2 py-1 text-xs bg-yellow-600 text-white rounded hover:bg-yellow-700 w-full transition"
+                        >
+                          + Add
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Difficult -->
+                    <div [formGroupName]="'difficult'" class="rounded border border-red-200 bg-red-50 p-3 space-y-2">
+                      <p class="text-xs font-semibold text-red-800">Difficult (20%)</p>
+                      <div>
+                        <label class="block text-[11px] text-red-700 font-medium">Allocation</label>
+                        <input
+                          type="number"
+                          formControlName="allocation"
+                          (change)="updateTotalItems(idx)"
+                          class="w-full rounded border border-red-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                          min="0"
+                        />
+                      </div>
+                      <div class="space-y-2" formArrayName="placement">
+                        <label class="block text-[11px] text-red-700 font-medium">Placement</label>
+                        @for (p of getPlacement(idx, 'difficult').controls; track $index; let pi = $index) {
+                          <div class="flex items-center gap-2">
+                            <input
+                              [formControlName]="pi"
+                              type="text"
+                              placeholder="e.g., Item 11-15"
+                              class="w-full rounded border border-red-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-red-500"
+                            />
+                            <button
+                              type="button"
+                              (click)="removePlacement(idx, 'difficult', pi)"
+                              class="px-1 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 shrink-0"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        }
+                        <button
+                          type="button"
+                          (click)="addPlacement(idx, 'difficult')"
+                          class="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 w-full transition"
+                        >
+                          + Add
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Remove Topic Button -->
+                  @if (tosArray.length > 1) {
+                    <button
+                      type="button"
+                      (click)="removeTosItem(idx)"
+                      class="w-full px-3 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition font-medium flex items-center justify-center gap-2"
+                    >
+                      <fa-icon [icon]="faTimesCircle"></fa-icon>
+                      Remove Topic
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Add Topic Button -->
+        <button
+          type="button"
+          (click)="addTosItem()"
+          class="w-full px-4 py-3 bg-indigo-100 text-indigo-700 rounded-lg font-medium hover:bg-indigo-200 transition flex items-center justify-center gap-2 mt-4"
+        >
+          <fa-icon [icon]="faPlus"></fa-icon>
+          Add Another Topic
+        </button>
+
+        <!-- Calculation Summary -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+          <div class="flex items-center justify-between text-sm">
+            <span class="font-medium text-blue-900 flex items-center gap-2">
+              <fa-icon [icon]="faInfoCircle" class="text-blue-600"></fa-icon>
+              Total Computed Items
+            </span>
+            <span class="text-lg font-bold text-blue-700">{{ totalItemsComputed() }}</span>
+          </div>
+          <p class="text-xs text-blue-700 mt-2">
+            This is calculated from all topics' item counts above.
+          </p>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex items-center justify-between">
+          <button
+            type="button"
+            (click)="onCancel()"
+            [disabled]="saving()"
+            class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition duration-200 disabled:opacity-50"
+          >
+            <fa-icon [icon]="faTimes" class="mr-2"></fa-icon>Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="examForm.invalid || saving()"
+            class="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+          >
+            @if (saving()) {
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            } @else {
+            <fa-icon [icon]="faSave"></fa-icon>
+            }
+            <span>Update Exam</span>
+          </button>
+        </div>
+      </div>
+    </form>

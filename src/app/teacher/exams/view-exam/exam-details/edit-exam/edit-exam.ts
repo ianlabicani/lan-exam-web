@@ -4,6 +4,7 @@ import {
   input,
   output,
   signal,
+  computed,
   ChangeDetectionStrategy,
   effect,
 } from '@angular/core';
@@ -37,8 +38,11 @@ import {
   faSave,
   faChartBar,
   faCircle,
+  faChevronDown,
+  faChevronUp,
+  faTimesCircle,
 } from '@fortawesome/free-solid-svg-icons';
-import { ExamApiService } from '../../services/exam-api.service';
+import { ExamApiService } from '../../../../services/exam-api.service';
 
 export interface EditExamData {
   id: number;
@@ -57,9 +61,9 @@ export interface TosItem {
   no_of_items: number;
   outcomes: string[];
   distribution: {
-    easy: { allocation: number };
-    moderate: { allocation: number };
-    difficult: { allocation: number };
+    easy: { allocation: number; placement?: string[] };
+    moderate: { allocation: number; placement?: string[] };
+    difficult: { allocation: number; placement?: string[] };
   };
 }
 
@@ -86,6 +90,9 @@ export class EditExam {
   // Signals
   saving = signal(false);
   error = signal<string | null>(null);
+  expandedTopic = signal<number | null>(null);
+  durationDisplay = signal<string>('Not set');
+  totalItemsComputed = signal<number>(0);
 
   // Form
   examForm!: FormGroup;
@@ -114,6 +121,9 @@ export class EditExam {
   faSave = faSave;
   faChartBar = faChartBar;
   faCircle = faCircle;
+  faChevronDown = faChevronDown;
+  faChevronUp = faChevronUp;
+  faTimesCircle = faTimesCircle;
 
   constructor() {
     this.initForm();
@@ -142,13 +152,22 @@ export class EditExam {
   createTosItem(): FormGroup {
     return this.fb.group({
       topic: ['', Validators.required],
-      time_allotment: [0],
+      time_allotment: [0, Validators.required],
       no_of_items: [{ value: 0, disabled: true }],
-      outcomes: [[]],
+      outcomes: this.fb.array<string>([]),
       distribution: this.fb.group({
-        easy: this.fb.group({ allocation: [0] }),
-        moderate: this.fb.group({ allocation: [0] }),
-        difficult: this.fb.group({ allocation: [0] }),
+        easy: this.fb.group({
+          allocation: [0, Validators.required],
+          placement: this.fb.array<string>([]),
+        }),
+        moderate: this.fb.group({
+          allocation: [0, Validators.required],
+          placement: this.fb.array<string>([]),
+        }),
+        difficult: this.fb.group({
+          allocation: [0, Validators.required],
+          placement: this.fb.array<string>([]),
+        }),
       }),
     });
   }
@@ -180,31 +199,59 @@ export class EditExam {
       ends_at: endsAt,
     });
 
-    // Populate TOS
+    // Populate TOS with full structure
     if (exam.tos && exam.tos.length > 0) {
       const tosFormArray = this.tosArray;
       tosFormArray.clear();
       exam.tos.forEach((tosItem: TosItem) => {
         const tosGroup = this.fb.group({
           topic: [tosItem.topic || '', Validators.required],
-          time_allotment: [tosItem.time_allotment || 0],
+          time_allotment: [tosItem.time_allotment || 0, Validators.required],
           no_of_items: [tosItem.no_of_items || 0],
-          outcomes: [tosItem.outcomes || []],
+          outcomes: this.fb.array(
+            (tosItem.outcomes || []).map((outcome) => this.fb.control(outcome))
+          ),
           distribution: this.fb.group({
             easy: this.fb.group({
-              allocation: [tosItem.distribution?.easy?.allocation || 0],
+              allocation: [
+                tosItem.distribution?.easy?.allocation || 0,
+                Validators.required,
+              ],
+              placement: this.fb.array(
+                (tosItem.distribution?.easy?.placement || []).map((p: string) =>
+                  this.fb.control(p)
+                )
+              ),
             }),
             moderate: this.fb.group({
-              allocation: [tosItem.distribution?.moderate?.allocation || 0],
+              allocation: [
+                tosItem.distribution?.moderate?.allocation || 0,
+                Validators.required,
+              ],
+              placement: this.fb.array(
+                (tosItem.distribution?.moderate?.placement || []).map(
+                  (p: string) => this.fb.control(p)
+                )
+              ),
             }),
             difficult: this.fb.group({
-              allocation: [tosItem.distribution?.difficult?.allocation || 0],
+              allocation: [
+                tosItem.distribution?.difficult?.allocation || 0,
+                Validators.required,
+              ],
+              placement: this.fb.array(
+                (tosItem.distribution?.difficult?.placement || []).map(
+                  (p: string) => this.fb.control(p)
+                )
+              ),
             }),
           }),
         });
         tosFormArray.push(tosGroup);
       });
     }
+
+    // TODO: Calculate total items and update signals
   }
 
   onYearChange(event: any): void {
@@ -268,6 +315,102 @@ export class EditExam {
 
   removeTosItem(index: number): void {
     this.tosArray.removeAt(index);
+  }
+
+  protected toggleTopicExpanded(index: number): void {
+    if (this.expandedTopic() === index) {
+      this.expandedTopic.set(null);
+    } else {
+      this.expandedTopic.set(index);
+    }
+  }
+
+  protected autoCalculateDistribution(topicIndex: number): void {
+    const tosArray = this.tosArray;
+    const topic = tosArray.at(topicIndex) as FormGroup;
+
+    const totalTimeAllotment = (tosArray.value as any[]).reduce(
+      (sum, t) => sum + (parseFloat(t.time_allotment || 0) || 0),
+      0
+    );
+
+    if (totalTimeAllotment === 0) return;
+
+    const topicTimeAllotment = parseFloat(
+      topic.get('time_allotment')?.value || 0
+    );
+    const totalItems = (tosArray.value as any[]).reduce(
+      (sum, t) => sum + (parseInt(t.no_of_items || 0) || 0),
+      0
+    );
+
+    if (totalItems <= 0) return;
+
+    const proportion = topicTimeAllotment / totalTimeAllotment;
+    const itemsForTopic = Math.round(proportion * totalItems);
+
+    // Calculate distribution: 30% easy, 50% moderate, 20% difficult
+    const distribution = topic.get('distribution') as FormGroup;
+    const easy = Math.round(itemsForTopic * 0.3);
+    const difficult = Math.round(itemsForTopic * 0.2);
+    const moderate = itemsForTopic - easy - difficult;
+
+    distribution.patchValue({
+      easy: { allocation: Math.max(0, easy) },
+      moderate: { allocation: Math.max(0, moderate) },
+      difficult: { allocation: Math.max(0, difficult) },
+    });
+
+    this.recalculateTotalItems();
+  }
+
+  private recalculateTotalItems(): void {
+    const total = this.tosArray.value.reduce((sum: number, topic: any) => {
+      return sum + (parseInt(topic.no_of_items || 0) || 0);
+    }, 0);
+    this.totalItemsComputed.set(total);
+  }
+
+  // ========== OUTCOME HELPERS ==========
+  protected getOutcomes(topicIndex: number): FormArray {
+    return (this.tosArray.at(topicIndex) as FormGroup).get(
+      'outcomes'
+    ) as FormArray;
+  }
+
+  protected addOutcome(topicIndex: number): void {
+    this.getOutcomes(topicIndex).push(this.fb.control(''));
+  }
+
+  protected removeOutcome(topicIndex: number, outcomeIndex: number): void {
+    this.getOutcomes(topicIndex).removeAt(outcomeIndex);
+  }
+
+  // ========== PLACEMENT HELPERS ==========
+  protected getPlacement(
+    topicIndex: number,
+    level: 'easy' | 'moderate' | 'difficult'
+  ): FormArray {
+    const dist = (this.tosArray.at(topicIndex) as FormGroup).get(
+      'distribution'
+    ) as FormGroup;
+    const lvl = dist.get(level) as FormGroup;
+    return lvl.get('placement') as FormArray;
+  }
+
+  protected addPlacement(
+    topicIndex: number,
+    level: 'easy' | 'moderate' | 'difficult'
+  ): void {
+    this.getPlacement(topicIndex, level).push(this.fb.control(''));
+  }
+
+  protected removePlacement(
+    topicIndex: number,
+    level: 'easy' | 'moderate' | 'difficult',
+    placementIndex: number
+  ): void {
+    this.getPlacement(topicIndex, level).removeAt(placementIndex);
   }
 
   onCancel(): void {

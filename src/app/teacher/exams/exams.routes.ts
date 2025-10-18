@@ -9,7 +9,9 @@ export const examsRoute: Routes = [
   {
     path: 'exams/:examId/edit',
     loadComponent: () =>
-      import('./edit-exam/edit-exam').then((c) => c.EditExam),
+      import('./view-exam/exam-details/edit-exam/edit-exam').then(
+        (c) => c.EditExam
+      ),
   },
   {
     path: 'exams',
