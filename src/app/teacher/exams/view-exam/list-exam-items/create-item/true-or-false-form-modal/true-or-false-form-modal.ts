@@ -1,17 +1,8 @@
-import {
-  Component,
-  OnInit,
-  inject,
-  input,
-  output,
-  signal,
-} from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../../../environments/environment.development';
-import { ExamItem } from '../../exam-item-state.service';
 import { ViewExamService } from '../../../view-exam.service';
-import { ExamApiService } from '../../../../services/exam-api.service';
+import { ExamItemApiService } from '../../../../../services/exam-item-api.service';
 
 @Component({
   selector: 'app-true-or-false-form-modal',
@@ -22,7 +13,7 @@ import { ExamApiService } from '../../../../services/exam-api.service';
 export class TrueOrFalseFormModal {
   fb = inject(FormBuilder);
   http = inject(HttpClient);
-  examApiSvc = inject(ExamApiService);
+  examApiSvc = inject(ExamItemApiService);
   viewExamSvc = inject(ViewExamService);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();

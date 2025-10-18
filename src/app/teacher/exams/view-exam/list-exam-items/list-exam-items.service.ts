@@ -1,13 +1,17 @@
+import { ViewExamService } from './../view-exam.service';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../../../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs';
+import { ExamItemApiService } from '../../../services/exam-item-api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ListExamItemsService {
   private http = inject(HttpClient);
+  private examItemApi = inject(ExamItemApiService);
+  viewExamSvc = inject(ViewExamService);
 
   private items = signal<ExamItem[]>([]);
   private currentExamId = signal<number | null>(null);
@@ -29,6 +33,7 @@ export class ListExamItemsService {
 
   index(examId: number) {
     this.currentExamId.set(examId);
+
     return this.http
       .get<{ data: ExamItem[] }>(
         `${environment.apiBaseUrl}/teacher/exams/${examId}/items`
@@ -69,25 +74,6 @@ export class ListExamItemsService {
         tap((res) => {
           this.items.update((items) =>
             items.map((it) => (it.id === res.data.id ? res.data : it))
-          );
-        })
-      );
-  }
-
-  delete(itemId: number) {
-    const examId = this.currentExamId();
-    if (!examId) {
-      throw new Error('No exam ID set. Call index() or store() first.');
-    }
-
-    return this.http
-      .delete<{ data: boolean }>(
-        `${environment.apiBaseUrl}/teacher/exams/${examId}/items/${itemId}`
-      )
-      .pipe(
-        tap(() => {
-          this.items.update((prev) =>
-            prev.filter((item) => item.id !== itemId)
           );
         })
       );

@@ -5,9 +5,9 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ExamItem } from '../../list-exam-items.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faCheckSquare, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { ExamItem } from '../../../view-exam.service';
 
 @Component({
   selector: 'app-mcq-item',

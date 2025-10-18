@@ -1,9 +1,11 @@
-import { Exam } from './../../../../services/exam.service';
-import { ViewExamService, ViewingExam } from '../../view-exam.service';
-import { ExamApiService } from '../../../../services/exam-api.service';
+import {
+  ExamItem,
+  ViewExamService,
+  ViewingExam,
+} from '../../view-exam.service';
 import { Component, input, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ExamItem } from '../exam-item-state.service';
+import { ExamItemApiService } from '../../../../services/exam-item-api.service';
 
 @Component({
   selector: 'app-delete-item',
@@ -14,10 +16,10 @@ import { ExamItem } from '../exam-item-state.service';
 export class DeleteItem {
   itemInput = input.required<ExamItem>();
   exam = input.required<ViewingExam>();
-  deleted = output<ExamItem>();
   close = output<void>();
 
-  examApiSvc = inject(ExamApiService);
+  examItemApi = inject(ExamItemApiService);
+  viewExamSvc = inject(ViewExamService);
 
   deleting = false;
   error: string | null = null;
@@ -29,10 +31,11 @@ export class DeleteItem {
     this.deleting = true;
     this.error = null;
 
-    this.examApiSvc.deleteItem(exam.id, item.id).subscribe({
-      next: () => {
+    this.examItemApi.deleteItem(exam.id, item.id).subscribe({
+      next: (res) => {
         this.deleting = false;
-        this.deleted.emit(item);
+        this.viewExamSvc.removeItem(item.id);
+        this.close.emit();
       },
       error: (err: any) => {
         this.deleting = false;

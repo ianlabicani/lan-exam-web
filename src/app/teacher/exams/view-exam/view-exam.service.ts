@@ -48,6 +48,15 @@ export class ViewExamService {
     this.currentViewingExam.set(merged);
     return merged;
   }
+
+  removeItem(id: number) {
+    this.currentViewingExam.update((prev) => {
+      if (!prev) return null;
+
+      const examItems = (prev?.items ?? []).filter((i) => i.id !== id);
+      return { ...prev, items: examItems };
+    });
+  }
 }
 
 export interface ViewingExam {
@@ -63,10 +72,10 @@ export interface ViewingExam {
   tos: Tos[];
   created_at: Date;
   updated_at: Date;
-  items: Item[];
+  items: ExamItem[];
 }
 
-export interface Item {
+export interface ExamItem {
   id: number;
   exam_id: number;
   type: string;

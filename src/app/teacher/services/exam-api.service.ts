@@ -39,13 +39,9 @@ export class ExamApiService {
   }
 
   show(id: number | string) {
-    return this.http
-      .get<{ data: Exam; message: string }>(`${this.apiUrl}/${id}`)
-      .pipe(
-        tap((res) => {
-          console.log('Fetched exam:', res.data);
-        })
-      );
+    return this.http.get<{ data: Exam; message: string }>(
+      `${this.apiUrl}/${id}`
+    );
   }
 
   store(payload: any) {
@@ -73,61 +69,6 @@ export class ExamApiService {
 
   destroy(id: number | string) {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
-  }
-
-  // ========== EXAM ITEMS ==========
-  createItem(examId: number | string, itemData: any) {
-    return this.http.post<{ data: Exam; message: string }>(
-      `${this.apiUrl}/${examId}/items`,
-      itemData
-    );
-  }
-
-  updateItem(examId: number | string, itemId: number | string, itemData: any) {
-    return this.http.patch<{ data: Exam; message: string }>(
-      `${this.apiUrl}/${examId}/items/${itemId}`,
-      itemData
-    );
-  }
-
-  deleteItem(examId: number | string, itemId: number | string) {
-    return this.http.delete<{ data: Exam; message: string }>(
-      `${this.apiUrl}/${examId}/items/${itemId}`
-    );
-  }
-
-  reorderItems(
-    examId: number | string,
-    items: Array<{ id: number; order: number }>
-  ) {
-    return this.http.patch<{ data: Exam; message: string }>(
-      `${this.apiUrl}/${examId}/items/reorder`,
-      { items }
-    );
-  }
-
-  // ========== GRADING & SUBMISSIONS ==========
-  getTakenExams(examId: number | string) {
-    return this.http.get<{ data: TakenExam[]; message: string }>(
-      `${this.apiUrl}/${examId}/taken-exams`
-    );
-  }
-
-  getTakenExam(examId: number | string, takenExamId: number | string) {
-    return this.http.get<{ data: TakenExam; message: string }>(
-      `${this.apiUrl}/${examId}/taken-exams/${takenExamId}`
-    );
-  }
-
-  gradeSubmission(
-    examId: number | string,
-    takenExamId: number | string,
-    gradingData: any
-  ) {
-    return this.http.post<{ data: TakenExam; message: string }>(
-      `${this.apiUrl}/${examId}/taken-exams/${takenExamId}/grade`,
-      gradingData
-    );
   }
 
   // ========== ANALYTICS ==========

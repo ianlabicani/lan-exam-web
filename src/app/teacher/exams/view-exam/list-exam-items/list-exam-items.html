@@ -1,6 +1,6 @@
-@let easyItemsSig = itemsStateSvc.easyItems$();
-@let moderateItemsSig = itemsStateSvc.moderateItems$();
-@let difficultItemsSig = itemsStateSvc.difficultItems$();
+@let easyItemsSig = easyItems();
+@let moderateItemsSig = moderateItems();
+@let difficultItemsSig = difficultItems();
 @let exam = viewExamSvc.viewingExam();
 
 @if (exam) {
@@ -268,7 +268,7 @@
 
   <!-- Delete Modal -->
   @if (isDeleteModalOpenSig()) {
-    <app-delete-item [itemInput]="selectedForUpdateSig()!" [exam]="exam!" (deleted)="onItemDeleted($event)" (close)="closeDeleteModal()"></app-delete-item>
+    <app-delete-item [itemInput]="selectedForUpdateSig()!" [exam]="exam!" (close)="closeDeleteModal()"></app-delete-item>
   }
 
   <!-- Add Question Modal -->

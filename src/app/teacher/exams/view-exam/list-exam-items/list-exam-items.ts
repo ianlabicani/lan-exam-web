@@ -1,6 +1,6 @@
-import { ExamItem, ExamItemStateService } from './exam-item-state.service';
+import { ExamItemStateService } from './exam-item-state.service';
 import { ActivatedRoute } from '@angular/router';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { McqItem } from './ui/mcq-item/mcq-item';
 import { HttpClient } from '@angular/common/http';
 import { TrueFalseItem } from './ui/true-false-item/true-false-item';
@@ -16,9 +16,10 @@ import { TrueOrFalseFormModal } from './create-item/true-or-false-form-modal/tru
 import { FillBlankFormModal } from './create-item/fill-blank-form-modal/fill-blank-form-modal';
 import { ShortAnswerFormModal } from './create-item/short-answer-form-modal/short-answer-form-modal';
 import { MatchingFormModal } from './create-item/matching-form-modal/matching-form-modal';
-import { ViewExamService } from '../view-exam.service';
+import { ExamItem, ViewExamService } from '../view-exam.service';
 import { AddQuestionModal } from './add-question-modal/add-question-modal';
 import { ExamApiService } from '../../../services/exam-api.service';
+import { ExamItemApiService } from '../../../services/exam-item-api.service';
 
 @Component({
   selector: 'app-teacher-list-exam-items',
@@ -47,6 +48,7 @@ export class ListExamItems implements OnInit {
   activatedRoute = inject(ActivatedRoute);
   viewExamSvc = inject(ViewExamService);
   examApiSvc = inject(ExamApiService);
+  examItemApi = inject(ExamItemApiService);
   itemsStateSvc = inject(ExamItemStateService);
 
   isUpdateModalOpenSig = signal(false);
@@ -94,25 +96,30 @@ export class ListExamItems implements OnInit {
   isModerateOpen = signal(true);
   isDifficultOpen = signal(true);
 
-  items = this.itemsStateSvc.items$;
+  items = computed(() => this.viewExamSvc.viewingExam()?.items ?? []);
 
-  ngOnInit(): void {
-    const examId: number =
-      this.activatedRoute.parent?.snapshot.params['examId'];
+  /**
+   * Computed accessor for easy difficulty items
+   */
+  easyItems = computed(() =>
+    this.items().filter((item) => item.level === 'easy')
+  );
 
-    this.getExamItems(examId);
-  }
+  /**
+   * Computed accessor for moderate difficulty items
+   */
+  moderateItems = computed(() =>
+    this.items().filter((item) => item.level === 'moderate')
+  );
 
-  getExamItems(examId: number) {
-    this.itemsStateSvc.index(examId).subscribe({
-      next: (res) => {
-        console.log(res);
-      },
-      error: (err) => {
-        console.error('Error fetching exam items:', err);
-      },
-    });
-  }
+  /**
+   * Computed accessor for difficult items
+   */
+  difficultItems = computed(() =>
+    this.items().filter((item) => item.level === 'difficult')
+  );
+
+  ngOnInit(): void {}
 
   openUpdateModal(item: ExamItem) {
     this.selectedForUpdateSig.set(item);
@@ -146,7 +153,7 @@ export class ListExamItems implements OnInit {
     }
     // Call updateItem with explicit parameters
     const itemId = examItem.id;
-    this.examApiSvc.updateItem(examId, itemId, examItem).subscribe({
+    this.examItemApi.updateItem(examId, itemId, examItem).subscribe({
       next: (res: any) => {
         // Update parent state with new exam data
         this.viewExamSvc.patchViewingExam(res.data);
