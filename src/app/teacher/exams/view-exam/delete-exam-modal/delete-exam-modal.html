@@ -1,0 +1,62 @@
+<!-- Modal Overlay -->
+@if (isOpen()) {
+  <div class="fixed inset-0 bg-black/50 z-40 flex items-center justify-center" (click)="onClose()">
+    <!-- Modal Container -->
+    <div
+      class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 animate-in fade-in scale-95 duration-200"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Modal Header -->
+      <div class="bg-red-50 border-b border-red-200 px-6 py-4 flex items-start gap-3">
+        <div class="flex-shrink-0">
+          <fa-icon [icon]="faExclamationTriangle" class="text-xl text-red-600"></fa-icon>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-lg font-bold text-red-900">Delete Exam</h3>
+          <p class="text-sm text-red-700 mt-1">This action cannot be undone.</p>
+        </div>
+        <button
+          type="button"
+          (click)="onClose()"
+          class="text-red-400 hover:text-red-600 transition"
+        >
+          <fa-icon [icon]="faTimes" class="text-lg"></fa-icon>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="px-6 py-4">
+        <p class="text-gray-700 text-sm">
+          Are you sure you want to delete the exam "<span class="font-semibold text-gray-900">{{ examTitle() }}</span>"?
+          This will permanently remove the exam and all associated data.
+        </p>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-gray-50 border-t border-gray-200 px-6 py-4 flex gap-3 justify-end">
+        <button
+          type="button"
+          (click)="onClose()"
+          [disabled]="isDeleting()"
+          class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 disabled:opacity-50 transition duration-200"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="onConfirm()"
+          [disabled]="isDeleting()"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 transition duration-200 flex items-center gap-2"
+        >
+          @if (isDeleting()) {
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            <span>Deleting...</span>
+          } @else {
+            <fa-icon [icon]="faTrash"></fa-icon>
+            <span>Delete Exam</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

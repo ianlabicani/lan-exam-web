@@ -271,14 +271,6 @@
                       <fa-icon [icon]="faEye"></fa-icon>
                       View
                     </a>
-                    @if (exam.status === 'draft') {
-                      <a
-                        [routerLink]="['/teacher/exams', exam.id, 'edit']"
-                        class="px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm font-medium hover:bg-yellow-700 transition duration-200 flex items-center gap-1">
-                        <fa-icon [icon]="faEdit"></fa-icon>
-                        Edit
-                      </a>
-                    }
                     <button
                       (click)="deleteExam(exam.id)"
                       class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition duration-200 flex items-center gap-1">

@@ -3,6 +3,15 @@
 @let errorMsgSig = errorMsg();
 @let showTabsSig = showTabs();
 
+<!-- Delete Exam Modal -->
+<app-delete-exam-modal
+  [examTitle]="examSig?.title || ''"
+  [isOpen]="showDeleteModal()"
+  [isDeleting]="isDeleting()"
+  (closeModal)="closeDeleteModal()"
+  (confirmDelete)="submitDelete()"
+></app-delete-exam-modal>
+
 <!-- Status Update Modal -->
 <app-status-update-modal
   [exam]="examSig"
@@ -140,23 +149,6 @@
               <fa-icon [icon]="faSync"></fa-icon>
               <span>Update Status</span>
             </button>
-
-            @if(examSig.status === 'draft') {
-              <a
-                [routerLink]="['/teacher/exams', examSig.id, 'edit']"
-                class="px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 transition duration-200 inline-flex items-center gap-2">
-                <fa-icon [icon]="faEdit"></fa-icon>
-                <span>Edit</span>
-              </a>
-
-              <button
-                type="button"
-                (click)="confirmDelete(examSig.id)"
-                class="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition duration-200 inline-flex items-center gap-2">
-                <fa-icon [icon]="faTrash"></fa-icon>
-                <span>Delete</span>
-              </button>
-            }
           </div>
         </div>
       </div>
@@ -335,6 +327,15 @@
         }
       }
 
+    @if(examSig.status === 'draft') {
+      <button
+        type="button"
+        (click)="confirmDelete(examSig.id)"
+        class="mt-5 w-full px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition duration-200 flex items-center justify-center gap-2">
+        <fa-icon [icon]="faTrash"></fa-icon>
+        <span>Delete</span>
+      </button>
+    }
     </div>
   </div>
 }

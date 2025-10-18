@@ -12,6 +12,7 @@ import {
   RouterOutlet,
   ActivatedRoute,
   RouterLinkActive,
+  Router,
 } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -50,6 +51,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { ViewExamService } from './view-exam.service';
 import { ExamApiService } from '../../services/exam-api.service';
 import { StatusUpdateModalComponent } from './status-update-modal/status-update-modal';
+import { DeleteExamModalComponent } from './delete-exam-modal/delete-exam-modal';
 
 @Component({
   selector: 'app-view-exam',
@@ -61,6 +63,7 @@ import { StatusUpdateModalComponent } from './status-update-modal/status-update-
     FaIconComponent,
     CommonModule,
     StatusUpdateModalComponent,
+    DeleteExamModalComponent,
   ],
   templateUrl: './view-exam.html',
   styleUrl: './view-exam.css',
@@ -70,6 +73,7 @@ export class ViewExam implements OnInit {
   viewExamSvc = inject(ViewExamService);
   examApi = inject(ExamApiService);
   route = inject(ActivatedRoute);
+  router = inject(Router);
 
   loading = signal(true);
   saving = signal(false);
@@ -77,6 +81,8 @@ export class ViewExam implements OnInit {
   activeTab = signal<'overview' | 'items' | 'takers' | 'analytics'>('overview');
   showStatusModal = signal(false);
   selectedStatus = signal<string | null>(null);
+  showDeleteModal = signal(false);
+  isDeleting = signal(false);
 
   faArrowLeft = faArrowLeft;
   faCheckCircle = faCheckCircle;
@@ -244,10 +250,32 @@ export class ViewExam implements OnInit {
   }
 
   confirmDelete(examId: number): void {
-    const confirmed = confirm('Are you sure you want to delete this exam?');
-    if (confirmed) {
-      // TODO: Implement delete exam method in service
-      console.log('Deleting exam:', examId);
-    }
+    this.showDeleteModal.set(true);
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal.set(false);
+  }
+
+  submitDelete(): void {
+    const examId = this.exam()?.id;
+    if (!examId) return;
+
+    this.isDeleting.set(true);
+    this.examApi.destroy(examId).subscribe({
+      next: () => {
+        this.isDeleting.set(false);
+        this.closeDeleteModal();
+        // Navigate back to exams list
+        this.router.navigate(['/teacher/exams']);
+      },
+      error: (err: any) => {
+        this.isDeleting.set(false);
+        this.errorMsg.set(err?.error?.message || 'Failed to delete exam');
+        setTimeout(() => {
+          this.errorMsg.set(null);
+        }, 5000);
+      },
+    });
   }
 }

@@ -7,13 +7,6 @@ export const examsRoute: Routes = [
       import('./create-exam/create-exam').then((c) => c.CreateExam),
   },
   {
-    path: 'exams/:examId/edit',
-    loadComponent: () =>
-      import('./view-exam/exam-details/edit-exam/edit-exam').then(
-        (c) => c.EditExam
-      ),
-  },
-  {
     path: 'exams',
     loadComponent: () =>
       import('./list-exams/list-exams').then((c) => c.ListExams),
