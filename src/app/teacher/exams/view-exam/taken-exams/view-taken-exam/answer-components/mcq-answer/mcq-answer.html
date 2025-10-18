@@ -1,0 +1,67 @@
+<div class="space-y-2">
+  @if (answer().item.options) {
+    @for (option of answer().item.options; let optIdx = $index; track optIdx) {
+      <div class="flex items-start gap-3 p-3 rounded-lg border"
+           [ngClass]="{
+             'border-green-500 bg-green-50': option.correct && answer().answer === optIdx,
+             'border-red-500 bg-red-50': !option.correct && answer().answer === optIdx,
+             'border-green-300 bg-green-25': option.correct && answer().answer !== optIdx,
+             'border-slate-200 bg-white': answer().answer !== optIdx && !option.correct
+           }">
+        <span class="font-semibold text-sm"
+              [ngClass]="{
+                'text-green-700': option.correct && answer().answer === optIdx,
+                'text-red-700': !option.correct && answer().answer === optIdx,
+                'text-green-600': option.correct && answer().answer !== optIdx,
+                'text-slate-500': answer().answer !== optIdx && !option.correct
+              }">
+          {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[optIdx] }}
+        </span>
+        <span class="text-slate-700 flex-1">{{ option.text }}</span>
+
+        <!-- Status indicators -->
+        <div class="flex items-center gap-2">
+          @if (option.correct && answer().answer === optIdx) {
+            <span class="text-green-700 text-xs font-medium flex items-center gap-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              Correct & Selected
+            </span>
+          }
+          @if (option.correct && answer().answer !== optIdx) {
+            <span class="text-green-600 text-xs font-medium flex items-center gap-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              Correct Answer
+            </span>
+          }
+          @if (!option.correct && answer().answer === optIdx) {
+            <span class="text-red-700 text-xs font-medium flex items-center gap-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+              </svg>
+              Student Selected
+            </span>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  <!-- Show comparison info -->
+  @if (comparison()) {
+    <div class="mt-3 p-3 rounded-lg"
+         [ngClass]="{
+           'bg-green-50 border border-green-200': comparison().is_correct,
+           'bg-red-50 border border-red-200': comparison().is_correct === false
+         }">
+      <div class="text-sm">
+        <span class="font-medium">Student selected:</span> {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[comparison().student_answer] }}
+        <span class="mx-2">|</span>
+        <span class="font-medium">Correct answer:</span> {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[comparison().correct_answer] }}
+      </div>
+    </div>
+  }
+</div>

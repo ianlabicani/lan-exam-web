@@ -1,81 +1,241 @@
-<nav class="bg-white shadow-md">
+<nav class="bg-white shadow-md sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between h-16 items-center">
-      <!-- Logo -->
-      <div class="flex items-center gap-2">
-        <a routerLink="/" class="flex items-center gap-2 font-bold text-lg text-indigo-600 hover:text-indigo-700">
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
-          </svg>
-          <span>CBEMS</span>
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo and Brand -->
+      <div class="flex items-center space-x-8">
+        <a routerLink="/teacher/dashboard" class="flex items-center space-x-3">
+          <fa-icon [icon]="faGraduationCap" class="text-3xl text-indigo-600"></fa-icon>
+          <div>
+            <h1 class="text-xl font-bold text-gray-900">CBEMS</h1>
+            <p class="text-xs text-gray-600">Teacher Portal</p>
+          </div>
         </a>
+
+        <!-- Main Navigation Links -->
+        <div class="hidden md:flex items-center space-x-1">
+          <a
+            routerLink="/teacher/dashboard"
+            routerLinkActive="bg-indigo-50 text-indigo-600"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="px-4 py-2 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 font-medium transition duration-200">
+            <fa-icon [icon]="faHome" class="mr-2"></fa-icon>Dashboard
+          </a>
+          <a
+            routerLink="/teacher/exams"
+            routerLinkActive="bg-indigo-50 text-indigo-600"
+            [routerLinkActiveOptions]="{ exact: false }"
+            class="px-4 py-2 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 font-medium transition duration-200">
+            <fa-icon [icon]="faFileAlt" class="mr-2"></fa-icon>Exams
+          </a>
+          <a
+            routerLink="/teacher/analytics"
+            routerLinkActive="bg-indigo-50 text-indigo-600"
+            [routerLinkActiveOptions]="{ exact: false }"
+            class="px-4 py-2 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 font-medium transition duration-200">
+            <fa-icon [icon]="faChartLine" class="mr-2"></fa-icon>Analytics
+          </a>
+          <a
+            routerLink="/teacher/grading"
+            routerLinkActive="bg-indigo-50 text-indigo-600"
+            [routerLinkActiveOptions]="{ exact: false }"
+            class="px-4 py-2 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 font-medium transition duration-200">
+            <fa-icon [icon]="faClipboardCheck" class="mr-2"></fa-icon>Grading
+          </a>
+        </div>
       </div>
 
-      <!-- Desktop Navigation -->
-      <div class="hidden md:flex items-center space-x-1">
-        <a
-          routerLink="/teacher/dashboard"
-          routerLinkActive="bg-indigo-100 text-indigo-600"
-          [routerLinkActiveOptions]="{ exact: true }"
-          class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-100 rounded-md transition duration-150">
-          Dashboard
+      <!-- Right Side Actions -->
+      <div class="flex items-center space-x-4">
+        <!-- Active Takers Indicator -->
+        <a href="#" class="hidden lg:flex items-center space-x-2 px-3 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition duration-200">
+          <div class="relative">
+            <fa-icon [icon]="faUserClock" class="text-lg"></fa-icon>
+            <span class="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+          </div>
+          <span class="text-sm font-medium">12 Active</span>
         </a>
-        <a
-          routerLink="/teacher/exams"
-          routerLinkActive="bg-indigo-100 text-indigo-600"
-          [routerLinkActiveOptions]="{ exact: false }"
-          class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-100 rounded-md transition duration-150">
-          Exams
-        </a>
-        <a
-          routerLink="/teacher/exams/create"
-          class="px-3 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition duration-150">
-          + New Exam
-        </a>
-      </div>
 
-      <!-- Right Section -->
-      <div class="flex items-center gap-4">
-        <!-- User Menu on Desktop -->
-        <div class="hidden md:flex items-center gap-3">
-          <app-logout-button></app-logout-button>
+        <!-- Notifications -->
+        <div class="relative">
+          <button
+            (click)="toggleNotifications()"
+            class="relative p-2 text-gray-600 hover:text-indigo-600 hover:bg-gray-100 rounded-lg transition duration-200">
+            <fa-icon [icon]="faBell" class="text-xl"></fa-icon>
+            <span class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">3</span>
+          </button>
+
+          <!-- Notifications Dropdown -->
+          @if (notificationsOpen()) {
+          <div class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
+            <div class="p-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+              <h3 class="font-semibold">Notifications</h3>
+              <p class="text-xs text-indigo-100">You have 3 unread notifications</p>
+            </div>
+            <div class="max-h-96 overflow-y-auto">
+              <!-- Notification Item 1 -->
+              <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
+                <div class="flex items-start space-x-3">
+                  <div class="bg-orange-100 p-2 rounded-full">
+                    <fa-icon [icon]="faExclamationTriangle" class="text-orange-600"></fa-icon>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-900">Suspicious activity detected</p>
+                    <p class="text-xs text-gray-600">Student switched tabs 5 times during exam</p>
+                    <p class="text-xs text-gray-500 mt-1">2 minutes ago</p>
+                  </div>
+                </div>
+              </a>
+              <!-- Notification Item 2 -->
+              <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
+                <div class="flex items-start space-x-3">
+                  <div class="bg-green-100 p-2 rounded-full">
+                    <fa-icon [icon]="faCheckCircle" class="text-green-600"></fa-icon>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-900">Exam completed</p>
+                    <p class="text-xs text-gray-600">Sarah Williams submitted Quiz 3</p>
+                    <p class="text-xs text-gray-500 mt-1">15 minutes ago</p>
+                  </div>
+                </div>
+              </a>
+              <!-- Notification Item 3 -->
+              <a href="#" class="block px-4 py-3 hover:bg-gray-50">
+                <div class="flex items-start space-x-3">
+                  <div class="bg-blue-100 p-2 rounded-full">
+                    <fa-icon [icon]="faCalendarAlt" class="text-blue-600"></fa-icon>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-900">Exam scheduled</p>
+                    <p class="text-xs text-gray-600">Midterm Exam starts in 2 hours</p>
+                    <p class="text-xs text-gray-500 mt-1">1 hour ago</p>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="p-3 bg-gray-50 text-center">
+              <a href="#" class="text-sm text-indigo-600 hover:text-indigo-700 font-medium">View All Notifications</a>
+            </div>
+          </div>
+          }
         </div>
 
-        <!-- Mobile Menu Toggle -->
+        <!-- User Profile Dropdown -->
+        <div class="relative">
+          <button
+            (click)="toggleProfileMenu()"
+            class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-lg transition duration-200">
+            <div class="bg-indigo-600 text-white w-10 h-10 rounded-full flex items-center justify-center font-semibold">
+              SJ
+            </div>
+            <div class="hidden md:block text-left">
+              <p class="text-sm font-semibold text-gray-900">Dr. Sarah Johnson</p>
+              <p class="text-xs text-gray-600">Teacher</p>
+            </div>
+            <fa-icon [icon]="faChevronDown" class="text-gray-600 text-sm"></fa-icon>
+          </button>
+
+          <!-- Profile Dropdown -->
+          @if (profileMenuOpen()) {
+          <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
+            <div class="p-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+              <p class="font-semibold">Dr. Sarah Johnson</p>
+              <p class="text-xs text-indigo-100">sarah.johnson@school.edu</p>
+            </div>
+            <div class="py-2">
+              <a
+                href="#"
+                class="flex items-center px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition duration-200">
+                <fa-icon [icon]="faUserCircle" class="mr-3 w-5"></fa-icon>My Profile
+              </a>
+              <a
+                href="#"
+                class="flex items-center px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition duration-200">
+                <fa-icon [icon]="faCog" class="mr-3 w-5"></fa-icon>Settings
+              </a>
+              <a
+                href="#"
+                class="flex items-center px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition duration-200">
+                <fa-icon [icon]="faQuestionCircle" class="mr-3 w-5"></fa-icon>Help & Support
+              </a>
+              <hr class="my-2 border-gray-200">
+              <button
+                (click)="openLogoutModal()"
+                class="w-full flex items-center px-4 py-2 text-red-600 hover:bg-red-50 transition duration-200 text-left">
+                <fa-icon [icon]="faSignOutAlt" class="mr-3 w-5"></fa-icon>Logout
+              </button>
+            </div>
+          </div>
+          }
+        </div>
+
+        <!-- Mobile Menu Button -->
         <button
           (click)="toggleMobileMenu()"
-          class="md:hidden p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          aria-label="Toggle menu">
-          <fa-icon [icon]="mobileMenuOpen() ? faTimes : faBars" class="h-6 w-6 text-gray-700"></fa-icon>
+          class="md:hidden p-2 text-gray-600 hover:text-indigo-600 hover:bg-gray-100 rounded-lg">
+          <fa-icon [icon]="mobileMenuOpen() ? faTimes : faBars" class="text-xl"></fa-icon>
         </button>
       </div>
     </div>
+  </div>
 
-    <!-- Mobile Navigation -->
-    @if (mobileMenuOpen()) {
-    <div class="md:hidden border-t border-gray-200 py-3 space-y-2">
+  <!-- Mobile Menu -->
+  @if (mobileMenuOpen()) {
+  <div class="md:hidden border-t border-gray-200">
+    <div class="px-4 py-3 space-y-2">
       <a
         routerLink="/teacher/dashboard"
         (click)="closeMobileMenu()"
-        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">
-        Dashboard
+        class="block px-4 py-2 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 font-medium">
+        <fa-icon [icon]="faHome" class="mr-2"></fa-icon>Dashboard
       </a>
       <a
         routerLink="/teacher/exams"
         (click)="closeMobileMenu()"
-        class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">
-        Exams
+        class="block px-4 py-2 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 font-medium">
+        <fa-icon [icon]="faFileAlt" class="mr-2"></fa-icon>Exams
       </a>
       <a
-        routerLink="/teacher/exams/create"
+        routerLink="/teacher/analytics"
         (click)="closeMobileMenu()"
-        class="block px-3 py-2 text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md">
-        + New Exam
+        class="block px-4 py-2 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 font-medium">
+        <fa-icon [icon]="faChartLine" class="mr-2"></fa-icon>Analytics
       </a>
-      <div class="pt-3 border-t border-gray-200">
-        <app-logout-button></app-logout-button>
-      </div>
+      <a
+        routerLink="/teacher/grading"
+        (click)="closeMobileMenu()"
+        class="block px-4 py-2 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 font-medium">
+        <fa-icon [icon]="faClipboardCheck" class="mr-2"></fa-icon>Grading
+      </a>
+      <a
+        href="#"
+        (click)="closeMobileMenu()"
+        class="block px-4 py-2 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-600 font-medium">
+        <fa-icon [icon]="faUserClock" class="mr-2"></fa-icon>Active Takers (12)
+      </a>
     </div>
-    }
   </div>
+  }
 </nav>
+
+<!-- Logout Confirmation Modal -->
+@if (logoutModalOpen()) {
+<div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" (click)="closeLogoutModal()">
+  <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6" (click)="$event.stopPropagation()">
+    <div class="text-center">
+      <div class="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+        <fa-icon [icon]="faSignOutAlt" class="text-3xl text-red-600"></fa-icon>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-2">Confirm Logout</h3>
+      <p class="text-gray-600 mb-6">Are you sure you want to logout from your account?</p>
+    </div>
+    <div class="flex space-x-3">
+      <button
+        (click)="closeLogoutModal()"
+        class="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition duration-200">
+        Cancel
+      </button>
+      <app-logout-button class="flex-1"></app-logout-button>
+    </div>
+  </div>
+</div>
+}

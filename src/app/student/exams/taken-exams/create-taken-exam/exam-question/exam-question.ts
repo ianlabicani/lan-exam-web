@@ -1,6 +1,7 @@
 import { Component, EventEmitter, input, Input, Output } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { IExamItem } from '../create-taken-exam';
+import { ExamItem } from '../../view-taken-exam/view-taken-exam';
 
 @Component({
   selector: 'app-exam-question',
@@ -9,7 +10,7 @@ import { IExamItem } from '../create-taken-exam';
   styleUrl: './exam-question.css',
 })
 export class ExamQuestion {
-  @Input() item!: IExamItem;
+  @Input() item!: ExamItem;
   @Input() index = 0;
   @Input() currentAnswer: any;
   @Output() answerChange = new EventEmitter<any>();

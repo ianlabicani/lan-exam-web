@@ -5,11 +5,7 @@ import { StudentExamItemService } from '../../../services/student-exam-item.serv
 import { concatMap } from 'rxjs';
 import { ExamHeader } from '../create-taken-exam/exam-header/exam-header';
 import { ExamQuestion } from '../create-taken-exam/exam-question/exam-question';
-import {
-  IExamItem,
-  ITakenExam,
-  ITakenExamAnswer,
-} from '../create-taken-exam/create-taken-exam';
+import { ITakenExamAnswer } from '../create-taken-exam/create-taken-exam';
 import { TakenExamService } from '../../../services/taken-exam.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment.development';
@@ -34,8 +30,6 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 })
 export class ViewTakenExam implements OnInit {
   private route = inject(ActivatedRoute);
-  private takenExamSvc = inject(TakenExamService);
-  private itemSvc = inject(StudentExamItemService);
   private http = inject(HttpClient);
 
   // FontAwesome icons
@@ -49,7 +43,7 @@ export class ViewTakenExam implements OnInit {
   faQuestionCircle = faQuestionCircle;
 
   takenExamSig = signal<TakenExam['takenExam'] | null>(null);
-  examItems = signal<IExamItem[]>([]);
+  examItems = signal<ExamItem[]>([]);
   answers = signal<Record<string, any>>({});
 
   ngOnInit(): void {
@@ -64,8 +58,6 @@ export class ViewTakenExam implements OnInit {
       )
       .subscribe({
         next: (takenExam) => {
-          console.log(takenExam);
-
           this.takenExamSig.set(takenExam.takenExam);
         },
       });
@@ -136,10 +128,10 @@ export interface Exam {
   tos: To[];
   created_at: Date;
   updated_at: Date;
-  items: Item[];
+  items: ExamItem[];
 }
 
-export interface Item {
+export interface ExamItem {
   id: number;
   exam_id: number;
   type: string;
@@ -212,5 +204,5 @@ export interface Answer {
   feedback: null;
   created_at: Date;
   updated_at: Date;
-  item: Item;
+  item: ExamItem;
 }
