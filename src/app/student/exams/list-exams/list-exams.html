@@ -161,12 +161,12 @@
                     <fa-icon [icon]="fasPlayCircle" class="mr-2"></fa-icon>Continue Exam
                   </a>
                 } @else if (isExamAvailable(exam)) {
-                  <a
+                  <button
                     (click)="takeExam(exam.id)"
                     class="flex-1 px-4 py-3 bg-green-600 text-white text-center rounded-lg font-medium hover:bg-green-700 transition duration-200 cursor-pointer"
                   >
                     <fa-icon [icon]="fasPlayCircle" class="mr-2"></fa-icon>Start Exam
-                  </a>
+                  </button>
                 } @else {
                   <button
                     disabled

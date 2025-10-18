@@ -19,6 +19,8 @@ import {
   type ActivityEvent,
   type ActivitySummary,
 } from './activity-monitor/activity-monitor';
+import { SubmitModal } from './submit-modal/submit-modal';
+import { ErrorModal } from '../../../../shared/components/error-modal/error-modal';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../../../environments/environment.development';
 import { TakenExamService } from '../../../services/taken-exam.service';
@@ -30,12 +32,14 @@ import { ExamActivityLogService } from '../../../services/exam-activity-log.serv
     ExamHeader,
     ExamProgress,
     ExamQuestion,
-    ExamTimer,
     ActivityMonitor,
+    SubmitModal,
+    ErrorModal,
     CommonModule,
   ],
   templateUrl: './create-taken-exam.html',
   styleUrl: './create-taken-exam.css',
+  standalone: true,
 })
 export class CreateTakenExam implements OnInit, OnDestroy {
   router = inject(Router);
@@ -54,8 +58,12 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   takenExam = signal<TakenExam | null>(null);
   examItems = signal<IExamItem[]>([]);
   showEventPanel = signal(false);
+  showSubmitModal = signal(false);
+  isSaving = signal(false);
+  currentQuestionIndex = signal(0);
 
   private essayDebounceHandles: Record<string, any> = {};
+  private savingTimeouts: Record<string, any> = {};
 
   // Computed properties for child components
   examTimerData = computed<ExamTimerData | null>(() => {
@@ -99,15 +107,36 @@ export class CreateTakenExam implements OnInit, OnDestroy {
 
   wasSubmitted = computed(() => this.takenExam()?.submitted_at !== null);
 
+  // Current question based on index
+  currentQuestion = computed(() => {
+    const items = this.examItems();
+    const index = this.currentQuestionIndex();
+    return items[index] || null;
+  });
+
+  // Computed - answered count
+  answeredCount = computed(() => {
+    const answers = this.answers();
+    return Object.keys(answers).filter(
+      (key) =>
+        answers[key] !== undefined &&
+        answers[key] !== null &&
+        answers[key] !== ''
+    ).length;
+  });
+
   // Activity tracking
   sessionEvents = this.examActivityService.examActivityEvents$;
+
   eventSummary = computed(() => {
     const events = this.sessionEvents();
     const tabSwitches = events.filter(
-      (e) => e.event_type === 'tab_hidden' || e.event_type === 'tab_visible'
+      (e: any) =>
+        e.event_type === 'tab_hidden' || e.event_type === 'tab_visible'
     ).length;
     const windowSwitches = events.filter(
-      (e) => e.event_type === 'window_blur' || e.event_type === 'window_focus'
+      (e: any) =>
+        e.event_type === 'window_blur' || e.event_type === 'window_focus'
     ).length;
 
     return {
@@ -115,11 +144,90 @@ export class CreateTakenExam implements OnInit, OnDestroy {
       tabSwitches,
       windowSwitches,
       questionsAnswered: events.filter(
-        (e) => e.event_type === 'question_answered'
+        (e: any) => e.event_type === 'question_answered'
       ).length,
       lastActivity: events[events.length - 1]?.created_at,
     };
   });
+
+  // ===== Navigation Methods =====
+  goToQuestion(index: number): void {
+    if (index >= 0 && index < this.examItems().length) {
+      this.currentQuestionIndex.set(index);
+    }
+  }
+
+  previousQuestion(): void {
+    if (this.currentQuestionIndex() > 0) {
+      this.currentQuestionIndex.update((idx) => idx - 1);
+    }
+  }
+
+  nextQuestion(): void {
+    if (this.currentQuestionIndex() < this.examItems().length - 1) {
+      this.currentQuestionIndex.update((idx) => idx + 1);
+    }
+  }
+
+  // ===== Answer & Saving =====
+  onAnswerChange(item: IExamItem, value: any): void {
+    this.answers.set({ ...this.answers(), [item.id]: value });
+    this.saveAnswerWithDebounce(item, value);
+  }
+
+  private saveAnswerWithDebounce(item: IExamItem, value: any): void {
+    // Clear existing timeout for this item
+    if (this.savingTimeouts[item.id]) {
+      clearTimeout(this.savingTimeouts[item.id]);
+    }
+
+    this.isSaving.set(true);
+
+    // Debounce save for 1 second
+    this.savingTimeouts[item.id] = setTimeout(() => {
+      this.upsertAnswer(item, value);
+    }, 1000);
+  }
+
+  // ===== Modal Methods =====
+  openSubmitModal(): void {
+    this.showSubmitModal.set(true);
+  }
+
+  closeSubmitModal(): void {
+    this.showSubmitModal.set(false);
+  }
+
+  closeErrorModal(): void {
+    this.error.set(null);
+  }
+
+  submitExam(): void {
+    this.submit();
+  }
+
+  // ===== Question Type Helper =====
+  getTypeLabel(type: string | undefined): string {
+    const labels: Record<string, string> = {
+      mcq: 'Multiple Choice',
+      truefalse: 'True/False',
+      essay: 'Essay',
+      fill_blank: 'Fill in the Blank',
+      fillblank: 'Fill in the Blank',
+      shortanswer: 'Short Answer',
+      matching: 'Matching',
+    };
+    return labels[type || ''] || type || 'Unknown';
+  }
+
+  // ===== Page Unload Handler =====
+  handleBeforeUnload(event: BeforeUnloadEvent): void {
+    if (!this.wasSubmitted() && this.answeredCount() > 0) {
+      event.preventDefault();
+      event.returnValue =
+        'You have unsaved answers. Are you sure you want to leave?';
+    }
+  }
 
   ngOnInit(): void {
     const takenExamId = this.route.snapshot.params['takenExamId'];
@@ -127,21 +235,47 @@ export class CreateTakenExam implements OnInit, OnDestroy {
     // Fetch exam data
     this.takenExamSvc.getOne(takenExamId).subscribe({
       next: (res) => {
-        this.takenExam.set(res.takenExam);
-        this.examItems.set(res.takenExam.exam?.items || []);
+        // Handle both response formats from the API
+        const takenExamData = res.taken_exam || res.takenExam;
+        let examData = res.exam;
 
-        if (res.takenExam.answers?.length) {
-          this.setAnswers(res.takenExam.answers);
+        // If exam data is not at top level, try to get it from takenExamData
+        if (!examData && takenExamData?.exam) {
+          examData = takenExamData.exam;
         }
 
-        // Log page loaded event
-        this.logActivity('exam_page_loaded');
+        if (takenExamData) {
+          // Ensure exam is merged into taken_exam
+          if (examData) {
+            takenExamData.exam = examData;
+          }
 
-        // Setup activity monitoring after exam is loaded
-        this.setupActivityMonitoring();
+          this.takenExam.set(takenExamData);
+
+          // Set exam items from either structure
+          const items = examData?.items || takenExamData.exam?.items || [];
+          this.examItems.set(items);
+
+          // Restore answers if they exist
+          if (takenExamData.answers?.length) {
+            this.setAnswers(takenExamData.answers);
+          }
+
+          // Log page loaded event
+          this.logActivity('exam_page_loaded');
+
+          // Setup activity monitoring after exam is loaded
+          this.setupActivityMonitoring();
+        } else {
+          this.error.set(
+            'Failed to load exam data - missing taken exam information'
+          );
+        }
       },
       error: (err) => {
-        this.error.set(err.message);
+        this.error.set(
+          err.error?.error || err.message || 'Failed to load exam'
+        );
       },
     });
 
@@ -175,13 +309,20 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   private setAnswers(answers: ITakenExamAnswer[]) {
     if (answers?.length) {
       const restored: Record<string, any> = {};
+      const itemsMap = new Map(this.examItems().map((item) => [item.id, item]));
+
       answers.forEach((ans) => {
         const key = ans.exam_item_id;
         let value: any = ans.answer;
-        if (ans.type === 'mcq') {
+
+        // Get the actual question type from examItems
+        const questionItem = itemsMap.get(key);
+        const questionType = questionItem?.type || ans.type;
+
+        if (questionType === 'mcq') {
           const num = Number(value);
           if (!Number.isNaN(num)) value = num;
-        } else if (ans.type === 'truefalse') {
+        } else if (questionType === 'truefalse') {
           if (
             value === '1' ||
             value === 1 ||
@@ -197,14 +338,15 @@ export class CreateTakenExam implements OnInit, OnDestroy {
           )
             value = false;
         } else if (
-          ans.type === 'shortanswer' ||
-          ans.type === 'fill_blank' ||
-          ans.type === 'essay'
+          questionType === 'shortanswer' ||
+          questionType === 'fill_blank' ||
+          questionType === 'fillblank' ||
+          questionType === 'essay'
         ) {
           // ensure string
           value = value ?? '';
           if (typeof value !== 'string') value = String(value);
-        } else if (ans.type === 'matching') {
+        } else if (questionType === 'matching') {
           // Expect array of selected right indices; parse JSON if string
           try {
             if (typeof value === 'string') value = JSON.parse(value);
@@ -225,17 +367,8 @@ export class CreateTakenExam implements OnInit, OnDestroy {
     }
   }
 
-  onAnswerChange(item: IExamItem, value: any) {
-    this.answers.set({ ...this.answers(), [item.id]: value });
-    this.upsertAnswer(item, value);
-  }
-
   toggleEventPanel() {
     this.showEventPanel.update((show) => !show);
-  }
-
-  answeredCount() {
-    return Object.keys(this.answers()).length;
   }
 
   submit() {
@@ -268,8 +401,8 @@ export class CreateTakenExam implements OnInit, OnDestroy {
       if (!item) return of(null);
 
       return this.http.post(
-        `${environment.apiBaseUrl}/student/taken-exams/${takenExam.id}/answers`,
-        { exam_item_id: id, type: item.type, answer: this.answers()[id] }
+        `${environment.apiBaseUrl}/student/taken-exams/${takenExam.id}/save-answer`,
+        { item_id: id, answer: this.answers()[id] }
       );
     });
 
@@ -289,8 +422,9 @@ export class CreateTakenExam implements OnInit, OnDestroy {
     window.removeEventListener('blur', this.handleWindowBlur);
     window.removeEventListener('focus', this.handleWindowFocus);
 
-    // Stop exam session
-    this.examActivityService.stopExamSession();
+    // Stop exam session and flush remaining events
+    const takenExam = this.takenExam();
+    this.examActivityService.stopExamSession(takenExam?.id);
   }
 
   // Simplified visibility and focus handlers
@@ -338,7 +472,8 @@ export class CreateTakenExam implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.submitting.set(false);
-          this.examActivityService.stopExamSession();
+          const takenExam = this.takenExam();
+          this.examActivityService.stopExamSession(takenExam?.id);
           this.router.navigate(['/student/exams']);
         },
         error: (err) => {
@@ -354,14 +489,20 @@ export class CreateTakenExam implements OnInit, OnDestroy {
 
     this.http
       .post(
-        `${environment.apiBaseUrl}/student/taken-exams/${takenExam.id}/answers`,
+        `${environment.apiBaseUrl}/student/taken-exams/${takenExam.id}/save-answer`,
         {
-          exam_item_id: examItem.id,
-          type: examItem.type,
+          item_id: examItem.id,
           answer: value,
         }
       )
-      .subscribe({ error: () => {} });
+      .subscribe({
+        next: () => {
+          this.isSaving.set(false);
+        },
+        error: () => {
+          this.isSaving.set(false);
+        },
+      });
   }
 }
 

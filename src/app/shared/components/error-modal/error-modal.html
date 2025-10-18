@@ -1,0 +1,16 @@
+@if (isOpen()) {
+  <div class="error-backdrop" (click)="onBackdropClick()">
+    <div class="error-modal" (click)="$event.stopPropagation()">
+      <div class="error-header">
+        <fa-icon [icon]="faCircleExclamation" class="error-icon"></fa-icon>
+        <h2>Error</h2>
+      </div>
+      <div class="error-body">
+        <p>{{ message() }}</p>
+      </div>
+      <div class="error-footer">
+        <button class="close-btn" (click)="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+}

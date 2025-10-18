@@ -17,6 +17,7 @@ import { environment } from '../../../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { ErrorModal } from '../../../shared/components/error-modal/error-modal';
 import { debounceTime, Subject } from 'rxjs';
 import {
   faPlus,
@@ -45,7 +46,14 @@ import {
 @Component({
   selector: 'app-exam-list',
   standalone: true,
-  imports: [RouterLink, DatePipe, CommonModule, FormsModule, FontAwesomeModule],
+  imports: [
+    RouterLink,
+    DatePipe,
+    CommonModule,
+    FormsModule,
+    FontAwesomeModule,
+    ErrorModal,
+  ],
   templateUrl: './list-exams.html',
   styleUrl: './list-exams.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -273,7 +281,7 @@ export class ListExams implements OnInit {
             this.loadExams();
           },
           error: (err) => {
-            alert('Failed to delete exam');
+            this.error.set('Failed to delete exam');
           },
         });
     }
@@ -371,6 +379,10 @@ export class ListExams implements OnInit {
     const remainingHours = hours % 24;
 
     return `${days}d ${remainingHours}h`;
+  }
+
+  closeErrorModal(): void {
+    this.error.set(null);
   }
 }
 

@@ -72,7 +72,29 @@ export class ListExams implements OnInit {
   takeExam(examId: number) {
     this.examSvc.takeExam(examId).subscribe({
       next: (res) => {
-        this.router.navigate(['/student/taken-exams', res.data.id, 'continue']);
+        // Handle both response formats from the API
+        let takenExamId: number | undefined;
+
+        if (res.data?.taken_exam?.id) {
+          // New exam created: data.taken_exam.id
+          takenExamId = res.data.taken_exam.id;
+        } else if (res.taken_exam_id) {
+          // Existing exam in progress: taken_exam_id
+          takenExamId = res.taken_exam_id;
+        }
+
+        if (takenExamId) {
+          this.router.navigate([
+            '/student/taken-exams',
+            takenExamId,
+            'continue',
+          ]);
+        } else {
+          console.error('No taken exam ID in response:', res);
+        }
+      },
+      error: (err) => {
+        console.error('Error starting exam:', err);
       },
     });
   }

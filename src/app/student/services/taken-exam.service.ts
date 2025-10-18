@@ -20,10 +20,16 @@ export class TakenExamService {
 
   getOne(takenExamId: number) {
     return this.http
-      .get<{ takenExam: any }>(
-        `${environment.apiBaseUrl}/student/taken-exams/${takenExamId}`
+      .get<{ exam: any; taken_exam: any; takenExam?: any }>(
+        `${environment.apiBaseUrl}/student/taken-exams/${takenExamId}/continue`
       )
-      .pipe(tap((res) => this.takenExam.set(res.takenExam)));
+      .pipe(
+        tap((res) => {
+          // Handle both response formats
+          const takenExam = res.takenExam || res.taken_exam;
+          this.takenExam.set(takenExam);
+        })
+      );
   }
 
   getAll() {

@@ -278,4 +278,18 @@
       }
     }
   </div>
+
+  <!-- Error Modal -->
+  <app-error-modal
+    [isOpen]="!!error()"
+    [message]="error() || ''"
+    (onClose)="closeErrorModal()"
+  />
+
+  <!-- Error Modal -->
+  <app-error-modal
+    [isOpen]="!!error()"
+    [message]="error() || ''"
+    (onClose)="closeErrorModal()"
+  />
 </div>

@@ -20,9 +20,9 @@ export class ExamService {
   }
 
   takeExam(examId: number) {
-    return this.http.post<{ data: Exam }>(
-      `${environment.apiBaseUrl}/student/exams/${examId}/take`,
-      {}
+    return this.http.get<{ data: any; taken_exam_id?: number }>(
+      `${environment.apiBaseUrl}/student/taken-exams/create`,
+      { params: { exam_id: examId } }
     );
   }
 }
