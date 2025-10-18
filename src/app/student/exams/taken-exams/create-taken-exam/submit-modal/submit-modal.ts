@@ -20,7 +20,7 @@ import {
     @if (isOpen) {
     <!-- Modal Backdrop -->
     <div
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 transition-opacity duration-300"
+      class="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4 transition-opacity duration-300"
       (click)="onBackdropClick()"
     >
       <!-- Modal Content -->

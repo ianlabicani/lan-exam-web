@@ -1,5 +1,6 @@
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { StudentExamItemService } from '../../../services/student-exam-item.service';
 import { concatMap } from 'rxjs';
 import { ExamHeader } from '../create-taken-exam/exam-header/exam-header';
@@ -10,12 +11,24 @@ import {
   ITakenExamAnswer,
 } from '../create-taken-exam/create-taken-exam';
 import { TakenExamService } from '../../../services/taken-exam.service';
-import { TakenExam } from '../../../models/exam';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment.development';
+import {
+  faArrowLeft,
+  faCheckCircle,
+  faClock,
+  faArrowRight,
+  faHourglassHalf,
+  faHistory,
+  faFileAlt,
+  faQuestionCircle,
+} from '@fortawesome/free-solid-svg-icons';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-view-taken-exam',
   standalone: true,
-  imports: [ExamHeader, ExamQuestion],
+  imports: [ExamHeader, ExamQuestion, DatePipe, RouterLink, FaIconComponent],
   templateUrl: './view-taken-exam.html',
   styleUrl: './view-taken-exam.css',
 })
@@ -23,26 +36,38 @@ export class ViewTakenExam implements OnInit {
   private route = inject(ActivatedRoute);
   private takenExamSvc = inject(TakenExamService);
   private itemSvc = inject(StudentExamItemService);
+  private http = inject(HttpClient);
 
-  takenExamSig = signal<TakenExam | null>(null);
+  // FontAwesome icons
+  faArrowLeft = faArrowLeft;
+  faCheckCircle = faCheckCircle;
+  faClock = faClock;
+  faArrowRight = faArrowRight;
+  faHourglassHalf = faHourglassHalf;
+  faHistory = faHistory;
+  faFileAlt = faFileAlt;
+  faQuestionCircle = faQuestionCircle;
+
+  takenExamSig = signal<TakenExam['takenExam'] | null>(null);
   examItems = signal<IExamItem[]>([]);
   answers = signal<Record<string, any>>({});
 
   ngOnInit(): void {
-    const takenExamId = this.route.snapshot.params['takenExamId'];
+    this.getTakenExam();
+  }
 
-    this.takenExamSvc
-      .getOne(takenExamId as unknown as number)
-      .pipe(
-        concatMap((res) => {
-          const taken = res.takenExam;
-          this.takenExamSig.set(taken);
-          if (taken.answers?.length) this.setAnswers(taken.answers);
-          return this.itemSvc.getExamItems(taken.exam_id);
-        })
+  getTakenExam() {
+    const takenExamId = this.route.snapshot.params['takenExamId'];
+    this.http
+      .get<TakenExam>(
+        `${environment.apiBaseUrl}/student/taken-exams/${takenExamId}`
       )
       .subscribe({
-        next: (items) => this.examItems.set(items),
+        next: (takenExam) => {
+          console.log(takenExam);
+
+          this.takenExamSig.set(takenExam.takenExam);
+        },
       });
   }
 
@@ -89,4 +114,103 @@ export class ViewTakenExam implements OnInit {
     });
     this.answers.set(restored);
   }
+}
+
+export interface TakenExam {
+  pending: boolean;
+  message: string;
+  takenExam: TakenExamClass;
+  exam: Exam;
+}
+
+export interface Exam {
+  id: number;
+  title: string;
+  description: null;
+  starts_at: Date;
+  ends_at: Date;
+  year: string[];
+  sections: string[];
+  status: string;
+  total_points: number;
+  tos: To[];
+  created_at: Date;
+  updated_at: Date;
+  items: Item[];
+}
+
+export interface Item {
+  id: number;
+  exam_id: number;
+  type: string;
+  level: Level;
+  question: string;
+  points: number;
+  expected_answer: null | string;
+  answer: null | string;
+  options: Option[] | null;
+  pairs: Pair[] | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export enum Level {
+  Difficult = 'difficult',
+  Easy = 'easy',
+  Moderate = 'moderate',
+}
+
+export interface Option {
+  text: string;
+  correct: boolean;
+}
+
+export interface Pair {
+  left: string;
+  right: string;
+}
+
+export interface To {
+  topic: string;
+  time_allotment: number;
+  no_of_items: number;
+  outcomes: any[];
+  distribution: Distribution;
+}
+
+export interface Distribution {
+  easy: Difficult;
+  moderate: Difficult;
+  difficult: Difficult;
+}
+
+export interface Difficult {
+  allocation: number;
+  placement: any[];
+}
+
+export interface TakenExamClass {
+  id: number;
+  exam_id: number;
+  user_id: number;
+  started_at: Date;
+  submitted_at: Date;
+  status: string;
+  total_points: number;
+  created_at: Date;
+  updated_at: Date;
+  exam: Exam;
+  answers: Answer[];
+}
+
+export interface Answer {
+  id: number;
+  taken_exam_id: number;
+  exam_item_id: number;
+  answer: string;
+  points_earned: number | null;
+  feedback: null;
+  created_at: Date;
+  updated_at: Date;
+  item: Item;
 }

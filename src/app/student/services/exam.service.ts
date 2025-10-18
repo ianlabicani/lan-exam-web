@@ -8,7 +8,7 @@ export class ExamService {
   http = inject(HttpClient);
 
   getAll() {
-    return this.http.get<{ data: Exam[] }>(
+    return this.http.get<{ data: any }>(
       `${environment.apiBaseUrl}/student/exams`
     );
   }

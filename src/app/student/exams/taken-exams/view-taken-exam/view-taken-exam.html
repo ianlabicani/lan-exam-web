@@ -2,28 +2,127 @@
 @let examItemsSig = examItems();
 
 @if (takenExam) {
-	<div class="mx-auto max-w-4xl p-6 space-y-6 bg-white/70 backdrop-blur rounded-xl shadow-sm border border-slate-200">
-		<app-exam-header [takenExam]="takenExam">
-			<div class="text-sm text-slate-600">
-				Submitted answers: {{ takenExam?.answers?.length || 0 }}
-			</div>
-		</app-exam-header>
+	<!-- Pending Grading View -->
+	@if (takenExam.status !== 'graded') {
+		<div class="mx-auto max-w-4xl">
+			<!-- Back Button -->
+			<a routerLink="/student/exams/taken-exams" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 mb-3 font-medium">
+				<fa-icon [icon]="faArrowLeft" class="mr-2"></fa-icon>Back to Exam History
+			</a>
 
-		@if (examItemsSig.length) {
-			<div class="space-y-6">
-				@for (item of examItemsSig; track item.id; let idx = $index) {
-					<app-exam-question
-						[item]="item"
-						[index]="idx"
-						[currentAnswer]="answers()[item.id]"
-						[isReadonlySig]="true"
-					/>
-				}
+			<!-- Main Card -->
+			<div class="bg-white rounded-xl shadow-md p-8 text-center">
+				<!-- Success Icon -->
+				<div class="mb-6">
+					<div class="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center">
+						<fa-icon [icon]="faCheckCircle" class="text-green-600 text-5xl"></fa-icon>
+					</div>
+				</div>
+
+				<!-- Main Message -->
+				<h2 class="text-2xl font-bold text-gray-900 mb-3">Exam Submitted Successfully!</h2>
+				<p class="text-lg text-gray-600 mb-6">
+					Your exam has been successfully submitted on {{ takenExam.submitted_at | date: 'MMM dd, y h:mm a' }}
+				</p>
+
+				<!-- Pending Message -->
+				<div class="max-w-2xl mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6 mb-6">
+					<div class="flex items-start">
+						<fa-icon [icon]="faClock" class="text-yellow-600 text-3xl mr-4 mt-1"></fa-icon>
+						<div class="text-left flex-1">
+							<h3 class="text-lg font-bold text-yellow-900 mb-2">Results Pending Grading</h3>
+							<p class="text-yellow-800 mb-3">
+								Your exam is currently being reviewed by your teacher. Results and detailed feedback will be available once grading is complete and the exam is closed.
+							</p>
+							<div class="bg-yellow-100 rounded-lg p-3">
+								<p class="text-sm font-semibold text-yellow-900 mb-1">What happens next:</p>
+								<ul class="text-sm text-yellow-800 space-y-1">
+									<li>
+										<fa-icon [icon]="faArrowRight" class="text-yellow-600 mr-2"></fa-icon>Your teacher will review your responses
+									</li>
+									<li>
+										<fa-icon [icon]="faArrowRight" class="text-yellow-600 mr-2"></fa-icon>Manual grading items (essays, short answers) will receive scores and feedback
+									</li>
+									<li>
+										<fa-icon [icon]="faArrowRight" class="text-yellow-600 mr-2"></fa-icon>Once grading is complete, teacher will close the exam
+									</li>
+									<li>
+										<fa-icon [icon]="faArrowRight" class="text-yellow-600 mr-2"></fa-icon>You'll be able to view your results and feedback after closure
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Submission Details -->
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto mb-6">
+					<div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+						<p class="text-sm text-gray-600 mb-1">Submitted On</p>
+						<p class="text-lg font-bold text-gray-900">
+							{{ takenExam.submitted_at | date: 'MMM dd, y' }}
+						</p>
+						<p class="text-sm text-gray-600">
+							{{ takenExam.submitted_at | date: 'h:mm a' }}
+						</p>
+					</div>
+
+					<div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
+						<p class="text-sm text-orange-600 mb-1">Grading Status</p>
+						<p class="text-lg font-bold text-orange-900">
+							<fa-icon [icon]="faHourglassHalf" class="mr-1"></fa-icon>Pending
+						</p>
+						<p class="text-sm text-orange-700">
+							Awaiting teacher review
+						</p>
+					</div>
+				</div>
+
+				<!-- Action Buttons -->
+				<div class="flex flex-col sm:flex-row gap-3 justify-center">
+					<a routerLink="/student/exams" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition duration-200">
+						<fa-icon [icon]="faFileAlt" class="mr-2"></fa-icon>Browse More Exams
+					</a>
+
+					<a routerLink="/student/exams/taken-exams" class="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200">
+						<fa-icon [icon]="faHistory" class="mr-2"></fa-icon>View Exam History
+					</a>
+				</div>
+
+				<!-- Help Text -->
+				<div class="mt-8 pt-6 border-t border-gray-200">
+					<p class="text-sm text-gray-500">
+						<fa-icon [icon]="faQuestionCircle" class="mr-1"></fa-icon>
+						Check back later to view your results. You'll receive your score and detailed feedback once the exam is closed by your teacher.
+					</p>
+				</div>
 			</div>
-		} @else {
-			<p class="text-slate-500 italic">No items available for this exam.</p>
-		}
-	</div>
+		</div>
+	} @else {
+		<!-- Graded View - Show Questions -->
+		<div class="mx-auto max-w-4xl p-6 space-y-6 bg-white/70 backdrop-blur rounded-xl shadow-sm border border-slate-200">
+			<app-exam-header [takenExam]="takenExam">
+				<div class="text-sm text-slate-600">
+					Submitted answers: {{ takenExam?.answers?.length || 0 }}
+				</div>
+			</app-exam-header>
+
+			@if (examItemsSig.length) {
+				<div class="space-y-6">
+					@for (item of examItemsSig; track item.id; let idx = $index) {
+						<app-exam-question
+							[item]="item"
+							[index]="idx"
+							[currentAnswer]="answers()[item.id]"
+							[isReadonlySig]="true"
+						/>
+					}
+				</div>
+			} @else {
+				<p class="text-slate-500 italic">No items available for this exam.</p>
+			}
+		</div>
+	}
 } @else {
 	<div class="max-w-md mx-auto mt-16 flex flex-col items-center gap-4 text-slate-500">
 		<svg class="size-10 animate-pulse text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">

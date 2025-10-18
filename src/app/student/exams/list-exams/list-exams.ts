@@ -1,9 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ExamService } from '../../services/exam.service';
-import { Exam } from '../../models/exam';
 import {
   faFileAlt,
   faPlayCircle,
@@ -62,9 +61,10 @@ export class ListExams implements OnInit {
   getExams() {
     this.isLoading.set(true);
     this.examSvc.getAll().subscribe({
-      next: (res) => {
+      next: (res: { data: Exam[] }) => {
         this.exams.set(res.data);
         this.isLoading.set(false);
+        console.log(res.data);
       },
     });
   }
@@ -145,4 +145,55 @@ export class ListExams implements OnInit {
       0
     );
   }
+}
+
+export interface Exam {
+  id: number;
+  title: string;
+  description: null;
+  starts_at: Date;
+  ends_at: Date;
+  year: string[];
+  sections: string[];
+  status: string;
+  total_points: number;
+  tos: To[];
+  created_at: Date;
+  updated_at: Date;
+  items_count: number;
+  taken: boolean;
+  taken_exam: TakenExam;
+  is_available: boolean;
+  taken_exams: TakenExam[];
+}
+
+export interface TakenExam {
+  id: number;
+  exam_id: number;
+  user_id: number;
+  started_at: Date;
+  submitted_at: Date;
+  status: string;
+  total_points: number;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface To {
+  topic: string;
+  time_allotment: number;
+  no_of_items: number;
+  outcomes: any[];
+  distribution: Distribution;
+}
+
+export interface Distribution {
+  easy: Difficult;
+  moderate: Difficult;
+  difficult: Difficult;
+}
+
+export interface Difficult {
+  allocation: number;
+  placement: any[];
 }

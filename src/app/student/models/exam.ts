@@ -22,6 +22,7 @@ export interface TakenExam {
   started_at: Date;
   submitted_at: Date | null;
   total_points: number;
+  status: string;
   created_at: Date;
   updated_at: Date;
   answers: any;
