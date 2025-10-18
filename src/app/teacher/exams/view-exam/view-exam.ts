@@ -151,6 +151,12 @@ export class ViewExam implements OnInit {
     return 0;
   });
 
+  totalPoints = computed(() => {
+    const exam = this.exam();
+    if (!exam?.items) return 0;
+    return exam.items.reduce((sum, item) => sum + (item.points ?? 0), 0);
+  });
+
   averageScore = computed(() => {
     const exam = this.exam();
     // TODO: Calculate from taken_exams when available
@@ -234,7 +240,6 @@ export class ViewExam implements OnInit {
       next: (res: any) => {
         this.loading.set(false);
         this.viewExamSvc.setCurrentViewingExam(res.data);
-        console.log(res.data);
       },
       error: (err: any) => {
         this.errorMsg.set(err?.error?.message || 'Failed to load exam');

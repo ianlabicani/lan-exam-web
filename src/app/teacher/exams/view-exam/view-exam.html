@@ -168,6 +168,19 @@
           </div>
         </div>
 
+        <!-- Total Points -->
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-yellow-500 hover:shadow-lg transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 text-sm font-medium">Total Points</p>
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ totalPoints() }}</p>
+            </div>
+            <div class="bg-yellow-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+              <fa-icon [icon]="faStar" class="text-xl text-yellow-600"></fa-icon>
+            </div>
+          </div>
+        </div>
+
         <!-- Total Takers -->
         <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500 hover:shadow-lg transition">
           <div class="flex items-center justify-between">
