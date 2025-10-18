@@ -57,6 +57,15 @@ export class ViewExamService {
       return { ...prev, items: examItems };
     });
   }
+
+  addItem(item: ExamItem) {
+    this.currentViewingExam.update((prev) => {
+      if (!prev) return null;
+
+      const examItems = [...(prev?.items ?? []), item];
+      return { ...prev, items: examItems };
+    });
+  }
 }
 
 export interface ViewingExam {

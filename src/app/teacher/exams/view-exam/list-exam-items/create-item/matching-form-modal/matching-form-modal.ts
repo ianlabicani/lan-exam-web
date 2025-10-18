@@ -16,9 +16,8 @@ import {
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../../../../../environments/environment.development';
-import { ExamItem } from '../../exam-item-state.service';
-import { ViewExamService } from '../../../view-exam.service';
-import { ExamApiService } from '../../../../services/exam-api.service';
+import { ExamItem, ViewExamService } from '../../../view-exam.service';
+import { ExamItemApiService } from '../../../../../services/exam-item-api.service';
 
 @Component({
   selector: 'app-matching-form-modal',
@@ -29,7 +28,7 @@ import { ExamApiService } from '../../../../services/exam-api.service';
 export class MatchingFormModal {
   fb = inject(FormBuilder);
   http = inject(HttpClient);
-  examApiSvc = inject(ExamApiService);
+  examItemApi = inject(ExamItemApiService);
   viewExamSvc = inject(ViewExamService);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();
@@ -103,10 +102,9 @@ export class MatchingFormModal {
       level: this.level(),
     };
 
-    this.examApiSvc.createItem(examId, payload).subscribe({
-      next: (res: any) => {
-        // Update parent state with new exam data
-        this.viewExamSvc.patchViewingExam(res.data);
+    this.examItemApi.create(examId, payload).subscribe({
+      next: (res: { data: ExamItem }) => {
+        this.viewExamSvc.addItem(res.data);
 
         this.form.reset({ question: '', points: 2 });
         while (this.pairs.length) this.pairs.removeAt(0);

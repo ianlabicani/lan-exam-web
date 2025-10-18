@@ -11,8 +11,8 @@ export class ExamItemApiService {
   private apiUrl = `${environment.apiBaseUrl}/teacher/exams`;
 
   // ========== EXAM ITEMS ==========
-  createItem(examId: number | string, itemData: any) {
-    return this.http.post<{ data: Exam; message: string }>(
+  create(examId: number | string, itemData: any) {
+    return this.http.post<{ data: any }>(
       `${this.apiUrl}/${examId}/items`,
       itemData
     );

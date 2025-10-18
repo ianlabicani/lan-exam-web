@@ -1,10 +1,7 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { environment } from '../../../../../../../environments/environment.development';
-import { HttpClient } from '@angular/common/http';
-import { ViewExamService } from '../../../view-exam.service';
-import { ExamApiService } from '../../../../services/exam-api.service';
-import { ExamItem } from '../../exam-item-state.service';
+import { ExamItem, ViewExamService } from '../../../view-exam.service';
+import { ExamItemApiService } from '../../../../../services/exam-item-api.service';
 
 @Component({
   selector: 'app-essay-form-modal',
@@ -14,9 +11,8 @@ import { ExamItem } from '../../exam-item-state.service';
 })
 export class EssayFormModal {
   viewExamSvc = inject(ViewExamService);
-  examApiSvc = inject(ExamApiService);
+  examItemApi = inject(ExamItemApiService);
   fb = inject(FormBuilder);
-  http = inject(HttpClient);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();
   close = output<void>();
@@ -53,12 +49,11 @@ export class EssayFormModal {
     const newItem = this.essayForm.getRawValue();
     const examId = this.examId();
 
-    this.examApiSvc
-      .createItem(examId, { ...newItem, level: this.level() })
+    this.examItemApi
+      .create(examId, { ...newItem, level: this.level() })
       .subscribe({
-        next: (res: any) => {
-          // Update parent state with new exam data
-          this.viewExamSvc.patchViewingExam(res.data);
+        next: (res: { data: ExamItem }) => {
+          this.viewExamSvc.addItem(res.data);
 
           this.essayForm.reset();
           this.isSaving.set(false);

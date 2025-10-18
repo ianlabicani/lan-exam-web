@@ -1,7 +1,7 @@
+import { ExamItem, ViewExamService } from './../../../view-exam.service';
 import { Component, inject, input, output, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { ViewExamService } from '../../../view-exam.service';
 import { ExamItemApiService } from '../../../../../services/exam-item-api.service';
 
 @Component({
@@ -13,7 +13,7 @@ import { ExamItemApiService } from '../../../../../services/exam-item-api.servic
 export class TrueOrFalseFormModal {
   fb = inject(FormBuilder);
   http = inject(HttpClient);
-  examApiSvc = inject(ExamItemApiService);
+  examItemApi = inject(ExamItemApiService);
   viewExamSvc = inject(ViewExamService);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();
@@ -50,11 +50,9 @@ export class TrueOrFalseFormModal {
     };
 
     const examId = this.examId();
-    this.examApiSvc.createItem(examId, payload).subscribe({
-      next: (res: any) => {
-        // Update parent state with new exam data
-        this.viewExamSvc.patchViewingExam(res.data);
-
+    this.examItemApi.create(examId, payload).subscribe({
+      next: (res: { data: ExamItem }) => {
+        this.viewExamSvc.addItem(res.data);
         this.tfForm.reset({ question: '', answer: 'true', points: 1 });
         this.isSaving.set(false);
         this.closeModal.emit();

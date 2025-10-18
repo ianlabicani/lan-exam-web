@@ -1,3 +1,4 @@
+import { ExamItem, ViewExamService } from '../../../view-exam.service';
 import {
   Component,
   OnInit,
@@ -16,9 +17,7 @@ import {
 } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../../environments/environment.development';
-import { ExamItem } from '../../exam-item-state.service';
-import { ViewExamService } from '../../../view-exam.service';
-import { ExamApiService } from '../../../../services/exam-api.service';
+import { ExamItemApiService } from '../../../../../services/exam-item-api.service';
 
 @Component({
   selector: 'app-mcq-form-modal',
@@ -29,7 +28,7 @@ import { ExamApiService } from '../../../../services/exam-api.service';
 export class McqFormModal implements OnInit {
   fb = inject(FormBuilder);
   http = inject(HttpClient);
-  examApiSvc = inject(ExamApiService);
+  examItemApi = inject(ExamItemApiService);
   viewExamSvc = inject(ViewExamService);
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();
@@ -102,10 +101,9 @@ export class McqFormModal implements OnInit {
     };
 
     const examId = this.examId();
-    this.examApiSvc.createItem(examId, payload).subscribe({
-      next: (res: any) => {
-        // Update parent state with new exam data
-        this.viewExamSvc.patchViewingExam(res.data);
+    this.examItemApi.create(examId, payload).subscribe({
+      next: (res: { data: ExamItem }) => {
+        this.viewExamSvc.addItem(res.data);
 
         // Reset form
         this.mcqForm.reset({ question: '', points: 1 });
