@@ -1,5 +1,5 @@
 import { Exam } from './../../../../services/exam.service';
-import { ViewExamService } from '../../view-exam.service';
+import { ViewExamService, ViewingExam } from '../../view-exam.service';
 import { ExamApiService } from '../../../../services/exam-api.service';
 import { Component, input, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -13,7 +13,7 @@ import { ExamItem } from '../exam-item-state.service';
 })
 export class DeleteItem {
   itemInput = input.required<ExamItem>();
-  exam = input.required<Exam>();
+  exam = input.required<ViewingExam>();
   deleted = output<ExamItem>();
   close = output<void>();
 

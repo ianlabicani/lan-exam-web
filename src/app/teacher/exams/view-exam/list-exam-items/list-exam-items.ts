@@ -139,7 +139,7 @@ export class ListExamItems implements OnInit {
   }
 
   onItemSaved(examItem: ExamItem) {
-    const examId = this.viewExamSvc.getViewingExamSnapshot()?.id;
+    const examId = this.viewExamSvc.viewingExam()?.id;
     if (!examId) {
       console.error('No exam ID available');
       return;

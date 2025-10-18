@@ -48,13 +48,6 @@ export class ViewExamService {
     this.currentViewingExam.set(merged);
     return merged;
   }
-
-  /**
-   * Get a snapshot of the currently viewing exam.
-   */
-  getViewingExamSnapshot(): ViewingExam | null {
-    return this.currentViewingExam();
-  }
 }
 
 export interface ViewingExam {
