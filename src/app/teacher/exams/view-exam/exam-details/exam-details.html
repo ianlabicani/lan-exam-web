@@ -1,9 +1,28 @@
 @let examSig = exam();
 
-<h1>{{examSig?.title ?? 'ahbdashdf'}}</h1>
+<!-- Header with Edit Button -->
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-3xl font-bold text-gray-900">{{ examSig?.title ?? 'Exam' }}</h1>
+  <button
+    (click)="toggleEditMode()"
+    class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition flex items-center gap-2">
+    <fa-icon [icon]="isEditing() ? faTimes : faEdit"></fa-icon>
+    <span>{{ isEditing() ? 'Cancel' : 'Edit' }}</span>
+  </button>
+</div>
 
+<!-- Edit Mode -->
+@if (isEditing() && examSig) {
+  <app-edit-exam
+    [exam]="examSig"
+    [showHeader]="false"
+    (submitted)="onEditSubmitted($event)"
+    (cancelled)="onEditCancelled()"
+  ></app-edit-exam>
+}
 
-@if (examSig) {
+<!-- View Mode -->
+@if (!isEditing() && examSig) {
   <div class="space-y-6">
   <!-- Exam Information -->
   <div class="bg-gray-50 rounded-lg p-6">

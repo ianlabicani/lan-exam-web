@@ -1,9 +1,11 @@
 import {
   Component,
   inject,
-  OnInit,
+  input,
+  output,
   signal,
   ChangeDetectionStrategy,
+  effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -13,8 +15,7 @@ import {
   FormArray,
   Validators,
 } from '@angular/forms';
-import { RouterLink, ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   faArrowLeft,
@@ -37,7 +38,30 @@ import {
   faChartBar,
   faCircle,
 } from '@fortawesome/free-solid-svg-icons';
-import { environment } from '../../../../environments/environment.development';
+import { ExamApiService } from '../../services/exam-api.service';
+
+export interface EditExamData {
+  id: number;
+  title: string;
+  description?: string | null;
+  starts_at: Date | string;
+  ends_at: Date | string;
+  year: string[] | number[];
+  sections: string[];
+  tos: TosItem[];
+}
+
+export interface TosItem {
+  topic: string;
+  time_allotment: number;
+  no_of_items: number;
+  outcomes: string[];
+  distribution: {
+    easy: { allocation: number };
+    moderate: { allocation: number };
+    difficult: { allocation: number };
+  };
+}
 
 @Component({
   selector: 'app-edit-exam',
@@ -47,14 +71,19 @@ import { environment } from '../../../../environments/environment.development';
   styleUrl: './edit-exam.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditExam implements OnInit {
-  http = inject(HttpClient);
-  fb = inject(FormBuilder);
-  route = inject(ActivatedRoute);
-  router = inject(Router);
+export class EditExam {
+  private fb = inject(FormBuilder);
+  private examApi = inject(ExamApiService);
+
+  // Inputs
+  exam = input<EditExamData | null>(null);
+  showHeader = input<boolean>(true);
+
+  // Outputs
+  submitted = output<EditExamData>();
+  cancelled = output<void>();
 
   // Signals
-  loading = signal(false);
   saving = signal(false);
   error = signal<string | null>(null);
 
@@ -86,9 +115,16 @@ export class EditExam implements OnInit {
   faChartBar = faChartBar;
   faCircle = faCircle;
 
-  ngOnInit(): void {
+  constructor() {
     this.initForm();
-    this.loadExam();
+
+    // Watch for exam input changes and populate form
+    effect(() => {
+      const currentExam = this.exam();
+      if (currentExam) {
+        this.populateForm(currentExam);
+      }
+    });
   }
 
   initForm(): void {
@@ -121,31 +157,7 @@ export class EditExam implements OnInit {
     return this.examForm.get('tos') as FormArray;
   }
 
-  loadExam(): void {
-    const examId = this.route.snapshot.paramMap.get('examId');
-    if (!examId) return;
-
-    this.loading.set(true);
-    this.http
-      .get<any>(`${environment.apiBaseUrl}/teacher/exams/${examId}/edit`)
-      .subscribe({
-        next: (res) => {
-          console.log('API Response:', res);
-          // Response structure is { exam: {...} }
-          const exam = res.exam;
-          console.log('Exam data:', exam);
-          this.populateForm(exam);
-          this.loading.set(false);
-        },
-        error: (err) => {
-          console.error('Load error:', err);
-          this.error.set(err?.error?.message || 'Failed to load exam');
-          this.loading.set(false);
-        },
-      });
-  }
-
-  populateForm(exam: any): void {
+  populateForm(exam: EditExamData): void {
     // Convert datetime string to datetime-local format
     const startsAt = exam.starts_at
       ? new Date(exam.starts_at).toISOString().slice(0, 16)
@@ -172,7 +184,7 @@ export class EditExam implements OnInit {
     if (exam.tos && exam.tos.length > 0) {
       const tosFormArray = this.tosArray;
       tosFormArray.clear();
-      exam.tos.forEach((tosItem: any) => {
+      exam.tos.forEach((tosItem: TosItem) => {
         const tosGroup = this.fb.group({
           topic: [tosItem.topic || '', Validators.required],
           time_allotment: [tosItem.time_allotment || 0],
@@ -196,16 +208,6 @@ export class EditExam implements OnInit {
   }
 
   onYearChange(event: any): void {
-    const selectedYears = this.yearOptions.filter((year) => {
-      const checkbox = event.target as HTMLInputElement;
-      if (checkbox.value === year) {
-        return event.target.checked;
-      }
-      // Keep already selected years
-      const currentYears = this.examForm.get('year')?.value || [];
-      return currentYears.includes(year);
-    });
-
     const currentYears = this.examForm.get('year')?.value || [];
     const yearValue = (event.target as HTMLInputElement).value;
 
@@ -268,6 +270,10 @@ export class EditExam implements OnInit {
     this.tosArray.removeAt(index);
   }
 
+  onCancel(): void {
+    this.cancelled.emit();
+  }
+
   onSubmit(): void {
     if (this.examForm.invalid) {
       Object.keys(this.examForm.controls).forEach((key) => {
@@ -276,10 +282,12 @@ export class EditExam implements OnInit {
       return;
     }
 
-    const examId = this.route.snapshot.paramMap.get('examId');
-    if (!examId) return;
+    const currentExam = this.exam();
+    if (!currentExam) return;
 
     this.saving.set(true);
+    this.error.set(null);
+
     const rawValue = this.examForm.getRawValue();
 
     // Update no_of_items for each TOS item before sending
@@ -293,17 +301,19 @@ export class EditExam implements OnInit {
       tos: tosArray,
     };
 
-    this.http
-      .put(`${environment.apiBaseUrl}/teacher/exams/${examId}`, payload)
-      .subscribe({
-        next: () => {
-          this.saving.set(false);
-          this.router.navigate(['/teacher/exams']);
-        },
-        error: (err) => {
-          this.error.set(err?.error?.message || 'Failed to update exam');
-          this.saving.set(false);
-        },
-      });
+    this.examApi.update(currentExam.id, payload).subscribe({
+      next: (res) => {
+        this.saving.set(false);
+        // Emit the updated exam data
+        this.submitted.emit({
+          ...currentExam,
+          ...res.data,
+        });
+      },
+      error: (err) => {
+        this.saving.set(false);
+        this.error.set(err?.error?.message || 'Failed to update exam');
+      },
+    });
   }
 }
