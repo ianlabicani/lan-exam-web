@@ -19,7 +19,6 @@ import {
   faExclamationTriangle,
 } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { Exam, TosTopic } from '../../../services/exam.service';
 import { Tos, ViewingExam } from '../view-exam.service';
 
 @Component({

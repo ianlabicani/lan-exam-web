@@ -1,8 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { ExamApiService } from '../../services/exam-api.service';
-import { Exam } from '../../services/exam.service';
 
-export interface GetExamsData extends Exam {
+export interface GetExamsData {
   durationInMins?: number;
   durationDisplay?: string;
 }
@@ -15,7 +14,7 @@ export interface GetExamsData extends Exam {
   providedIn: 'root',
 })
 export class ListExamsService {
-  private api = inject(ExamApiService);
+  private examApi = inject(ExamApiService);
 
   // ========== STATE SIGNALS ==========
   exams = signal<GetExamsData[]>([]);
@@ -58,7 +57,7 @@ export class ListExamsService {
     this.error.set(null);
 
     const params = this.buildQueryParams();
-    this.api.index(params).subscribe({
+    this.examApi.index(params).subscribe({
       next: (res) => {
         const examsWithDuration = res.data.map((exam) => ({
           ...exam,
@@ -172,7 +171,7 @@ export class ListExamsService {
    */
   deleteExam(examId: number | string): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.api.destroy(examId).subscribe({
+      this.examApi.destroy(examId).subscribe({
         next: () => {
           this.loadExams();
           resolve();

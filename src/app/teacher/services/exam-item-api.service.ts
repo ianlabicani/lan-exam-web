@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment.development';
-import { Exam, TakenExam } from './exam.service';
 import { ExamItem } from '../exams/view-exam/view-exam.service';
 
 @Injectable({
@@ -36,7 +35,7 @@ export class ExamItemApiService {
     examId: number | string,
     items: Array<{ id: number; order: number }>
   ) {
-    return this.http.patch<{ data: Exam; message: string }>(
+    return this.http.patch<{ data: any }>(
       `${this.apiUrl}/${examId}/items/reorder`,
       { items }
     );
@@ -44,13 +43,11 @@ export class ExamItemApiService {
 
   // ========== GRADING & SUBMISSIONS ==========
   getTakenExams(examId: number | string) {
-    return this.http.get<{ data: TakenExam[]; message: string }>(
-      `${this.apiUrl}/${examId}/taken-exams`
-    );
+    return this.http.get<{ data: any }>(`${this.apiUrl}/${examId}/taken-exams`);
   }
 
   getTakenExam(examId: number | string, takenExamId: number | string) {
-    return this.http.get<{ data: TakenExam; message: string }>(
+    return this.http.get<{ data: any }>(
       `${this.apiUrl}/${examId}/taken-exams/${takenExamId}`
     );
   }
@@ -60,7 +57,7 @@ export class ExamItemApiService {
     takenExamId: number | string,
     gradingData: any
   ) {
-    return this.http.post<{ data: TakenExam; message: string }>(
+    return this.http.post<{ data: any }>(
       `${this.apiUrl}/${examId}/taken-exams/${takenExamId}/grade`,
       gradingData
     );

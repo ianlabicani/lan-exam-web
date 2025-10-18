@@ -16,7 +16,7 @@
           <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-green-600 text-white text-sm font-bold">E</span>
           <div class="text-left">
             <h3 class="text-lg font-semibold text-gray-900">Easy Items</h3>
-            <p class="text-xs text-gray-600">{{ easyItemsSig.length }} / {{ exam.tos?.[0]?.distribution?.easy?.allocation ?? 0 }} items</p>
+            <p class="text-xs text-gray-600">{{ easyItemsSig.length }} / {{ exam.tos[0]?.distribution?.easy?.allocation ?? 0 }} items</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -30,7 +30,7 @@
       @if (isEasyOpen()) {
         <div class="p-6 space-y-4">
           <!-- Add Button -->
-          @if (exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.easy?.allocation ?? 0) > easyItemsSig.length) {
+          @if (exam?.status === 'draft' && (exam.tos[0]?.distribution?.easy?.allocation ?? 0) > easyItemsSig.length) {
             <div class="mb-6 pb-6 border-b border-gray-200">
               <button
                 (click)="openAddQuestionModal('easy')"
@@ -101,7 +101,7 @@
           <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-yellow-600 text-white text-sm font-bold">M</span>
           <div class="text-left">
             <h3 class="text-lg font-semibold text-gray-900">Moderate Items</h3>
-            <p class="text-xs text-gray-600">{{ moderateItemsSig.length }} / {{ exam.tos?.[0]?.distribution?.moderate?.allocation ?? 0 }} items</p>
+            <p class="text-xs text-gray-600">{{ moderateItemsSig.length }} / {{ exam.tos[0]?.distribution?.moderate?.allocation ?? 0 }} items</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -115,7 +115,7 @@
       @if (isModerateOpen()) {
         <div class="p-6 space-y-4">
           <!-- Add Button -->
-          @if (exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.moderate?.allocation ?? 0) > moderateItemsSig.length) {
+          @if (exam?.status === 'draft' && (exam.tos[0]?.distribution?.moderate?.allocation ?? 0) > moderateItemsSig.length) {
             <div class="mb-6 pb-6 border-b border-gray-200">
               <button
                 (click)="openAddQuestionModal('moderate')"
@@ -186,7 +186,7 @@
           <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-red-600 text-white text-sm font-bold">D</span>
           <div class="text-left">
             <h3 class="text-lg font-semibold text-gray-900">Difficult Items</h3>
-            <p class="text-xs text-gray-600">{{ difficultItemsSig.length }} / {{ exam.tos?.[0]?.distribution?.difficult?.allocation ?? 0 }} items</p>
+            <p class="text-xs text-gray-600">{{ difficultItemsSig.length }} / {{ exam.tos[0]?.distribution?.difficult?.allocation ?? 0 }} items</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -200,7 +200,7 @@
       @if (isDifficultOpen()) {
         <div class="p-6 space-y-4">
           <!-- Add Button -->
-          @if (exam?.status === 'draft' && (exam.tos?.[0]?.distribution?.difficult?.allocation ?? 0) > difficultItemsSig.length) {
+          @if (exam?.status === 'draft' && (exam.tos[0]?.distribution?.difficult?.allocation ?? 0) > difficultItemsSig.length) {
             <div class="mb-6 pb-6 border-b border-gray-200">
               <button
                 (click)="openAddQuestionModal('difficult')"

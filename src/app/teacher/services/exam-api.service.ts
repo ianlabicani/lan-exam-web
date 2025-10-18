@@ -1,14 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment.development';
-import {
-  Exam,
-  ExamItem,
-  TakenExam,
-  ExamAnalytics,
-  ActivityLog,
-} from './exam.service';
-import { tap } from 'rxjs';
 
 /**
  * Pure HTTP API service for exam endpoints.
@@ -33,38 +25,27 @@ export class ExamApiService {
       url += `?${queryString.toString()}`;
     }
     return this.http.get<{
-      data: Exam[];
+      data: any[];
       meta?: { total: number; current_page: number; per_page: number };
     }>(url);
   }
 
   show(id: number | string) {
-    return this.http.get<{ data: Exam; message: string }>(
-      `${this.apiUrl}/${id}`
-    );
+    return this.http.get<{ data: any }>(`${this.apiUrl}/${id}`);
   }
 
   store(payload: any) {
-    return this.http.post<{ data: Exam; message: string }>(
-      this.apiUrl,
-      payload
-    );
+    return this.http.post<{ data: any }>(this.apiUrl, payload);
   }
 
   update(id: number | string, payload: any) {
-    return this.http.patch<{ data: Exam; message: string }>(
-      `${this.apiUrl}/${id}`,
-      payload
-    );
+    return this.http.patch<{ data: any }>(`${this.apiUrl}/${id}`, payload);
   }
 
   updateStatus(id: number | string, status: string) {
-    return this.http.patch<{ data: Exam; message: string }>(
-      `${this.apiUrl}/${id}/status`,
-      {
-        status,
-      }
-    );
+    return this.http.patch<{ data: any }>(`${this.apiUrl}/${id}/status`, {
+      status,
+    });
   }
 
   destroy(id: number | string) {
@@ -73,14 +54,12 @@ export class ExamApiService {
 
   // ========== ANALYTICS ==========
   getExamAnalytics(examId: number | string) {
-    return this.http.get<{ data: ExamAnalytics; message: string }>(
-      `${this.apiUrl}/${examId}/analytics`
-    );
+    return this.http.get<{ data: any }>(`${this.apiUrl}/${examId}/analytics`);
   }
 
   // ========== ACTIVITY LOGS ==========
   getActivityLogs(takenExamId: number | string) {
-    return this.http.get<{ data: ActivityLog[]; message: string }>(
+    return this.http.get<{ data: any }>(
       `${environment.apiBaseUrl}/teacher/taken-exams/${takenExamId}/activity-logs`
     );
   }

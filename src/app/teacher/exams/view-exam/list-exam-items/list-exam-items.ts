@@ -1,4 +1,3 @@
-import { ExamItemStateService } from './exam-item-state.service';
 import { ActivatedRoute } from '@angular/router';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { McqItem } from './ui/mcq-item/mcq-item';
@@ -19,7 +18,6 @@ import { MatchingFormModal } from './create-item/matching-form-modal/matching-fo
 import { ExamItem, ViewExamService } from '../view-exam.service';
 import { AddQuestionModal } from './add-question-modal/add-question-modal';
 import { ExamApiService } from '../../../services/exam-api.service';
-import { ExamItemApiService } from '../../../services/exam-item-api.service';
 
 @Component({
   selector: 'app-teacher-list-exam-items',
@@ -47,9 +45,7 @@ export class ListExamItems implements OnInit {
   http = inject(HttpClient);
   activatedRoute = inject(ActivatedRoute);
   viewExamSvc = inject(ViewExamService);
-  examApiSvc = inject(ExamApiService);
-  examItemApi = inject(ExamItemApiService);
-  itemsStateSvc = inject(ExamItemStateService);
+  examApi = inject(ExamApiService);
 
   isUpdateModalOpenSig = signal(false);
   selectedForUpdateSig = signal<ExamItem | null>(null);
@@ -233,19 +229,4 @@ export class ListExamItems implements OnInit {
       }
     }
   }
-}
-
-interface GetItemsData {
-  id: number;
-  exam_id: number;
-  type: string;
-  question: string;
-  points: number;
-  expected_answer: null;
-  answer: string;
-  options: null;
-  pairs: null;
-  created_at: Date;
-  updated_at: Date;
-  level: string;
 }
