@@ -99,28 +99,100 @@
 			</div>
 		</div>
 	} @else {
-		<!-- Graded View - Show Questions -->
+		<!-- Graded View - Show Questions (Blade-like) -->
 		<div class="mx-auto max-w-4xl p-6 space-y-6 bg-white/70 backdrop-blur rounded-xl shadow-sm border border-slate-200">
-			<app-exam-header [takenExam]="takenExam">
-				<div class="text-sm text-slate-600">
-					Submitted answers: {{ takenExam?.answers?.length || 0 }}
-				</div>
-			</app-exam-header>
+			<div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl shadow-md p-6 mb-6">
+				<h2 class="text-2xl font-bold mb-2">{{ takenExamSig()?.exam?.title }}</h2>
+				<p class="text-indigo-100">{{ takenExamSig()?.exam?.description }}</p>
+			</div>
 
-			@if (examItemsSig.length) {
-				<div class="space-y-6">
-					@for (item of examItemsSig; track item.id; let idx = $index) {
-						<app-exam-question
-							[item]="item"
-							[index]="idx"
-							[currentAnswer]="answers()[item.id]"
-							[isReadonlySig]="true"
-						/>
-					}
+			<div class="space-y-6">
+				@for (item of examItemsSig; track item.id; let idx = $index) {
+					<div class="bg-white rounded-xl shadow-md p-6">
+						<div class="flex items-start justify-between mb-4">
+							<div class="flex-1">
+								<div class="flex items-center mb-2">
+									<span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-full uppercase mr-3">
+										{{ item.type.replace('_',' ') }}
+									</span>
+									<span class="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-semibold rounded-full">
+										<i class="fas fa-star text-yellow-500 mr-1"></i>{{ item.points }} pts
+									</span>
+								</div>
+								<h3 class="text-lg font-bold text-gray-900">{{ item.question }}</h3>
+							</div>
+
+							<div class="ml-4">
+								@if (isItemCorrect(item) === true) {
+									<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Correct</span>
+								} @else if (isItemCorrect(item) === null) {
+									<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Manual</span>
+								} @else {
+									<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Incorrect</span>
+								}
+							</div>
+						</div>
+
+						<div class="mb-4 p-4 rounded-lg border {{ isItemCorrect(item) === true ? 'bg-green-50 border-green-200' : (isItemCorrect(item) === null ? 'bg-gray-50 border-gray-200' : 'bg-red-50 border-red-200') }}">
+							<p class="text-sm font-semibold text-gray-700 mb-2">Student's Answer:</p>
+							<p class="text-gray-900">{{ getStudentAnswerText(item) }}</p>
+						</div>
+
+						@let correctText = getCorrectAnswerText(item);
+						@if (correctText) {
+							<div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+								<p class="text-sm font-semibold text-blue-700 mb-2">Correct Answer:</p>
+								<p class="text-blue-900">{{ correctText }}</p>
+							</div>
+						}
+
+						@let ansObj = getAnswerObj(item.id);
+						@if (ansObj && (ansObj.points_earned !== null || ansObj.feedback)) {
+							<div class="mt-4 pt-4 border-t border-gray-200">
+								<div class="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+									@if (ansObj.feedback) {
+										<div class="mb-2">
+											<p class="text-sm font-semibold text-indigo-700 mb-1">Teacher Feedback:</p>
+											<p class="text-indigo-900 whitespace-pre-wrap">{{ ansObj.feedback }}</p>
+										</div>
+									}
+								</div>
+							</div>
+						}
+
+						<div class="mt-4 pt-4 border-t border-gray-200">
+							<div class="flex items-center justify-between">
+								<span class="text-sm font-semibold text-gray-700">Points Earned:</span>
+								<span class="text-lg font-bold {{ getAnswerPoints(item.id) === item.points ? 'text-green-600' : 'text-orange-600' }}">
+									{{ getAnswerPoints(item.id) ?? 0 }} / {{ item.points }}
+								</span>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+
+			<!-- Sidebar summary -->
+			<div class="mt-6">
+				<div class="p-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg text-white mb-6">
+					<p class="text-sm opacity-90 mb-1">Total Score</p>
+					<p class="text-4xl font-bold">{{ takenExamSig()?.total_points ?? 0 }}<span class="text-xl opacity-75">/ {{ takenExamSig()?.exam?.total_points }}</span></p>
 				</div>
-			} @else {
-				<p class="text-slate-500 italic">No items available for this exam.</p>
-			}
+				<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+					<div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+						<span class="text-sm text-blue-700">Total Questions</span>
+						<span class="font-bold text-blue-900">{{ totalQuestions() }}</span>
+					</div>
+					<div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+						<span class="text-sm text-purple-700">Answered</span>
+						<span class="font-bold text-purple-900">{{ answeredCount() }}</span>
+					</div>
+					<div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+						<span class="text-sm text-green-700">Correct</span>
+						<span class="font-bold text-green-900">{{ correctCount() }}</span>
+					</div>
+				</div>
+			</div>
 		</div>
 	}
 } @else {

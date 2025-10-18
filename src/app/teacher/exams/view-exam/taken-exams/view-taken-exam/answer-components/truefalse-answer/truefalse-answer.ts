@@ -11,27 +11,16 @@ import { CommonModule } from '@angular/common';
 export class TruefalsAnswerComponent {
   answer = input.required<any>();
   comparison = input.required<any>();
-
-  // Normalize boolean-like values (handles true/false strings, '1'/'0', numbers)
-  private parseBool(val: any): boolean {
-    if (typeof val === 'boolean') return val;
-    if (typeof val === 'number') return val === 1;
-    if (typeof val === 'string') {
-      const s = val.trim().toLowerCase();
-      // Only treat explicit truthy tokens as true. Everything else is false.
-      return s === 'true' || s === '1' || s === 'yes';
-    }
-    return false;
-  }
-
-  // Public helpers used by the template
+  // Public helpers used by the template. After backend normalization
+  // `comparison().correct_answer` and `answer().answer` will be boolean|null
+  // for true/false items, so we can use them directly.
   isCorrectTrue(): boolean {
     const comp = this.comparison && this.comparison();
-    return comp ? this.parseBool(comp.correct_answer) : false;
+    return !!(comp && comp.correct_answer === true);
   }
 
   studentAnsweredTrue(): boolean {
     const ans = this.answer && this.answer();
-    return ans ? this.parseBool(ans.answer) : false;
+    return !!(ans && ans.answer === true);
   }
 }
