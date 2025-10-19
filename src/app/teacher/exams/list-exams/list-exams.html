@@ -93,117 +93,130 @@
       </div>
     }
 
-    <!-- Exams Grid -->
+    <!-- Exams Table -->
     @if (!loading()) {
       @if (filteredExams().length > 0) {
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          @for (exam of filteredExams(); track exam.id) {
-            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition duration-300 border border-gray-200">
-              <!-- Exam Header with Gradient -->
-              <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
-                <div class="flex items-start justify-between">
-                  <div class="flex-1">
-                    <h3 class="text-xl font-bold mb-2">{{ exam.title }}</h3>
-                    <p class="text-indigo-100 text-sm">{{ exam.description || 'No description provided' }}</p>
+        <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Title</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Year/Section</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Start Date</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Duration</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Questions</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Points</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                  <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                @for (exam of filteredExams(); track exam.id) {
+                  <tr class="hover:bg-gray-50 transition duration-200">
+                    <!-- Title -->
+                    <td class="px-6 py-4">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900">{{ exam.title }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ exam.description || 'No description' }}</p>
+                      </div>
+                    </td>
 
-                    <!-- Year and Sections -->
-                    <div class="flex flex-wrap items-center gap-2 mt-3">
-                      @if (exam.year && exam.year.length > 0) {
-                        <div class="flex items-center gap-1">
-                          <fa-icon [icon]="faGraduationCap" class="text-xs text-indigo-200"></fa-icon>
-                          @if (Array.isArray(exam.year)) {
-                            @for (year of exam.year; track $index) {
-                              <span class="px-2 py-0.5 bg-white bg-opacity-20 text-indigo-600 text-xs font-medium rounded">
-                                Yr{{ year }}
-                              </span>
-                            }
-                          } @else {
-                            <span class="px-2 py-0.5 bg-white bg-opacity-20 text-indigo-600 text-xs font-medium rounded">
+                    <!-- Year/Section -->
+                    <td class="px-6 py-4">
+                      <div class="flex flex-wrap gap-2">
+                        @if (Array.isArray(exam.year)) {
+                          @for (year of exam.year; track $index) {
+                            <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                              Yr{{ year }}
+                            </span>
+                          }
+                        } @else {
+                          @if (exam.year) {
+                            <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
                               Yr{{ exam.year }}
                             </span>
                           }
-                        </div>
-                      }
-
-                      @if (exam.sections && exam.sections.length > 0) {
-                        <div class="flex items-center gap-1">
-                          <fa-icon [icon]="faUsers" class="text-xs text-indigo-200"></fa-icon>
+                        }
+                        @if (exam.sections && exam.sections.length > 0) {
                           @for (section of exam.sections; track $index) {
-                            <span class="px-2 py-0.5 bg-white bg-opacity-20 text-indigo-600 text-xs font-medium rounded uppercase">
+                            <span class="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded uppercase">
                               {{ section }}
                             </span>
                           }
-                        </div>
+                        }
+                      </div>
+                    </td>
+
+                    <!-- Start Date -->
+                    <td class="px-6 py-4 text-sm text-gray-600">
+                      {{ exam.starts_at | date: 'MMM dd, y' }}
+                    </td>
+
+                    <!-- Duration -->
+                    <td class="px-6 py-4">
+                      <span class="text-sm text-gray-900 font-medium">{{ exam.durationDisplay }}</span>
+                    </td>
+
+                    <!-- Questions -->
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <fa-icon [icon]="faQuestion" class="text-indigo-600"></fa-icon>
+                        <span>{{ exam.items?.length || 0 }}</span>
+                      </div>
+                    </td>
+
+                    <!-- Points -->
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <fa-icon [icon]="faStar" class="text-indigo-600"></fa-icon>
+                        <span>{{ exam.total_points }}</span>
+                      </div>
+                    </td>
+
+                    <!-- Status -->
+                    <td class="px-6 py-4">
+                      @switch (exam.status) {
+                        @case ('published') {
+                          <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
+                            <fa-icon [icon]="faCheckCircle" class="text-xs"></fa-icon>Published
+                          </span>
+                        }
+                        @case ('draft') {
+                          <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
+                            <fa-icon [icon]="faPencil" class="text-xs"></fa-icon>Draft
+                          </span>
+                        }
+                        @default {
+                          <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
+                            <fa-icon [icon]="faArchive" class="text-xs"></fa-icon>Archived
+                          </span>
+                        }
                       }
-                    </div>
-                  </div>
-                  @switch (exam.status) {
-                    @case ('published') {
-                      <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full flex-shrink-0 ml-2 whitespace-nowrap">
-                        <fa-icon [icon]="faCheckCircle" class="mr-1"></fa-icon>Published
-                      </span>
-                    }
-                    @case ('draft') {
-                      <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full flex-shrink-0 ml-2 whitespace-nowrap">
-                        <fa-icon [icon]="faPencil" class="mr-1"></fa-icon>Draft
-                      </span>
-                    }
-                    @default {
-                      <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full flex-shrink-0 ml-2 whitespace-nowrap">
-                        <fa-icon [icon]="faArchive" class="mr-1"></fa-icon>Archived
-                      </span>
-                    }
-                  }
-                </div>
-              </div>
+                    </td>
 
-              <!-- Exam Details -->
-              <div class="p-6">
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                  <div class="flex items-center space-x-2 text-sm text-gray-600">
-                    <fa-icon [icon]="faQuestion" class="text-indigo-600"></fa-icon>
-                    <span>{{ exam.items?.length || 0 }} Questions</span>
-                  </div>
-                  <div class="flex items-center space-x-2 text-sm text-gray-600">
-                    <fa-icon [icon]="faStar" class="text-indigo-600"></fa-icon>
-                    <span>{{ exam.total_points }} Points</span>
-                  </div>
-                  <div class="flex items-center space-x-2 text-sm text-gray-600">
-                    <fa-icon [icon]="faCalendar" class="text-indigo-600"></fa-icon>
-                    <span>{{ exam.starts_at | date: 'MMM dd, y' }}</span>
-                  </div>
-                  <div class="flex items-center space-x-2 text-sm text-gray-600">
-                    <fa-icon [icon]="faCalendarCheck" class="text-indigo-600"></fa-icon>
-                    <span>{{ exam.ends_at | date: 'h:mm A' }}</span>
-                  </div>
-                </div>
-
-                <!-- Duration Info -->
-                <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div class="flex items-center space-x-2 text-blue-800 text-sm">
-                    <fa-icon [icon]="faCalendarCheck" class="text-blue-600"></fa-icon>
-                    <span class="font-semibold">Duration: {{ exam.durationDisplay }}</span>
-                  </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex space-x-3">
-                  <a
-                    [routerLink]="['/teacher/exams', exam.id]"
-                    class="flex-1 px-4 py-3 bg-indigo-600 text-white text-center rounded-lg font-medium hover:bg-indigo-700 transition duration-200 flex items-center justify-center gap-2">
-                    <fa-icon [icon]="faEye"></fa-icon>
-                    <span>View</span>
-                  </a>
-                  <button
-                    (click)="deleteExam(exam.id)"
-                    class="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition duration-200 flex items-center justify-center gap-2">
-                    <fa-icon [icon]="faTrash"></fa-icon>
-                    <span>Delete</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          }
+                    <!-- Actions -->
+                    <td class="px-6 py-4">
+                      <div class="flex items-center justify-center gap-2">
+                        <a
+                          [routerLink]="['/teacher/exams', exam.id]"
+                          class="px-3 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200 inline-flex items-center gap-1 text-xs">
+                          <fa-icon [icon]="faEye"></fa-icon>
+                          View
+                        </a>
+                        <button
+                          (click)="deleteExam(exam.id)"
+                          class="px-3 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition duration-200 inline-flex items-center gap-1 text-xs">
+                          <fa-icon [icon]="faTrash"></fa-icon>
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <!-- Pagination -->
