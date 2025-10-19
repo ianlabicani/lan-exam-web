@@ -10,7 +10,7 @@ import {
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
@@ -29,7 +29,7 @@ import { CreateExamService } from './create-exam.service';
 
 @Component({
   selector: 'app-create-exam',
-  imports: [ReactiveFormsModule, FaIconComponent, CommonModule],
+  imports: [ReactiveFormsModule, FaIconComponent, CommonModule, RouterLink],
   templateUrl: './create-exam.html',
   styleUrl: './create-exam.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
