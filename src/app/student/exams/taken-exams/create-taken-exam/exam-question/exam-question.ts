@@ -36,25 +36,54 @@ export class ExamQuestion {
     this.essayTimer = setTimeout(() => this.answerChange.emit(val), 600);
   }
 
-  getMatchingRightIndex(leftIndex: number): string {
-    const matchedItem = this.currentAnswer?.[leftIndex];
-    if (!matchedItem?.right || !this.item?.pairs) return '';
-    const foundIndex = this.item.pairs.findIndex(
-      (pair: any) => pair.right === matchedItem.right
-    );
-    return foundIndex >= 0 ? '' + foundIndex : '';
+  getCurrentAnswer(leftIndex: number): string {
+    // Parse answer if it's a JSON string (from backend reload)
+    let answers = this.currentAnswer;
+
+    if (typeof answers === 'string') {
+      try {
+        answers = JSON.parse(answers);
+      } catch {
+        return '';
+      }
+    }
+
+    if (!Array.isArray(answers)) {
+      return '';
+    }
+
+    const matchedItem = answers[leftIndex];
+    if (!matchedItem || typeof matchedItem !== 'object' || !matchedItem.right) {
+      return '';
+    }
+
+    return matchedItem.right;
   }
 
   // Matching: answer as array of objects { left, right }
   setMatching(leftIndex: number, rightIndex: string) {
     const pairs = this.item?.pairs ?? [];
-    const current = Array.isArray(this.currentAnswer)
-      ? [...this.currentAnswer]
-      : [];
+
+    // Parse answer if it's a JSON string (from backend reload)
+    let current: any[] = [];
+    if (Array.isArray(this.currentAnswer)) {
+      current = [...this.currentAnswer];
+    } else if (typeof this.currentAnswer === 'string') {
+      try {
+        current = JSON.parse(this.currentAnswer) || [];
+      } catch {
+        current = [];
+      }
+    }
+
+    // Ensure array has enough slots
+    while (current.length <= leftIndex) {
+      current.push(null);
+    }
 
     if (rightIndex === '') {
       // Remove the match if empty selection
-      current.splice(leftIndex, 1);
+      current[leftIndex] = null;
     } else {
       const parsedRightIndex = parseInt(rightIndex, 10);
       if (!Number.isNaN(parsedRightIndex) && parsedRightIndex < pairs.length) {

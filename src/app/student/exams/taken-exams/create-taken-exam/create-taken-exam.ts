@@ -347,18 +347,16 @@ export class CreateTakenExam implements OnInit, OnDestroy {
           value = value ?? '';
           if (typeof value !== 'string') value = String(value);
         } else if (questionType === 'matching') {
-          // Expect array of selected right indices; parse JSON if string
+          // Parse JSON if string; answers are now objects: [{"left":"...", "right":"..."}]
           try {
             if (typeof value === 'string') value = JSON.parse(value);
           } catch (_) {
             // fallback: empty array
             value = [];
           }
-          if (Array.isArray(value)) {
-            value = value.map((v) => {
-              const n = typeof v === 'number' ? v : parseInt(String(v), 10);
-              return Number.isNaN(n) ? null : n;
-            });
+          // Keep as array of objects - no conversion needed
+          if (!Array.isArray(value)) {
+            value = [];
           }
         }
         restored[key] = value;
