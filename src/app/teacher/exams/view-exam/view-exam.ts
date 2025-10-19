@@ -124,22 +124,6 @@ export class ViewExam implements OnInit {
 
   // Computed signals
   exam = this.viewExamSvc.viewingExam;
-  statusBadgeClass = computed(() => {
-    const exam = this.exam();
-    if (!exam) return 'bg-gray-100 text-gray-700';
-    switch (exam.status) {
-      case 'active':
-        return 'bg-blue-100 text-blue-700';
-      case 'published':
-        return 'bg-green-100 text-green-700';
-      case 'draft':
-        return 'bg-gray-100 text-gray-700';
-      case 'archived':
-        return 'bg-yellow-100 text-yellow-700';
-      default:
-        return 'bg-gray-100 text-gray-700';
-    }
-  });
 
   totalTakers = computed(() => {
     const exam = this.exam();
