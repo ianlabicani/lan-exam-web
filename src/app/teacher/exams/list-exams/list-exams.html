@@ -16,37 +16,80 @@
         <label class="block text-sm font-medium text-gray-700 mb-3">Filter by Status:</label>
         <div class="flex flex-wrap gap-2">
           <button
-            (click)="onStatusFilterChange('all')"
-            [class.bg-indigo-100]="statusFilter() === 'all'"
-            [class.text-indigo-700]="statusFilter() === 'all'"
-            [class.bg-gray-100]="statusFilter() !== 'all'"
-            [class.text-gray-700]="statusFilter() !== 'all'"
-            class="px-4 py-2 rounded-lg text-sm font-medium transition duration-200 hover:shadow-sm">
-            All
-          </button>
-          <button
-            (click)="onStatusFilterChange('published')"
-            [class.bg-green-100]="statusFilter() === 'published'"
-            [class.text-green-700]="statusFilter() === 'published'"
-            [class.bg-gray-100]="statusFilter() !== 'published'"
-            [class.text-gray-700]="statusFilter() !== 'published'"
-            class="px-4 py-2 rounded-lg text-sm font-medium transition duration-200 hover:shadow-sm">
-            Published
-          </button>
-          <button
             (click)="onStatusFilterChange('draft')"
-            [class.bg-yellow-100]="statusFilter() === 'draft'"
-            [class.text-yellow-700]="statusFilter() === 'draft'"
-            [class.bg-gray-100]="statusFilter() !== 'draft'"
-            [class.text-gray-700]="statusFilter() !== 'draft'"
-            class="px-4 py-2 rounded-lg text-sm font-medium transition duration-200 hover:shadow-sm">
+            [class.bg-yellow-100]="isStatusSelected('draft')"
+            [class.text-yellow-700]="isStatusSelected('draft')"
+            [class.ring-2]="isStatusSelected('draft')"
+            [class.ring-yellow-500]="isStatusSelected('draft')"
+            [class.bg-gray-100]="!isStatusSelected('draft')"
+            [class.text-gray-700]="!isStatusSelected('draft')"
+            class="px-4 py-2 rounded-full text-sm font-medium transition duration-200 hover:shadow-sm cursor-pointer">
             Draft
           </button>
           <button
+            (click)="onStatusFilterChange('ready')"
+            [class.bg-blue-100]="isStatusSelected('ready')"
+            [class.text-blue-700]="isStatusSelected('ready')"
+            [class.ring-2]="isStatusSelected('ready')"
+            [class.ring-blue-500]="isStatusSelected('ready')"
+            [class.bg-gray-100]="!isStatusSelected('ready')"
+            [class.text-gray-700]="!isStatusSelected('ready')"
+            class="px-4 py-2 rounded-full text-sm font-medium transition duration-200 hover:shadow-sm cursor-pointer">
+            Ready
+          </button>
+          <button
+            (click)="onStatusFilterChange('published')"
+            [class.bg-green-100]="isStatusSelected('published')"
+            [class.text-green-700]="isStatusSelected('published')"
+            [class.ring-2]="isStatusSelected('published')"
+            [class.ring-green-500]="isStatusSelected('published')"
+            [class.bg-gray-100]="!isStatusSelected('published')"
+            [class.text-gray-700]="!isStatusSelected('published')"
+            class="px-4 py-2 rounded-full text-sm font-medium transition duration-200 hover:shadow-sm cursor-pointer">
+            Published
+          </button>
+          <button
+            (click)="onStatusFilterChange('ongoing')"
+            [class.bg-purple-100]="isStatusSelected('ongoing')"
+            [class.text-purple-700]="isStatusSelected('ongoing')"
+            [class.ring-2]="isStatusSelected('ongoing')"
+            [class.ring-purple-500]="isStatusSelected('ongoing')"
+            [class.bg-gray-100]="!isStatusSelected('ongoing')"
+            [class.text-gray-700]="!isStatusSelected('ongoing')"
+            class="px-4 py-2 rounded-full text-sm font-medium transition duration-200 hover:shadow-sm cursor-pointer">
+            Ongoing
+          </button>
+          <button
+            (click)="onStatusFilterChange('closed')"
+            [class.bg-orange-100]="isStatusSelected('closed')"
+            [class.text-orange-700]="isStatusSelected('closed')"
+            [class.ring-2]="isStatusSelected('closed')"
+            [class.ring-orange-500]="isStatusSelected('closed')"
+            [class.bg-gray-100]="!isStatusSelected('closed')"
+            [class.text-gray-700]="!isStatusSelected('closed')"
+            class="px-4 py-2 rounded-full text-sm font-medium transition duration-200 hover:shadow-sm cursor-pointer">
+            Closed
+          </button>
+          <button
+            (click)="onStatusFilterChange('graded')"
+            [class.bg-cyan-100]="isStatusSelected('graded')"
+            [class.text-cyan-700]="isStatusSelected('graded')"
+            [class.ring-2]="isStatusSelected('graded')"
+            [class.ring-cyan-500]="isStatusSelected('graded')"
+            [class.bg-gray-100]="!isStatusSelected('graded')"
+            [class.text-gray-700]="!isStatusSelected('graded')"
+            class="px-4 py-2 rounded-full text-sm font-medium transition duration-200 hover:shadow-sm cursor-pointer">
+            Graded
+          </button>
+          <button
             (click)="onStatusFilterChange('archived')"
-            [class.bg-gray-100]="statusFilter() === 'archived'"
-            [class.text-gray-700]="statusFilter() === 'archived'"
-            class="px-4 py-2 rounded-lg text-sm font-medium transition duration-200 hover:shadow-sm">
+            [class.bg-gray-200]="isStatusSelected('archived')"
+            [class.text-gray-800]="isStatusSelected('archived')"
+            [class.ring-2]="isStatusSelected('archived')"
+            [class.ring-gray-500]="isStatusSelected('archived')"
+            [class.bg-gray-100]="!isStatusSelected('archived')"
+            [class.text-gray-700]="!isStatusSelected('archived')"
+            class="px-4 py-2 rounded-full text-sm font-medium transition duration-200 hover:shadow-sm cursor-pointer">
             Archived
           </button>
         </div>
@@ -251,19 +294,44 @@
                     <!-- Status -->
                     <td class="px-6 py-4">
                       @switch (exam.status) {
-                        @case ('published') {
-                          <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
-                            <fa-icon [icon]="faCheckCircle" class="text-xs"></fa-icon>Published
-                          </span>
-                        }
                         @case ('draft') {
                           <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
                             <fa-icon [icon]="faPencil" class="text-xs"></fa-icon>Draft
                           </span>
                         }
-                        @default {
+                        @case ('ready') {
+                          <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
+                            <fa-icon [icon]="faCheckCircle" class="text-xs"></fa-icon>Ready
+                          </span>
+                        }
+                        @case ('published') {
+                          <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
+                            <fa-icon [icon]="faCheckCircle" class="text-xs"></fa-icon>Published
+                          </span>
+                        }
+                        @case ('ongoing') {
+                          <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
+                            <fa-icon [icon]="faList" class="text-xs"></fa-icon>Ongoing
+                          </span>
+                        }
+                        @case ('closed') {
+                          <span class="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
+                            <fa-icon [icon]="faArchive" class="text-xs"></fa-icon>Closed
+                          </span>
+                        }
+                        @case ('graded') {
+                          <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
+                            <fa-icon [icon]="faStar" class="text-xs"></fa-icon>Graded
+                          </span>
+                        }
+                        @case ('archived') {
                           <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
                             <fa-icon [icon]="faArchive" class="text-xs"></fa-icon>Archived
+                          </span>
+                        }
+                        @default {
+                          <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
+                            <fa-icon [icon]="faArchive" class="text-xs"></fa-icon>{{ exam.status }}
                           </span>
                         }
                       }
@@ -349,8 +417,8 @@
           </div>
           <h3 class="text-xl font-bold text-gray-900 mb-2">No Exams Found</h3>
           <p class="text-gray-600 mb-6">
-            @if (statusFilter() !== 'all') {
-              No {{ statusFilter() }} exams. Try changing your filter or create a new exam.
+            @if (statusFilters().length > 0) {
+              No exams match your filters. Try adjusting your selection or create a new exam.
             } @else {
               You haven't created any exams yet. Get started by creating your first exam.
             }

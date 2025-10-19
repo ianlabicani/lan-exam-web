@@ -66,7 +66,17 @@ export class ListExams implements OnInit {
   loading = signal(false);
   error = signal<string | null>(null);
 
-  statusFilter = signal<'all' | 'published' | 'draft' | 'archived'>('all');
+  statusFilters = signal<
+    Array<
+      | 'draft'
+      | 'ready'
+      | 'published'
+      | 'ongoing'
+      | 'closed'
+      | 'graded'
+      | 'archived'
+    >
+  >([]);
   searchQuery = signal('');
   showAdvanced = signal(false);
   yearFilter = signal('');
@@ -154,8 +164,8 @@ export class ListExams implements OnInit {
       page: this.currentPage(),
     };
 
-    if (this.statusFilter() !== 'all') {
-      params['status'] = this.statusFilter();
+    if (this.statusFilters().length > 0) {
+      params['statuses'] = this.statusFilters().join(',');
     }
 
     if (this.searchQuery()) {
@@ -198,8 +208,10 @@ export class ListExams implements OnInit {
     let filtered = [...this.exams()];
 
     // Status filter
-    if (this.statusFilter() !== 'all') {
-      filtered = filtered.filter((e) => e.status === this.statusFilter());
+    if (this.statusFilters().length > 0) {
+      filtered = filtered.filter((e) =>
+        this.statusFilters().includes(e.status as any)
+      );
     }
 
     // Search filter
@@ -239,10 +251,47 @@ export class ListExams implements OnInit {
     this.filteredExams.set(filtered);
   }
 
-  onStatusFilterChange(status: 'all' | 'published' | 'draft' | 'archived') {
-    this.statusFilter.set(status);
+  onStatusFilterChange(
+    status:
+      | 'draft'
+      | 'ready'
+      | 'published'
+      | 'ongoing'
+      | 'closed'
+      | 'graded'
+      | 'archived'
+  ) {
+    const currentStatuses = this.statusFilters();
+    if (currentStatuses.includes(status)) {
+      // Remove if already selected
+      this.statusFilters.set(currentStatuses.filter((s) => s !== status));
+    } else {
+      // Add if not selected
+      this.statusFilters.set([...currentStatuses, status] as Array<
+        | 'draft'
+        | 'ready'
+        | 'published'
+        | 'ongoing'
+        | 'closed'
+        | 'graded'
+        | 'archived'
+      >);
+    }
     this.currentPage.set(1);
     this.loadExams();
+  }
+
+  isStatusSelected(
+    status:
+      | 'draft'
+      | 'ready'
+      | 'published'
+      | 'ongoing'
+      | 'closed'
+      | 'graded'
+      | 'archived'
+  ): boolean {
+    return this.statusFilters().includes(status);
   }
 
   onSearch() {
@@ -262,7 +311,7 @@ export class ListExams implements OnInit {
   }
 
   clearFilters() {
-    this.statusFilter.set('all');
+    this.statusFilters.set([]);
     this.searchQuery.set('');
     this.yearFilter.set('');
     this.sectionFilter.set('');
