@@ -76,6 +76,80 @@
           <span>Create New Exam</span>
         </a>
       </div>
+
+      <!-- Advanced Filters (Collapsible) -->
+      <div class="border-t pt-4 mt-4">
+        <button
+          (click)="showAdvanced.set(!showAdvanced())"
+          class="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-2">
+          <fa-icon [icon]="showAdvanced() ? faChevronUp : faChevronDown"></fa-icon>
+          <span>{{ showAdvanced() ? 'Hide Advanced Filters' : 'Show Advanced Filters' }}</span>
+        </button>
+
+        @if (showAdvanced()) {
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <!-- Year Filter -->
+            <div>
+              <label for="year" class="block text-sm font-medium text-gray-700 mb-2">Year Level</label>
+              <select
+                id="year"
+                [(ngModel)]="yearFilter"
+                (change)="onAdvancedFilterChange()"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">All Years</option>
+                <option value="1">Year 1</option>
+                <option value="2">Year 2</option>
+                <option value="3">Year 3</option>
+                <option value="4">Year 4</option>
+              </select>
+            </div>
+
+            <!-- Section Filter -->
+            <div>
+              <label for="section" class="block text-sm font-medium text-gray-700 mb-2">Section</label>
+              <select
+                id="section"
+                [(ngModel)]="sectionFilter"
+                (change)="onAdvancedFilterChange()"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">All Sections</option>
+                <option value="a">Section A</option>
+                <option value="b">Section B</option>
+                <option value="c">Section C</option>
+                <option value="d">Section D</option>
+                <option value="e">Section E</option>
+                <option value="f">Section F</option>
+                <option value="g">Section G</option>
+              </select>
+            </div>
+
+            <!-- Date Filter -->
+            <div>
+              <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">Date From</label>
+              <input
+                type="date"
+                id="date_from"
+                [(ngModel)]="dateFromFilter"
+                (change)="onAdvancedFilterChange()"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div class="md:col-span-3 flex justify-end gap-2">
+              <button
+                (click)="clearFilters()"
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition duration-200">
+                Clear Filters
+              </button>
+              <button
+                (click)="onAdvancedFilterChange()"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200">
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        }
+      </div>
     </div>
 
     <!-- Loading State -->
