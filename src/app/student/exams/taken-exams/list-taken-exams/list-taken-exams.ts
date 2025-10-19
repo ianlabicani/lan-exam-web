@@ -1,11 +1,20 @@
 import { RouterLink } from '@angular/router';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { TitleCasePipe } from '@angular/common';
+import { TitleCasePipe, DatePipe } from '@angular/common';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import {
+  faFileLines,
+  faCheckCircle,
+  faClock,
+  faEye,
+  faArrowRight,
+  faCircle,
+} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-list-taken-exams',
-  imports: [RouterLink, TitleCasePipe],
+  imports: [RouterLink, TitleCasePipe, DatePipe, FontAwesomeModule],
   templateUrl: './list-taken-exams.html',
   styleUrl: './list-taken-exams.css',
 })
@@ -13,6 +22,14 @@ export class ListTakenExams implements OnInit {
   http = inject(HttpClient);
 
   takenExams = signal<any[]>([]);
+
+  // FontAwesome icons
+  faFileLines = faFileLines;
+  faCheckCircle = faCheckCircle;
+  faClock = faClock;
+  faEye = faEye;
+  faArrowRight = faArrowRight;
+  faCircle = faCircle;
 
   ngOnInit(): void {
     this.getTakenExams();

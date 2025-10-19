@@ -1,6 +1,6 @@
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, TitleCasePipe } from '@angular/common';
 import { StudentExamItemService } from '../../../services/student-exam-item.service';
 import { concatMap } from 'rxjs';
 // Note: ExamHeader and ExamQuestion were removed from imports because they're not used in this template
@@ -23,7 +23,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 @Component({
   selector: 'app-view-taken-exam',
   standalone: true,
-  imports: [DatePipe, RouterLink, FaIconComponent],
+  imports: [DatePipe, TitleCasePipe, RouterLink, FaIconComponent],
   templateUrl: './view-taken-exam.html',
   styleUrl: './view-taken-exam.css',
 })
@@ -100,6 +100,8 @@ export class ViewTakenExam implements OnInit {
             taken,
             examObj,
             answers,
+            examStatus: examObj?.status,
+            takenExamStatus: taken?.status,
           });
         },
         error: (err) => {

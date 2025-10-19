@@ -1,9 +1,11 @@
 @let takenExam = takenExamSig();
 @let examItemsSig = examItems();
+@let examObj = takenExam?.exam;
 
 @if (takenExam) {
-	<!-- Pending Grading View -->
-	@if (takenExam.status !== 'graded') {
+	<!-- Check if exam is still ongoing (not closed) -->
+	@if (examObj?.status === 'ongoing' || examObj?.status === 'published' || examObj?.status === 'closed') {
+		<!-- Pending Grading View (Exam still ongoing or grading in progress) -->
 		<div class="mx-auto max-w-4xl">
 			<!-- Back Button -->
 			<a routerLink="/student/exams/taken-exams" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 mb-3 font-medium">
@@ -28,30 +30,72 @@
 				<!-- Pending Message -->
 				<div class="max-w-2xl mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6 mb-6">
 					<div class="flex items-start">
-						<fa-icon [icon]="faClock" class="text-yellow-600 text-3xl mr-4 mt-1"></fa-icon>
+						<fa-icon [icon]="faClock" class="text-yellow-600 text-3xl mr-4 mt-1" style="min-width: 2rem;"></fa-icon>
 						<div class="text-left flex-1">
-							<h3 class="text-lg font-bold text-yellow-900 mb-2">Results Pending Grading</h3>
+							<h3 class="text-lg font-bold text-yellow-900 mb-2">
+								@if (takenExam.status === 'graded') {
+									Graded - Awaiting Release
+								} @else {
+									Results Pending Grading
+								}
+							</h3>
 							<p class="text-yellow-800 mb-3">
-								Your exam is currently being reviewed by your teacher. Results and detailed feedback will be available once grading is complete and the exam is closed.
+								@if (takenExam.status === 'graded') {
+									Your exam has been graded by your teacher! Results and detailed feedback will be visible once the teacher closes the exam for all students.
+								} @else {
+									Your exam is currently being reviewed by your teacher. Results and detailed feedback will be available once grading is complete and the exam is closed.
+								}
 							</p>
 							<div class="bg-yellow-100 rounded-lg p-3">
 								<p class="text-sm font-semibold text-yellow-900 mb-1">What happens next:</p>
 								<ul class="text-sm text-yellow-800 space-y-1">
-									<li>
-										<fa-icon [icon]="faArrowRight" class="text-yellow-600 mr-2"></fa-icon>Your teacher will review your responses
-									</li>
-									<li>
-										<fa-icon [icon]="faArrowRight" class="text-yellow-600 mr-2"></fa-icon>Manual grading items (essays, short answers) will receive scores and feedback
-									</li>
-									<li>
-										<fa-icon [icon]="faArrowRight" class="text-yellow-600 mr-2"></fa-icon>Once grading is complete, teacher will close the exam
-									</li>
-									<li>
-										<fa-icon [icon]="faArrowRight" class="text-yellow-600 mr-2"></fa-icon>You'll be able to view your results and feedback after closure
-									</li>
+									@if (takenExam.status === 'graded') {
+										<li>
+											<fa-icon [icon]="faCheckCircle" class="text-green-600 mr-2"></fa-icon>Your responses have been graded
+										</li>
+										<li>
+											<fa-icon [icon]="faCheckCircle" class="text-green-600 mr-2"></fa-icon>Scores and feedback are ready
+										</li>
+										<li>
+											<fa-icon [icon]="faArrowRight" class="text-yellow-600 mr-2"></fa-icon>Teacher will close the exam when all students are graded
+										</li>
+										<li>
+											<fa-icon [icon]="faArrowRight" class="text-yellow-600 mr-2"></fa-icon>You'll be able to view your complete results after closure
+										</li>
+									} @else {
+										<li>
+											<fa-icon [icon]="faArrowRight" class="text-yellow-600 mr-2"></fa-icon>Your teacher will review your responses
+										</li>
+										<li>
+											<fa-icon [icon]="faArrowRight" class="text-yellow-600 mr-2"></fa-icon>Manual grading items (essays, short answers) will receive scores and feedback
+										</li>
+										<li>
+											<fa-icon [icon]="faArrowRight" class="text-yellow-600 mr-2"></fa-icon>Once grading is complete, teacher will close the exam
+										</li>
+										<li>
+											<fa-icon [icon]="faArrowRight" class="text-yellow-600 mr-2"></fa-icon>You'll be able to view your results and feedback after closure
+										</li>
+									}
 								</ul>
 							</div>
 						</div>
+					</div>
+				</div>
+
+				<!-- Exam Status Badge -->
+				<div class="inline-flex items-center px-6 py-3 bg-blue-50 rounded-lg border-2 border-blue-200 mb-6">
+					<fa-icon [icon]="faCheckCircle" class="text-blue-600 text-xl mr-3"></fa-icon>
+					<div class="text-left">
+						<p class="text-sm text-blue-600 font-semibold">Current Exam Status:</p>
+						<p class="text-lg font-bold text-blue-900">
+							@if (examObj?.status === 'ongoing') {
+								<span class="text-orange-600">Ongoing</span> - Accepting submissions
+							} @else if (examObj?.status === 'closed') {
+								<span class="text-purple-600">Closed</span> - Being graded
+							} @else {
+								{{ examObj?.status | titlecase }}
+							}
+						</p>
 					</div>
 				</div>
 
@@ -67,25 +111,37 @@
 						</p>
 					</div>
 
-					<div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
-						<p class="text-sm text-orange-600 mb-1">Grading Status</p>
-						<p class="text-lg font-bold text-orange-900">
-							<fa-icon [icon]="faHourglassHalf" class="mr-1"></fa-icon>Pending
-						</p>
-						<p class="text-sm text-orange-700">
-							Awaiting teacher review
-						</p>
-					</div>
+					@if (takenExam.status === 'graded') {
+						<div class="bg-green-50 p-4 rounded-lg border border-green-200">
+							<p class="text-sm text-green-600 mb-1">Grading Status</p>
+							<p class="text-lg font-bold text-green-900">
+								<fa-icon [icon]="faCheckCircle" class="mr-1" ></fa-icon>Graded
+							</p>
+							<p class="text-sm text-green-700">
+								Waiting for exam to close
+							</p>
+						</div>
+					} @else {
+						<div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
+							<p class="text-sm text-orange-600 mb-1">Grading Status</p>
+							<p class="text-lg font-bold text-orange-900">
+								<fa-icon [icon]="faHourglassHalf" class="mr-1" ></fa-icon>Pending
+							</p>
+							<p class="text-sm text-orange-700">
+								Awaiting teacher review
+							</p>
+						</div>
+					}
 				</div>
 
 				<!-- Action Buttons -->
 				<div class="flex flex-col sm:flex-row gap-3 justify-center">
-					<a routerLink="/student/exams" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition duration-200">
-						<fa-icon [icon]="faFileAlt" class="mr-2"></fa-icon>Browse More Exams
+					<a routerLink="/student/exams" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition duration-200 inline-flex items-center justify-center gap-2">
+						<fa-icon [icon]="faFileAlt"></fa-icon>Browse More Exams
 					</a>
 
-					<a routerLink="/student/exams/taken-exams" class="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200">
-						<fa-icon [icon]="faHistory" class="mr-2"></fa-icon>View Exam History
+					<a routerLink="/student/exams/taken-exams" class="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200 inline-flex items-center justify-center gap-2">
+						<fa-icon [icon]="faHistory"></fa-icon>View Exam History
 					</a>
 				</div>
 
@@ -102,8 +158,8 @@
 		<!-- Graded View - Show Questions (Blade-like) -->
 		<div class="mx-auto max-w-4xl p-6 space-y-6 bg-white/70 backdrop-blur rounded-xl shadow-sm border border-slate-200">
 			<div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl shadow-md p-6 mb-6">
-				<h2 class="text-2xl font-bold mb-2">{{ takenExamSig()?.exam?.title }}</h2>
-				<p class="text-indigo-100">{{ takenExamSig()?.exam?.description }}</p>
+				<h2 class="text-2xl font-bold mb-2">{{ examObj?.title }}</h2>
+				<p class="text-indigo-100">{{ examObj?.description }}</p>
 			</div>
 
 			<div class="space-y-6">
@@ -116,7 +172,7 @@
 										{{ item.type.replace('_',' ') }}
 									</span>
 									<span class="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-semibold rounded-full">
-										<i class="fas fa-star text-yellow-500 mr-1"></i>{{ item.points }} pts
+										<fa-icon [icon]="faCheckCircle" class="text-yellow-500 mr-1" ></fa-icon>{{ item.points }} pts
 									</span>
 								</div>
 								<h3 class="text-lg font-bold text-gray-900">{{ item.question }}</h3>
@@ -176,7 +232,7 @@
 			<div class="mt-6">
 				<div class="p-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg text-white mb-6">
 					<p class="text-sm opacity-90 mb-1">Total Score</p>
-					<p class="text-4xl font-bold">{{ takenExamSig()?.total_points ?? 0 }}<span class="text-xl opacity-75">/ {{ takenExamSig()?.exam?.total_points }}</span></p>
+					<p class="text-4xl font-bold">{{ takenExam?.total_points ?? 0 }}<span class="text-xl opacity-75">/ {{ examObj?.total_points }}</span></p>
 				</div>
 				<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
 					<div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
