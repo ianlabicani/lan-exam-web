@@ -8,9 +8,14 @@
 		<!-- Pending Grading View (Exam still ongoing or grading in progress) -->
 		<div class="mx-auto max-w-4xl">
 			<!-- Back Button -->
-			<a routerLink="/student/exams/taken-exams" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 mb-3 font-medium">
-				<fa-icon [icon]="faArrowLeft" class="mr-2"></fa-icon>Back to Exam History
-			</a>
+			<div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex items-center justify-between">
+					<div class="flex items-center gap-4">
+						<a routerLink="/student/taken-exams" class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/20 hover:bg-white/30 transition-colors duration-200">
+							<fa-icon [icon]="faArrowLeft" class="text-white"></fa-icon>
+						</a>
+						<h1 class="text-xl font-bold text-white">Exam Results</h1>
+					</div>
+      </div>
 
 			<!-- Main Card -->
 			<div class="bg-white rounded-xl shadow-md p-8 text-center">
