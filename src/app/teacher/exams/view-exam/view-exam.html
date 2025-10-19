@@ -73,15 +73,30 @@
                   <fa-icon [icon]="faPencilAlt" class="text-lg"></fa-icon>
                   <span>Draft</span>
                 </span>
-              } @else if(examSig.status === 'active') {
-                <span class="px-4 py-2 bg-blue-500 text-white text-base font-bold rounded-lg inline-flex items-center gap-2 shadow-lg border-2 border-blue-600 animate-pulse">
-                  <fa-icon [icon]="faClipboardCheck" class="text-lg"></fa-icon>
-                  <span>Active</span>
+              } @else if(examSig.status === 'ready') {
+                <span class="px-4 py-2 bg-amber-400 text-amber-900 text-base font-bold rounded-lg inline-flex items-center gap-2 shadow-md border-2 border-amber-500">
+                  <fa-icon [icon]="faCheckSquare" class="text-lg"></fa-icon>
+                  <span>Ready</span>
                 </span>
               } @else if(examSig.status === 'published') {
                 <span class="px-4 py-2 bg-green-500 text-white text-base font-bold rounded-lg inline-flex items-center gap-2 shadow-md border-2 border-green-600">
                   <fa-icon [icon]="faCheckCircle" class="text-lg"></fa-icon>
                   <span>Published</span>
+                </span>
+              } @else if(examSig.status === 'ongoing') {
+                <span class="px-4 py-2 bg-blue-500 text-white text-base font-bold rounded-lg inline-flex items-center gap-2 shadow-lg border-2 border-blue-600 animate-pulse">
+                  <fa-icon [icon]="faClipboardCheck" class="text-lg"></fa-icon>
+                  <span>Ongoing</span>
+                </span>
+              } @else if(examSig.status === 'closed') {
+                <span class="px-4 py-2 bg-orange-500 text-white text-base font-bold rounded-lg inline-flex items-center gap-2 shadow-md border-2 border-orange-600">
+                  <fa-icon [icon]="faLock" class="text-lg"></fa-icon>
+                  <span>Closed</span>
+                </span>
+              } @else if(examSig.status === 'graded') {
+                <span class="px-4 py-2 bg-indigo-500 text-white text-base font-bold rounded-lg inline-flex items-center gap-2 shadow-md border-2 border-indigo-600">
+                  <fa-icon [icon]="faClipboardList" class="text-lg"></fa-icon>
+                  <span>Graded</span>
                 </span>
               } @else if(examSig.status === 'archived') {
                 <span class="px-4 py-2 bg-red-500 text-white text-base font-bold rounded-lg inline-flex items-center gap-2 shadow-md border-2 border-red-600 opacity-75">

@@ -17,6 +17,11 @@ import {
   faArrowLeft,
   faArrowRight,
   faExclamationTriangle,
+  faPencilAlt,
+  faCheckSquare,
+  faLock,
+  faClipboardList,
+  faArchive,
 } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { Tos, ViewingExam } from '../view-exam.service';
@@ -45,6 +50,11 @@ export class StatusUpdateModalComponent {
   faArrowLeft = faArrowLeft;
   faArrowRight = faArrowRight;
   faExclamationTriangle = faExclamationTriangle;
+  faPencilAlt = faPencilAlt;
+  faCheckSquare = faCheckSquare;
+  faLock = faLock;
+  faClipboardList = faClipboardList;
+  faArchive = faArchive;
 
   // Status lifecycle
   private lifecycle: Array<
@@ -207,21 +217,21 @@ export class StatusUpdateModalComponent {
   getStatusColor(status: string | undefined): string {
     switch (status) {
       case 'draft':
-        return 'bg-gray-100 text-gray-700';
+        return 'px-4 py-2 bg-gray-200 text-gray-800 text-base font-bold rounded-lg shadow-md border-2 border-gray-400';
       case 'ready':
-        return 'bg-blue-100 text-blue-700';
+        return 'px-4 py-2 bg-amber-400 text-amber-900 text-base font-bold rounded-lg shadow-md border-2 border-amber-500';
       case 'published':
-        return 'bg-green-100 text-green-700';
+        return 'px-4 py-2 bg-green-500 text-white text-base font-bold rounded-lg shadow-md border-2 border-green-600';
       case 'ongoing':
-        return 'bg-yellow-100 text-yellow-700';
+        return 'px-4 py-2 bg-blue-500 text-white text-base font-bold rounded-lg shadow-lg border-2 border-blue-600 animate-pulse';
       case 'closed':
-        return 'bg-orange-100 text-orange-700';
+        return 'px-4 py-2 bg-orange-500 text-white text-base font-bold rounded-lg shadow-md border-2 border-orange-600';
       case 'graded':
-        return 'bg-purple-100 text-purple-700';
+        return 'px-4 py-2 bg-indigo-500 text-white text-base font-bold rounded-lg shadow-md border-2 border-indigo-600';
       case 'archived':
-        return 'bg-red-100 text-red-700';
+        return 'px-4 py-2 bg-red-500 text-white text-base font-bold rounded-lg shadow-md border-2 border-red-600 opacity-75';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'px-4 py-2 bg-gray-200 text-gray-800 rounded-lg';
     }
   }
 }

@@ -21,10 +21,25 @@
         <p class="text-sm text-gray-600 mb-2">Current Status:</p>
         <div class="flex items-center space-x-2">
           <span
-            class="px-4 py-2 rounded-full font-semibold"
+            class="inline-flex items-center gap-2"
             [ngClass]="getStatusColor(exam()?.status)"
           >
-            {{ exam()?.status | titlecase }}
+            @if (exam()?.status === 'draft') {
+              <fa-icon [icon]="faPencilAlt" class="text-lg"></fa-icon>
+            } @else if (exam()?.status === 'ready') {
+              <fa-icon [icon]="faCheckSquare" class="text-lg"></fa-icon>
+            } @else if (exam()?.status === 'published') {
+              <fa-icon [icon]="faCheckCircle" class="text-lg"></fa-icon>
+            } @else if (exam()?.status === 'ongoing') {
+              <fa-icon [icon]="faSync" class="text-lg"></fa-icon>
+            } @else if (exam()?.status === 'closed') {
+              <fa-icon [icon]="faLock" class="text-lg"></fa-icon>
+            } @else if (exam()?.status === 'graded') {
+              <fa-icon [icon]="faClipboardList" class="text-lg"></fa-icon>
+            } @else if (exam()?.status === 'archived') {
+              <fa-icon [icon]="faArchive" class="text-lg"></fa-icon>
+            }
+            <span>{{ exam()?.status | titlecase }}</span>
           </span>
         </div>
       </div>

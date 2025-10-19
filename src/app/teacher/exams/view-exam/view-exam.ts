@@ -46,6 +46,8 @@ import {
   faEdit,
   faTrash,
   faChalkboardUser,
+  faCheckSquare,
+  faClipboardList,
 } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { ViewExamService } from './view-exam.service';
@@ -113,6 +115,8 @@ export class ViewExam implements OnInit {
   faEdit = faEdit;
   faTrash = faTrash;
   faChalkboardUser = faChalkboardUser;
+  faCheckSquare = faCheckSquare;
+  faClipboardList = faClipboardList;
 
   // Computed signals
   exam = this.viewExamSvc.viewingExam;
