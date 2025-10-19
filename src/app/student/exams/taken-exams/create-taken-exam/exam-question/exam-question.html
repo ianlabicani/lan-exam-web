@@ -123,16 +123,17 @@
               <ul class="space-y-2">
                 @for (p of item.pairs; track $index; let i = $index) {
                   <li>
+                    {{ currentAnswer?.[i]?.right ?? 'No selection' }}
                     <select
                       class="w-full rounded border border-slate-300 px-2 py-2 text-sm"
-                      [value]="'' + (currentAnswer?.[i] ?? '')"
+                      [value]="getMatchingRightIndex(i)"
                       (change)="setMatching(i, $any($event.target).value)"
                       [disabled]="isReadonly"
                       [ngClass]="{ 'opacity-50 cursor-not-allowed': isReadonly }"
                     >
                       <option value="" disabled>Select…</option>
                         @for (r of item.pairs; track $index; let j = $index) {
-                          <option [value]="'' + j" [selected]="('' + (currentAnswer?.[i] ?? '')) === ('' + j)">{{ r.right }}</option>
+                          <option [value]="'' + j">{{ r.right }}</option>
                       }
                     </select>
                   </li>

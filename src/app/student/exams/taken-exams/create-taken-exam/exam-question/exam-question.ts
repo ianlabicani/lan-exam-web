@@ -36,15 +36,39 @@ export class ExamQuestion {
     this.essayTimer = setTimeout(() => this.answerChange.emit(val), 600);
   }
 
-  // Matching: answer as array where index = left item index, value = selected right index
-  setMatching(leftIndex: number, raw: any) {
-    const parsed = typeof raw === 'number' ? raw : parseInt(String(raw), 10);
-    const rightIndex = Number.isNaN(parsed) ? null : parsed;
-    const len = this.item?.pairs?.length ?? 0;
+  getMatchingRightIndex(leftIndex: number): string {
+    const matchedItem = this.currentAnswer?.[leftIndex];
+    if (!matchedItem?.right || !this.item?.pairs) return '';
+    const foundIndex = this.item.pairs.findIndex(
+      (pair: any) => pair.right === matchedItem.right
+    );
+    return foundIndex >= 0 ? '' + foundIndex : '';
+  }
+
+  // Matching: answer as array of objects { left, right }
+  setMatching(leftIndex: number, rightIndex: string) {
+    const pairs = this.item?.pairs ?? [];
     const current = Array.isArray(this.currentAnswer)
       ? [...this.currentAnswer]
-      : Array(len).fill(null);
-    current[leftIndex] = rightIndex;
+      : [];
+
+    if (rightIndex === '') {
+      // Remove the match if empty selection
+      current.splice(leftIndex, 1);
+    } else {
+      const parsedRightIndex = parseInt(rightIndex, 10);
+      if (!Number.isNaN(parsedRightIndex) && parsedRightIndex < pairs.length) {
+        const leftPair = pairs[leftIndex];
+        const rightPair = pairs[parsedRightIndex];
+        if (leftPair && rightPair) {
+          current[leftIndex] = {
+            left: leftPair.left,
+            right: rightPair.right,
+          };
+        }
+      }
+    }
+
     this.answerChange.emit(current);
   }
 }
