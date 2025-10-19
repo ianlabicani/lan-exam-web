@@ -113,12 +113,12 @@
                           <fa-icon [icon]="faGraduationCap" class="text-xs text-indigo-200"></fa-icon>
                           @if (Array.isArray(exam.year)) {
                             @for (year of exam.year; track $index) {
-                              <span class="px-2 py-0.5 bg-white bg-opacity-20 text-white text-xs font-medium rounded">
+                              <span class="px-2 py-0.5 bg-white bg-opacity-20 text-indigo-600 text-xs font-medium rounded">
                                 Yr{{ year }}
                               </span>
                             }
                           } @else {
-                            <span class="px-2 py-0.5 bg-white bg-opacity-20 text-white text-xs font-medium rounded">
+                            <span class="px-2 py-0.5 bg-white bg-opacity-20 text-indigo-600 text-xs font-medium rounded">
                               Yr{{ exam.year }}
                             </span>
                           }
@@ -129,7 +129,7 @@
                         <div class="flex items-center gap-1">
                           <fa-icon [icon]="faUsers" class="text-xs text-indigo-200"></fa-icon>
                           @for (section of exam.sections; track $index) {
-                            <span class="px-2 py-0.5 bg-white bg-opacity-20 text-white text-xs font-medium rounded uppercase">
+                            <span class="px-2 py-0.5 bg-white bg-opacity-20 text-indigo-600 text-xs font-medium rounded uppercase">
                               {{ section }}
                             </span>
                           }
