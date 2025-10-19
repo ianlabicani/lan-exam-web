@@ -22,7 +22,7 @@
       <!-- Question -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">
-          <i class="fas fa-question-circle text-blue-600 mr-2"></i>Question *
+          <fa-icon [icon]="faQuestionCircle" class="text-blue-600 mr-2"></fa-icon>Question *
         </label>
         <textarea
           formControlName="question"
@@ -33,7 +33,7 @@
         ></textarea>
         @if (form.get('question')?.invalid && form.get('question')?.touched) {
           <p class="text-red-500 text-sm mt-2">
-            <i class="fas fa-exclamation-circle mr-1"></i>
+            <fa-icon [icon]="faExclamationCircle" class="mr-1"></fa-icon>
             Question is required (minimum 3 characters).
           </p>
         }
@@ -42,7 +42,7 @@
       <!-- Points -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">
-          <i class="fas fa-star text-blue-600 mr-2"></i>Points *
+          <fa-icon [icon]="faStar" class="text-blue-600 mr-2"></fa-icon>Points *
         </label>
         <input
           type="number"
@@ -53,7 +53,7 @@
         />
         @if (form.get('points')?.invalid && form.get('points')?.touched) {
           <p class="text-red-500 text-sm mt-2">
-            <i class="fas fa-exclamation-circle mr-1"></i>
+            <fa-icon [icon]="faExclamationCircle" class="mr-1"></fa-icon>
             Must be at least 1 point.
           </p>
         }
@@ -64,7 +64,7 @@
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <label class="text-sm font-medium text-gray-700">
-              <i class="fas fa-list text-blue-600 mr-2"></i>Answer Options * (Min {{MIN_OPTIONS}} / Max {{MAX_OPTIONS}})
+              <fa-icon [icon]="faList" class="text-blue-600 mr-2"></fa-icon>Answer Options * (Min {{MIN_OPTIONS}} / Max {{MAX_OPTIONS}})
             </label>
             <button
               type="button"
@@ -72,7 +72,7 @@
               [disabled]="options.length >= MAX_OPTIONS"
               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm font-medium"
             >
-              <i class="fas fa-plus mr-2"></i>Add Option
+              <fa-icon [icon]="faPlus" class="mr-2"></fa-icon>Add Option
             </button>
           </div>
 
@@ -117,14 +117,14 @@
                     class="p-2 text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition"
                     title="Remove option"
                   >
-                    <i class="fas fa-trash-alt"></i>
+                    <fa-icon [icon]="faTrashAlt"></fa-icon>
                   </button>
                 </div>
               </div>
             }
           </div>
           <p class="text-xs text-gray-500">
-            <i class="fas fa-info-circle mr-1"></i>
+            <fa-icon [icon]="faInfoCircle" class="mr-1"></fa-icon>
             Select at least one correct answer.
           </p>
         </div>
@@ -134,7 +134,7 @@
       @if (itemInput().type === 'truefalse') {
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">
-            <i class="fas fa-toggle-on text-blue-600 mr-2"></i>Correct Answer *
+            <fa-icon [icon]="faToggleOn" class="text-blue-600 mr-2"></fa-icon>Correct Answer *
           </label>
           <select
             formControlName="answer"
@@ -151,7 +151,7 @@
       @if (itemInput().type === 'shortanswer' || itemInput().type === 'fillblank') {
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">
-            <i class="fas fa-keyboard text-blue-600 mr-2"></i>Expected Answer *
+            <fa-icon [icon]="faKeyboard" class="text-blue-600 mr-2"></fa-icon>Expected Answer *
           </label>
           <textarea
             formControlName="expected_answer"
@@ -162,7 +162,7 @@
           ></textarea>
           @if (form.get('expected_answer')?.invalid && form.get('expected_answer')?.touched) {
             <p class="text-red-500 text-sm mt-2">
-              <i class="fas fa-exclamation-circle mr-1"></i>
+              <fa-icon [icon]="faExclamationCircle" class="mr-1"></fa-icon>
               Expected answer is required.
             </p>
           }
@@ -173,7 +173,7 @@
       @if (itemInput().type === 'essay') {
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">
-            <i class="fas fa-lightbulb text-blue-600 mr-2"></i>Grading Rubric / Key Points *
+            <fa-icon [icon]="faLightbulb" class="text-blue-600 mr-2"></fa-icon>Grading Rubric / Key Points *
           </label>
           <textarea
             formControlName="expected_answer"
@@ -183,84 +183,39 @@
             placeholder="Outline the key points, criteria, or rubric for grading..."
           ></textarea>
           <p class="text-xs text-gray-500 mt-1">
-            <i class="fas fa-info-circle mr-1"></i>
+            <fa-icon [icon]="faInfoCircle" class="mr-1"></fa-icon>
             This will guide you when manually grading responses
           </p>
           @if (form.get('expected_answer')?.invalid && form.get('expected_answer')?.touched) {
             <p class="text-red-500 text-sm mt-2">
-              <i class="fas fa-exclamation-circle mr-1"></i>
+              <fa-icon [icon]="faExclamationCircle" class="mr-1"></fa-icon>
               Rubric is required.
             </p>
           }
         </div>
       }
 
-      <!-- Matching Pairs -->
+      <!-- Matching Pairs (delegated to reusable modal) -->
       @if (itemInput().type === 'matching') {
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-medium text-gray-700">
-              <i class="fas fa-arrows-alt-h text-blue-600 mr-2"></i>Matching Pairs *
-            </label>
-            <button
-              type="button"
-              (click)="addPair()"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
-            >
-              <i class="fas fa-plus mr-2"></i>Add Pair
-            </button>
+        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-blue-900">Edit Matching Pairs</p>
+            <p class="text-xs text-blue-700 mt-1">Use the dedicated matching editor to update this question.</p>
           </div>
-
-          <div class="space-y-3" formArrayName="pairs">
-            @for (pair of pairs.controls; track $index; let i = $index) {
-              <div
-                class="p-4 rounded-lg border border-gray-300 flex items-start gap-3"
-                [formGroup]="asFormGroup(pair)"
-              >
-                <!-- Left Column -->
-                <div class="flex-1">
-                  <label class="text-xs font-medium text-gray-500 mb-1 block">Left Item</label>
-                  <input
-                    type="text"
-                    formControlName="left"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                    placeholder="Item to match..."
-                  />
-                </div>
-
-                <!-- Right Column -->
-                <div class="flex-1">
-                  <label class="text-xs font-medium text-gray-500 mb-1 block">Right Item</label>
-                  <input
-                    type="text"
-                    formControlName="right"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                    placeholder="Corresponding match..."
-                  />
-                </div>
-
-                <!-- Remove Button -->
-                <div class="flex items-end">
-                  <button
-                    type="button"
-                    (click)="removePair(i)"
-                    [disabled]="pairs.length <= 1"
-                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition"
-                    title="Remove pair"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
+          <button
+            type="button"
+            (click)="openMatchingModal()"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+          >
+            <fa-icon [icon]="faArrowsAltH" class="mr-2"></fa-icon>Edit Matching
+          </button>
         </div>
       }
 
       <!-- Error Message -->
       @if (errorMessage()) {
         <div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-start gap-3">
-          <i class="fas fa-exclamation-triangle mt-0.5 flex-shrink-0"></i>
+          <fa-icon [icon]="faExclamationTriangle" class="mt-0.5 flex-shrink-0"></fa-icon>
           <div>{{ errorMessage() }}</div>
         </div>
       }
@@ -279,10 +234,11 @@
           [disabled]="form.invalid || isSaving() || (itemInput().type === 'mcq' && !hasAnyCorrect())"
           class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium"
         >
-          <i class="fas fa-save mr-2"></i>
+          <fa-icon [icon]="faSave" class="mr-2"></fa-icon>
           {{ isSaving() ? 'Saving...' : 'Save Changes' }}
         </button>
       </div>
     </form>
   </div>
 </div>
+

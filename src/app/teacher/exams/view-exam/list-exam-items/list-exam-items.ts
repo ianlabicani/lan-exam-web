@@ -7,7 +7,6 @@ import { EssayItem } from './ui/essay-item/essay-item';
 import { FillBlankItem } from './ui/fill-blank-item/fill-blank-item';
 import { ShortAnswerItem } from './ui/short-answer-item/short-answer-item';
 import { MatchingItem } from './ui/matching-item/matching-item';
-import { UpdateItem } from './update-item/update-item';
 import { DeleteItem } from './delete-item/delete-item';
 import { EssayFormModal } from './create-item/essay-form-modal/essay-form-modal';
 import { McqFormModal } from './create-item/mcq-form-modal/mcq-form-modal';
@@ -28,7 +27,6 @@ import { ExamApiService } from '../../../services/exam-api.service';
     FillBlankItem,
     ShortAnswerItem,
     MatchingItem,
-    UpdateItem,
     DeleteItem,
     EssayFormModal,
     McqFormModal,
@@ -47,9 +45,11 @@ export class ListExamItems implements OnInit {
   viewExamSvc = inject(ViewExamService);
   examApi = inject(ExamApiService);
 
-  isUpdateModalOpenSig = signal(false);
   selectedForUpdateSig = signal<ExamItem | null>(null);
   isDeleteModalOpenSig = signal(false);
+
+  // Edit modal state
+  selectedEditItemType = signal<string | null>(null);
 
   // Add question modal states by difficulty level
   addQuestionModalLevel = signal<'easy' | 'moderate' | 'difficult' | null>(
@@ -117,14 +117,21 @@ export class ListExamItems implements OnInit {
 
   ngOnInit(): void {}
 
-  openUpdateModal(item: ExamItem) {
+  openEditModal(item: ExamItem): void {
     this.selectedForUpdateSig.set(item);
-    this.isUpdateModalOpenSig.set(true);
+    this.selectedEditItemType.set(item.type);
   }
 
-  closeUpdateModal() {
+  closeEditModal(): void {
     this.selectedForUpdateSig.set(null);
-    this.isUpdateModalOpenSig.set(false);
+    this.selectedEditItemType.set(null);
+  }
+
+  isEditingItemType(type: string): boolean {
+    return (
+      this.selectedEditItemType() === type &&
+      this.selectedForUpdateSig() !== null
+    );
   }
 
   openDeleteModal(item: ExamItem) {

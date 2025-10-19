@@ -10,7 +10,7 @@ import { ExamItem } from '../../view-taken-exam/view-taken-exam';
   styleUrl: './exam-question.css',
 })
 export class ExamQuestion {
-  @Input() item!: ExamItem;
+  @Input() item!: IExamItem | ExamItem;
   @Input() index = 0;
   @Input() currentAnswer: any;
   @Output() answerChange = new EventEmitter<any>();

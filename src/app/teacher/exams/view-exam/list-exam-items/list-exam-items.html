@@ -56,7 +56,7 @@
                 <!-- Edit/Delete Actions -->
                 @if (exam?.status === 'draft') {
                   <div class="flex justify-end gap-2 mb-3">
-                    <button (click)="openUpdateModal(item)" class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition">Edit</button>
+                    <button (click)="openEditModal(item)" class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition">Edit</button>
                     <button (click)="openDeleteModal(item)" class="text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded transition">Delete</button>
                   </div>
                 }
@@ -141,7 +141,7 @@
                 <!-- Edit/Delete Actions -->
                 @if (exam?.status === 'draft') {
                   <div class="flex justify-end gap-2 mb-3">
-                    <button (click)="openUpdateModal(item)" class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition">Edit</button>
+                    <button (click)="openEditModal(item)" class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition">Edit</button>
                     <button (click)="openDeleteModal(item)" class="text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded transition">Delete</button>
                   </div>
                 }
@@ -226,7 +226,7 @@
                 <!-- Edit/Delete Actions -->
                 @if (exam?.status === 'draft') {
                   <div class="flex justify-end gap-2 mb-3">
-                    <button (click)="openUpdateModal(item)" class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition">Edit</button>
+                    <button (click)="openEditModal(item)" class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition">Edit</button>
                     <button (click)="openDeleteModal(item)" class="text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded transition">Delete</button>
                   </div>
                 }
@@ -261,20 +261,64 @@
     </div>
   </div>
 
-  <!-- Update Modal -->
-  @if (isUpdateModalOpenSig()) {
-    <app-update-item [itemInput]="selectedForUpdateSig()!" (close)="closeUpdateModal()"></app-update-item>
-  }
-
-  <!-- Delete Modal -->
-  @if (isDeleteModalOpenSig()) {
-    <app-delete-item [itemInput]="selectedForUpdateSig()!" [exam]="exam!" (close)="closeDeleteModal()"></app-delete-item>
-  }
-
   <!-- Add Question Modal -->
   <app-add-question-modal
     [isOpen]="addQuestionModalLevel() !== null"
     [level]="addQuestionModalLevel() || 'easy'"
     (typeSelected)="onQuestionTypeSelected($event)"
     (closeModal)="closeAddQuestionModal()"></app-add-question-modal>
+
+  <!-- Delete Modal -->
+  @if (isDeleteModalOpenSig()) {
+    <app-delete-item [itemInput]="selectedForUpdateSig()!" [exam]="exam!" (close)="closeDeleteModal()"></app-delete-item>
+  }
+
+  <!-- Edit Modals (with itemToEdit for all types) -->
+  <app-mcq-form-modal
+    [examId]="selectedForUpdateSig()?.exam_id ?? 0"
+    [isModalOpen]="isEditingItemType('mcq')"
+    [itemToEdit]="selectedForUpdateSig()"
+    (closeModal)="closeEditModal()"
+    (itemSaved)="closeEditModal()">
+  </app-mcq-form-modal>
+
+  <app-true-or-false-form-modal
+    [examId]="selectedForUpdateSig()?.exam_id ?? 0"
+    [isModalOpen]="isEditingItemType('truefalse')"
+    [itemToEdit]="selectedForUpdateSig()"
+    (closeModal)="closeEditModal()"
+    (itemSaved)="closeEditModal()">
+  </app-true-or-false-form-modal>
+
+  <app-essay-form-modal
+    [examId]="selectedForUpdateSig()?.exam_id ?? 0"
+    [isModalOpen]="isEditingItemType('essay')"
+    [itemToEdit]="selectedForUpdateSig()"
+    (closeModal)="closeEditModal()"
+    (itemSaved)="closeEditModal()">
+  </app-essay-form-modal>
+
+  <app-fill-blank-form-modal
+    [examId]="selectedForUpdateSig()?.exam_id ?? 0"
+    [isModalOpen]="isEditingItemType('fillblank')"
+    [itemToEdit]="selectedForUpdateSig()"
+    (closeModal)="closeEditModal()"
+    (itemSaved)="closeEditModal()">
+  </app-fill-blank-form-modal>
+
+  <app-short-answer-form-modal
+    [examId]="selectedForUpdateSig()?.exam_id ?? 0"
+    [isModalOpen]="isEditingItemType('shortanswer')"
+    [itemToEdit]="selectedForUpdateSig()"
+    (closeModal)="closeEditModal()"
+    (itemSaved)="closeEditModal()">
+  </app-short-answer-form-modal>
+
+  <app-matching-form-modal
+    [examId]="selectedForUpdateSig()?.exam_id ?? 0"
+    [isModalOpen]="isEditingItemType('matching')"
+    [itemToEdit]="selectedForUpdateSig()"
+    (closeModal)="closeEditModal()"
+    (itemSaved)="closeEditModal()">
+  </app-matching-form-modal>
 }

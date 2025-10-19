@@ -5,6 +5,7 @@ import {
   inject,
   OnInit,
   signal,
+  computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -15,10 +16,32 @@ import {
 } from '@angular/forms';
 import { ExamItem, ViewExamService, Pair } from '../../view-exam.service';
 import { ExamItemApiService } from '../../../../services/exam-item-api.service';
+import { MatchingFormModal } from '../create-item/matching-form-modal/matching-form-modal';
+import {
+  faQuestionCircle,
+  faExclamationCircle,
+  faStar,
+  faList,
+  faPlus,
+  faTrashAlt,
+  faInfoCircle,
+  faToggleOn,
+  faKeyboard,
+  faLightbulb,
+  faArrowsAltH,
+  faSave,
+  faExclamationTriangle,
+} from '@fortawesome/free-solid-svg-icons';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-update-item',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FaIconComponent,
+    MatchingFormModal,
+  ],
   templateUrl: './update-item.html',
   styleUrl: './update-item.css',
 })
@@ -32,6 +55,23 @@ export class UpdateItem implements OnInit {
   viewExamSvc = inject(ViewExamService);
   isSaving = signal(false);
   errorMessage = signal<string | null>(null);
+  isMatchingModalOpen = signal(false);
+  isMatchingType = computed(() => this.itemInput().type === 'matching');
+
+  // FontAwesome icons
+  faQuestionCircle = faQuestionCircle;
+  faExclamationCircle = faExclamationCircle;
+  faStar = faStar;
+  faList = faList;
+  faPlus = faPlus;
+  faTrashAlt = faTrashAlt;
+  faInfoCircle = faInfoCircle;
+  faToggleOn = faToggleOn;
+  faKeyboard = faKeyboard;
+  faLightbulb = faLightbulb;
+  faArrowsAltH = faArrowsAltH;
+  faSave = faSave;
+  faExclamationTriangle = faExclamationTriangle;
 
   // note: `type` is intentionally NOT editable here — keep original item type
   form = this.fb.nonNullable.group({
@@ -40,7 +80,6 @@ export class UpdateItem implements OnInit {
     options: this.fb.array([]) as FormArray,
     answer: [null],
     expected_answer: [''],
-    pairs: this.fb.array([]) as FormArray,
   });
 
   readonly MAX_OPTIONS = 6;
@@ -62,15 +101,10 @@ export class UpdateItem implements OnInit {
 
     // clear any existing arrays
     while (this.options.length) this.options.removeAt(0);
-    while (this.pairs.length) this.pairs.removeAt(0);
 
     // Load type-specific data
     if (it.type === 'mcq' && it.options?.length) {
       it.options.forEach((o) => this.options.push(this.createOption(o)));
-    }
-
-    if (it.type === 'matching' && it.pairs?.length) {
-      it.pairs.forEach((p) => this.pairs.push(this.createPair(p)));
     }
   }
 
@@ -78,21 +112,10 @@ export class UpdateItem implements OnInit {
     return this.form.get('options') as FormArray;
   }
 
-  get pairs() {
-    return this.form.get('pairs') as FormArray;
-  }
-
   createOption(opt?: { text: string; correct: boolean }) {
     return this.fb.group({
       text: [opt?.text || '', Validators.required],
       correct: [opt?.correct || false],
-    });
-  }
-
-  createPair(p?: Pair) {
-    return this.fb.group({
-      left: [p?.left || '', Validators.required],
-      right: [p?.right || '', Validators.required],
     });
   }
 
@@ -105,16 +128,6 @@ export class UpdateItem implements OnInit {
   removeOption(index: number) {
     if (this.options.length > this.MIN_OPTIONS) {
       this.options.removeAt(index);
-    }
-  }
-
-  addPair() {
-    this.pairs.push(this.createPair());
-  }
-
-  removePair(index: number) {
-    if (this.pairs.length > 1) {
-      this.pairs.removeAt(index);
     }
   }
 
@@ -131,6 +144,16 @@ export class UpdateItem implements OnInit {
   // Template helpers for form group casting
   asFormGroup(control: any) {
     return control;
+  }
+
+  openMatchingModal() {
+    this.isMatchingModalOpen.set(true);
+  }
+
+  onMatchingItemSaved(item: ExamItem) {
+    this.itemSaved.emit(item);
+    this.isMatchingModalOpen.set(false);
+    this.close.emit();
   }
 
   save() {
@@ -176,9 +199,6 @@ export class UpdateItem implements OnInit {
         break;
       case 'shortanswer':
         payload.expected_answer = raw.expected_answer || null;
-        break;
-      case 'matching':
-        payload.pairs = raw.pairs || [];
         break;
     }
 

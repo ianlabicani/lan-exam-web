@@ -60,15 +60,18 @@ export class MatchingFormModal {
   faExclamationTriangle = faExclamationTriangle;
   faSave = faSave;
 
-  level = input.required<'easy' | 'moderate' | 'difficult'>();
+  level = input<'easy' | 'moderate' | 'difficult'>('moderate');
   examId = input.required<number>();
   isModalOpen = input.required<boolean>();
+  itemToEdit = input<ExamItem | null>(null);
   openModal = output<void>();
   closeModal = output<void>();
+  itemSaved = output<ExamItem>();
 
   isSaving = signal(false);
   errorMessage = signal<string | null>(null);
   pairCount = signal(2);
+  isEditMode = computed(() => !!this.itemToEdit());
 
   form = this.fb.nonNullable.group({
     question: ['', [Validators.required, Validators.minLength(3)]],
@@ -88,11 +91,55 @@ export class MatchingFormModal {
   }
 
   constructor() {
+    // Load form data when item to edit changes
+    effect(() => {
+      const item = this.itemToEdit();
+      if (item) {
+        this.loadItemData(item);
+      } else {
+        this.resetForm();
+      }
+    });
+
     // Auto-update points when pairs change
     effect(() => {
       const pairCount = this.pairCount();
       this.form.get('points')?.setValue(pairCount, { emitEvent: false });
     });
+  }
+
+  loadItemData(item: ExamItem) {
+    this.form.patchValue({
+      question: item.question,
+      points: item.points,
+    });
+
+    // Clear existing pairs
+    while (this.pairs.length) this.pairs.removeAt(0);
+
+    // Load pairs from item
+    if (item.pairs && Array.isArray(item.pairs)) {
+      item.pairs.forEach((p: any) => {
+        this.pairs.push(
+          this.fb.nonNullable.group({
+            left: [p.left || '', Validators.required],
+            right: [p.right || '', Validators.required],
+          })
+        );
+      });
+    } else {
+      this.pairs.push(this.createPair());
+      this.pairs.push(this.createPair());
+    }
+
+    this.pairCount.set(this.pairs.length);
+  }
+
+  resetForm() {
+    this.form.reset({ question: '', points: 2 });
+    while (this.pairs.length) this.pairs.removeAt(0);
+    this.initialPairs().forEach((p) => this.pairs.push(p));
+    this.pairCount.set(2);
   }
 
   createPair() {
@@ -131,19 +178,31 @@ export class MatchingFormModal {
       level: this.level(),
     };
 
-    this.examItemApi.create(examId, payload).subscribe({
-      next: (res: { data: ExamItem }) => {
-        this.viewExamSvc.addItem(res.data);
+    const isEdit = this.isEditMode();
+    const itemId = isEdit ? this.itemToEdit()?.id : null;
 
-        this.form.reset({ question: '', points: 2 });
-        while (this.pairs.length) this.pairs.removeAt(0);
-        this.initialPairs().forEach((p) => this.pairs.push(p));
-        this.pairCount.set(2);
+    (isEdit && itemId
+      ? this.examItemApi.updateItem(examId, itemId, payload)
+      : this.examItemApi.create(examId, payload)
+    ).subscribe({
+      next: (res: { data: ExamItem }) => {
+        const item = res.data;
+
+        if (isEdit) {
+          this.viewExamSvc.updateItem(item);
+        } else {
+          this.viewExamSvc.addItem(item);
+        }
+
+        this.itemSaved.emit(item);
+        this.resetForm();
         this.isSaving.set(false);
         this.closeModal.emit();
       },
       error: (err: any) => {
-        this.errorMessage.set(err?.error?.message || 'Failed to add Matching');
+        this.errorMessage.set(
+          err?.error?.message || 'Failed to save matching question'
+        );
         this.isSaving.set(false);
       },
     });

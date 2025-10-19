@@ -6,6 +6,8 @@ import {
   input,
   output,
   signal,
+  computed,
+  effect,
 } from '@angular/core';
 import {
   FormArray,
@@ -18,10 +20,23 @@ import {
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../../environments/environment.development';
 import { ExamItemApiService } from '../../../../../services/exam-item-api.service';
+import { CommonModule } from '@angular/common';
+import {
+  faQuestionCircle,
+  faStar,
+  faList,
+  faPlus,
+  faTrashAlt,
+  faExclamationCircle,
+  faExclamationTriangle,
+  faSave,
+  faInfoCircle,
+} from '@fortawesome/free-solid-svg-icons';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-mcq-form-modal',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule, FaIconComponent],
   templateUrl: './mcq-form-modal.html',
   styleUrl: './mcq-form-modal.css',
 })
@@ -31,13 +46,27 @@ export class McqFormModal implements OnInit {
   examItemApi = inject(ExamItemApiService);
   viewExamSvc = inject(ViewExamService);
 
-  level = input.required<'easy' | 'moderate' | 'difficult'>();
+  // FontAwesome icons
+  faQuestionCircle = faQuestionCircle;
+  faStar = faStar;
+  faList = faList;
+  faPlus = faPlus;
+  faTrashAlt = faTrashAlt;
+  faExclamationCircle = faExclamationCircle;
+  faExclamationTriangle = faExclamationTriangle;
+  faSave = faSave;
+  faInfoCircle = faInfoCircle;
+
+  level = input<'easy' | 'moderate' | 'difficult'>('moderate');
   examId = input.required<number>();
+  itemToEdit = input<ExamItem | null>(null);
   isSaving = signal(false);
   errorMessage = signal<string | null>(null);
   isModalOpen = input.required<boolean>();
   openModal = output<void>();
   closeModal = output<void>();
+  itemSaved = output<ExamItem>();
+  isEditMode = computed(() => !!this.itemToEdit());
 
   readonly String = String;
   readonly MIN_OPTIONS = 2;
@@ -55,9 +84,51 @@ export class McqFormModal implements OnInit {
     return this.mcqForm.get('options') as any;
   }
 
+  constructor() {
+    effect(() => {
+      const item = this.itemToEdit();
+      if (item) {
+        this.loadItemData(item);
+      } else {
+        this.resetForm();
+      }
+    });
+  }
+
   ngOnInit(): void {
+    // Initialize if not in edit mode
+    if (!this.isEditMode()) {
+      this.resetForm();
+    }
+  }
+
+  loadItemData(item: ExamItem) {
+    this.mcqForm.patchValue({
+      question: item.question,
+      points: item.points,
+    });
+
+    // Clear existing options
+    while (this.options.length) this.options.removeAt(0);
+
+    // Load options from item
+    if (item.options && Array.isArray(item.options)) {
+      item.options.forEach((opt: any) => {
+        this.options.push(
+          this.createOption(opt.text || '', opt.correct || false)
+        );
+      });
+    } else {
+      this.resetForm();
+    }
+  }
+
+  resetForm() {
+    this.mcqForm.reset({ question: '', points: 1 });
+    while (this.options.length) this.options.removeAt(0);
     this.addOption();
     this.addOption();
+    this.mcqForm.markAsPristine();
   }
 
   private createOption(text = '', correct = false) {
@@ -101,22 +172,29 @@ export class McqFormModal implements OnInit {
     };
 
     const examId = this.examId();
-    this.examItemApi.create(examId, payload).subscribe({
+    const isEdit = this.isEditMode();
+    const itemId = isEdit ? this.itemToEdit()?.id : null;
+
+    (isEdit && itemId
+      ? this.examItemApi.updateItem(examId, itemId, payload)
+      : this.examItemApi.create(examId, payload)
+    ).subscribe({
       next: (res: { data: ExamItem }) => {
-        this.viewExamSvc.addItem(res.data);
+        const item = res.data;
 
-        // Reset form
-        this.mcqForm.reset({ question: '', points: 1 });
-        while (this.options.length) this.options.removeAt(0);
-        this.addOption();
-        this.addOption();
-        this.mcqForm.markAsPristine();
+        if (isEdit) {
+          this.viewExamSvc.updateItem(item);
+        } else {
+          this.viewExamSvc.addItem(item);
+        }
 
+        this.itemSaved.emit(item);
+        this.resetForm();
         this.isSaving.set(false);
         this.closeModal.emit();
       },
       error: (err: any) => {
-        this.errorMessage.set(err?.error?.message || 'Failed to add MCQ');
+        this.errorMessage.set(err?.error?.message || 'Failed to save MCQ');
         this.isSaving.set(false);
       },
     });
@@ -124,6 +202,10 @@ export class McqFormModal implements OnInit {
 
   hasAnyCorrect(): boolean {
     return this.options.controls.some((c) => !!c.get('correct')!.value);
+  }
+
+  asFormGroup(control: any) {
+    return control;
   }
 }
 
