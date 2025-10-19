@@ -133,12 +133,6 @@ export class ViewExam implements OnInit {
     }
   });
 
-  // Stats computed signals
-  totalQuestions = computed(() => {
-    const exam = this.exam();
-    return exam?.items?.length ?? 0;
-  });
-
   totalTakers = computed(() => {
     const exam = this.exam();
     // TODO: Calculate from taken_exams when available
