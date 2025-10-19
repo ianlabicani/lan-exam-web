@@ -53,8 +53,16 @@ export class ViewExamService {
     this.currentViewingExam.update((prev) => {
       if (!prev) return null;
 
-      const examItems = (prev?.items ?? []).filter((i) => i.id !== id);
-      return { ...prev, items: examItems };
+      const examItems = (prev?.items ?? []).filter((i) => {
+        if (i.id !== id) return true;
+        prev.total_points -= i.points;
+        return false;
+      });
+      const updatedExam = {
+        ...prev,
+        items: examItems,
+      };
+      return updatedExam;
     });
   }
 
@@ -63,7 +71,12 @@ export class ViewExamService {
       if (!prev) return null;
 
       const examItems = [...(prev?.items ?? []), item];
-      return { ...prev, items: examItems };
+      const updatedExam = {
+        ...prev,
+        items: examItems,
+        total_points: prev.total_points + item.points,
+      };
+      return updatedExam;
     });
   }
 
@@ -71,9 +84,12 @@ export class ViewExamService {
     this.currentViewingExam.update((prev) => {
       if (!prev) return null;
 
-      const examItems = (prev?.items ?? []).map((i) =>
-        i.id === updatedItem.id ? updatedItem : i
-      );
+      const examItems = (prev?.items ?? []).map((i) => {
+        if (updatedItem.id !== i.id) return i;
+        const pointsDiff = updatedItem.points - i.points;
+        prev.total_points += pointsDiff;
+        return updatedItem;
+      });
       return { ...prev, items: examItems };
     });
   }
