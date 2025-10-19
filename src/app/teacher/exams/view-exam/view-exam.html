@@ -55,115 +55,178 @@
 
       <!-- Page Header -->
       <div class="mb-8">
+        <a routerLink="/teacher/exams" class="text-gray-600 hover:text-gray-900 transition">
+          <fa-icon [icon]="faArrowLeft" class="text-xl"></fa-icon>
+        </a>
         <div class="flex items-center space-x-4 mb-4">
           <!-- Back Button -->
-          <a routerLink="/teacher/exams" class="text-gray-600 hover:text-gray-900 transition">
-            <fa-icon [icon]="faArrowLeft" class="text-xl"></fa-icon>
-          </a>
 
           <!-- Main Content -->
           <div class="flex-1">
-            <!-- Title and Status Badge -->
-            <div class="flex items-center space-x-3 mb-3">
+            <!-- Title and Status Timeline -->
+            <div class="flex items-center space-x-3 mb-6">
               <h1 class="text-3xl font-bold text-gray-900">{{ examSig.title }}</h1>
+              <!-- Description -->
+              <p class="text-gray-600 mt-2">{{ examSig.description }}</p>
 
-            <!-- Status Badge with Icon -->
-              @if(examSig.status === 'draft') {
-                <span class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-bold rounded-lg inline-flex items-center gap-2 shadow-md border-2 border-gray-400">
-                  <fa-icon [icon]="faPencilAlt" class="text-lg"></fa-icon>
-                  <span>Draft</span>
-                </span>
-              } @else if(examSig.status === 'ready') {
-                <span class="px-4 py-2 bg-amber-400 text-amber-900 text-base font-bold rounded-lg inline-flex items-center gap-2 shadow-md border-2 border-amber-500">
-                  <fa-icon [icon]="faCheckSquare" class="text-lg"></fa-icon>
-                  <span>Ready</span>
-                </span>
-              } @else if(examSig.status === 'published') {
-                <span class="px-4 py-2 bg-green-500 text-white text-base font-bold rounded-lg inline-flex items-center gap-2 shadow-md border-2 border-green-600">
-                  <fa-icon [icon]="faCheckCircle" class="text-lg"></fa-icon>
-                  <span>Published</span>
-                </span>
-              } @else if(examSig.status === 'ongoing') {
-                <span class="px-4 py-2 bg-blue-500 text-white text-base font-bold rounded-lg inline-flex items-center gap-2 shadow-lg border-2 border-blue-600 animate-pulse">
-                  <fa-icon [icon]="faClipboardCheck" class="text-lg"></fa-icon>
-                  <span>Ongoing</span>
-                </span>
-              } @else if(examSig.status === 'closed') {
-                <span class="px-4 py-2 bg-orange-500 text-white text-base font-bold rounded-lg inline-flex items-center gap-2 shadow-md border-2 border-orange-600">
-                  <fa-icon [icon]="faLock" class="text-lg"></fa-icon>
-                  <span>Closed</span>
-                </span>
-              } @else if(examSig.status === 'graded') {
-                <span class="px-4 py-2 bg-indigo-500 text-white text-base font-bold rounded-lg inline-flex items-center gap-2 shadow-md border-2 border-indigo-600">
-                  <fa-icon [icon]="faClipboardList" class="text-lg"></fa-icon>
-                  <span>Graded</span>
-                </span>
-              } @else if(examSig.status === 'archived') {
-                <span class="px-4 py-2 bg-red-500 text-white text-base font-bold rounded-lg inline-flex items-center gap-2 shadow-md border-2 border-red-600 opacity-75">
-                  <fa-icon [icon]="faArchive" class="text-lg"></fa-icon>
-                  <span>Archived</span>
-                </span>
-              }
-            </div>
+              <!-- Date and Time Summary -->
+              <div class="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-700">
+                @if(examSig.starts_at) {
+                  <div class="flex items-center gap-2">
+                    <fa-icon [icon]="faCalendar" class="text-indigo-600"></fa-icon>
+                    <span class="font-medium">{{ examSig.starts_at | date: 'MMM dd, yyyy' }}</span>
+                  </div>
+                }
+                @if(examSig.starts_at) {
+                  <div class="flex items-center gap-2">
+                    <fa-icon [icon]="faClock" class="text-blue-600"></fa-icon>
+                    <span class="font-medium">{{ examSig.starts_at | date: 'h:mm a' }} - {{ examSig.ends_at | date: 'h:mm a' }}</span>
+                  </div>
+                }
+              </div>
 
-            <!-- Description -->
-            <p class="text-gray-600 mt-2">{{ examSig.description }}</p>
-
-            <!-- Date and Time Summary -->
-            <div class="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-700">
-              @if(examSig.starts_at) {
-                <div class="flex items-center gap-2">
-                  <fa-icon [icon]="faCalendar" class="text-indigo-600"></fa-icon>
-                  <span class="font-medium">{{ examSig.starts_at | date: 'MMM dd, yyyy' }}</span>
-                </div>
-              }
-              @if(examSig.starts_at) {
-                <div class="flex items-center gap-2">
-                  <fa-icon [icon]="faClock" class="text-blue-600"></fa-icon>
-                  <span class="font-medium">{{ examSig.starts_at | date: 'h:mm a' }} - {{ examSig.ends_at | date: 'h:mm a' }}</span>
-                </div>
-              }
-            </div>
-
-            <!-- Year and Sections Summary -->
-            <div class="flex flex-wrap items-center gap-3 mt-3">
-              @if(examSig.year && examSig.year.length > 0) {
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-medium text-gray-500 uppercase">
-                    <fa-icon [icon]="faGraduationCap" class="mr-1"></fa-icon>Year:
-                  </span>
-                  @for(y of examSig.year; track $index) {
-                    <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded">
-                      {{ y }}
+              <!-- Year and Sections Summary -->
+              <div class="flex flex-wrap items-center gap-3 mt-3">
+                @if(examSig.year && examSig.year.length > 0) {
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-medium text-gray-500 uppercase">
+                      <fa-icon [icon]="faGraduationCap" class="mr-1"></fa-icon>Year:
                     </span>
-                  }
-                </div>
-              }
+                    @for(y of examSig.year; track $index) {
+                      <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded">
+                        {{ y }}
+                      </span>
+                    }
+                  </div>
+                }
 
-              @if(examSig.sections && examSig.sections.length > 0) {
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-medium text-gray-500 uppercase">
-                    <fa-icon [icon]="faChalkboardUser" class="mr-1"></fa-icon>Section:
-                  </span>
-                  @for(section of examSig.sections; track $index) {
-                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded uppercase">
-                      {{ section }}
+                @if(examSig.sections && examSig.sections.length > 0) {
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-medium text-gray-500 uppercase">
+                      <fa-icon [icon]="faChalkboardUser" class="mr-1"></fa-icon>Section:
                     </span>
-                  }
-                </div>
-              }
+                    @for(section of examSig.sections; track $index) {
+                      <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded uppercase">
+                        {{ section }}
+                      </span>
+                    }
+                  </div>
+                }
+              </div>
             </div>
-          </div>
 
-          <!-- Action Buttons -->
-          <div class="flex space-x-2">
-            <button
-              type="button"
-              (click)="openStatusModal()"
-              class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200 inline-flex items-center gap-2">
-              <fa-icon [icon]="faSync"></fa-icon>
-              <span>Update Status</span>
-            </button>
+            <!-- Status Timeline -->
+            <div class="mb-6">
+              <div class="flex items-center justify-between gap-2">
+                <!-- Draft -->
+                <div class="flex flex-col items-center flex-1">
+                  <div
+                    [class.bg-yellow-500]="examSig.status === 'draft' || ['ready', 'published', 'ongoing', 'closed', 'graded', 'archived'].includes(examSig.status)"
+                    [class.bg-gray-300]="!examSig.status || examSig.status === 'draft'"
+                    class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mb-2 transition">
+                    <fa-icon [icon]="faPencil"></fa-icon>
+                  </div>
+                  <span class="text-xs font-medium text-gray-700 text-center">Draft</span>
+                </div>
+
+                <!-- Connector -->
+                <div [class.bg-blue-400]="['ready', 'published', 'ongoing', 'closed', 'graded', 'archived'].includes(examSig.status)" class="h-1 flex-1 bg-gray-300 mb-6"></div>
+
+                <!-- Ready -->
+                <div class="flex flex-col items-center flex-1">
+                  <div
+                    [class.bg-blue-500]="examSig.status === 'ready' || ['published', 'ongoing', 'closed', 'graded', 'archived'].includes(examSig.status)"
+                    [class.bg-gray-300]="!['ready', 'published', 'ongoing', 'closed', 'graded', 'archived'].includes(examSig.status)"
+                    class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mb-2 transition">
+                    <fa-icon [icon]="faCheckSquare"></fa-icon>
+                  </div>
+                  <span class="text-xs font-medium text-gray-700 text-center">Ready</span>
+                </div>
+
+                <!-- Connector -->
+                <div [class.bg-green-400]="['published', 'ongoing', 'closed', 'graded', 'archived'].includes(examSig.status)" class="h-1 flex-1 bg-gray-300 mb-6"></div>
+
+                <!-- Published -->
+                <div class="flex flex-col items-center flex-1">
+                  <div
+                    [class.bg-green-500]="examSig.status === 'published' || ['ongoing', 'closed', 'graded', 'archived'].includes(examSig.status)"
+                    [class.bg-gray-300]="!['published', 'ongoing', 'closed', 'graded', 'archived'].includes(examSig.status)"
+                    class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mb-2 transition">
+                    <fa-icon [icon]="faCheckCircle"></fa-icon>
+                  </div>
+                  <span class="text-xs font-medium text-gray-700 text-center">Published</span>
+                </div>
+
+                <!-- Connector -->
+                <div [class.bg-purple-400]="['ongoing', 'closed', 'graded', 'archived'].includes(examSig.status)" class="h-1 flex-1 bg-gray-300 mb-6"></div>
+
+                <!-- Ongoing -->
+                <div class="flex flex-col items-center flex-1">
+                  <div
+                    [class.bg-purple-500]="examSig.status === 'ongoing' || ['closed', 'graded', 'archived'].includes(examSig.status)"
+                    [class.bg-gray-300]="!['ongoing', 'closed', 'graded', 'archived'].includes(examSig.status)"
+                    [class.animate-pulse]="examSig.status === 'ongoing'"
+                    class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mb-2 transition">
+                    <fa-icon [icon]="faList"></fa-icon>
+                  </div>
+                  <span class="text-xs font-medium text-gray-700 text-center">Ongoing</span>
+                </div>
+
+                <!-- Connector -->
+                <div [class.bg-orange-400]="['closed', 'graded', 'archived'].includes(examSig.status)" class="h-1 flex-1 bg-gray-300 mb-6"></div>
+
+                <!-- Closed -->
+                <div class="flex flex-col items-center flex-1">
+                  <div
+                    [class.bg-orange-500]="examSig.status === 'closed' || ['graded', 'archived'].includes(examSig.status)"
+                    [class.bg-gray-300]="!['closed', 'graded', 'archived'].includes(examSig.status)"
+                    class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mb-2 transition">
+                    <fa-icon [icon]="faLock"></fa-icon>
+                  </div>
+                  <span class="text-xs font-medium text-gray-700 text-center">Closed</span>
+                </div>
+
+                <!-- Connector -->
+                <div [class.bg-cyan-400]="['graded', 'archived'].includes(examSig.status)" class="h-1 flex-1 bg-gray-300 mb-6"></div>
+
+                <!-- Graded -->
+                <div class="flex flex-col items-center flex-1">
+                  <div
+                    [class.bg-cyan-500]="examSig.status === 'graded' || examSig.status === 'archived'"
+                    [class.bg-gray-300]="!['graded', 'archived'].includes(examSig.status)"
+                    class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mb-2 transition">
+                    <fa-icon [icon]="faStar"></fa-icon>
+                  </div>
+                  <span class="text-xs font-medium text-gray-700 text-center">Graded</span>
+                </div>
+
+                <!-- Connector -->
+                <div [class.bg-red-400]="examSig.status === 'archived'" class="h-1 flex-1 bg-gray-300 mb-6"></div>
+
+                <!-- Archived -->
+                <div class="flex flex-col items-center flex-1">
+                  <div
+                    [class.bg-red-500]="examSig.status === 'archived'"
+                    [class.bg-gray-300]="examSig.status !== 'archived'"
+                    [class.opacity-75]="examSig.status === 'archived'"
+                    class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mb-2 transition">
+                    <fa-icon [icon]="faArchive"></fa-icon>
+                  </div>
+                  <span class="text-xs font-medium text-gray-700 text-center">Archived</span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex space-x-2">
+                  <button
+                    type="button"
+                    (click)="openStatusModal()"
+                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200 inline-flex items-center gap-2">
+                    <fa-icon [icon]="faSync"></fa-icon>
+                    <span>Update Status</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
