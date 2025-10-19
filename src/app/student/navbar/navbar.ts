@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { LogoutButton } from '../../auth/logout-button/logout-button';
@@ -14,6 +14,8 @@ export class Navbar {
   router = inject(Router);
 
   userSig = this.authService.currentUser;
+  mobileMenuOpen = signal(false);
+
   initials = computed(() => {
     const u = this.userSig()?.user;
     if (!u || !u.name) return 'NA';
@@ -23,6 +25,14 @@ export class Navbar {
       .map((p) => p[0]?.toUpperCase() || '')
       .join('');
   });
+
+  toggleMobileMenu() {
+    this.mobileMenuOpen.update((v) => !v);
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen.set(false);
+  }
 
   logout() {
     this.authService.logout();
