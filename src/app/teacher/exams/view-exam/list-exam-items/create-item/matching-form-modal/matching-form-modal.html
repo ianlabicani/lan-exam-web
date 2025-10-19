@@ -23,7 +23,7 @@
         <!-- Question / Instructions -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">
-            <i class="fas fa-question-circle text-indigo-600 mr-2"></i>Question / Instructions *
+            <fa-icon [icon]="faQuestionCircle" class="text-indigo-600 mr-2"></fa-icon>Question / Instructions *
           </label>
           <textarea
             formControlName="question"
@@ -33,7 +33,7 @@
           ></textarea>
           @if (form.get('question')?.invalid && form.get('question')?.touched) {
             <p class="text-red-500 text-sm mt-2">
-              <i class="fas fa-exclamation-circle mr-1"></i>
+              <fa-icon [icon]="faExclamationTriangle" class="mr-1"></fa-icon>
               Question is required (minimum 3 characters).
             </p>
           }
@@ -43,7 +43,7 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-star text-indigo-600 mr-2"></i>Points (Auto-calculated) *
+              <fa-icon [icon]="faStar" class="text-indigo-600 mr-2"></fa-icon>Points (Auto-calculated) *
             </label>
             <input
               type="number"
@@ -52,13 +52,13 @@
               title="Points are automatically set to the number of pairs (1 point per pair)"
             />
             <p class="text-xs text-gray-500 mt-1">
-              <i class="fas fa-info-circle mr-1"></i>
+              <fa-icon [icon]="faInfoCircle" class="mr-1"></fa-icon>
               1 point per pair
             </p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-signal text-indigo-600 mr-2"></i>Difficulty *
+              <fa-icon [icon]="faSignal" class="text-indigo-600 mr-2"></fa-icon>Difficulty *
             </label>
             <select
               class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
@@ -74,10 +74,10 @@
         <!-- Matching Pairs -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-3">
-            <i class="fas fa-link text-indigo-600 mr-2"></i>Matching Pairs *
+            <fa-icon [icon]="faLink" class="text-indigo-600 mr-2"></fa-icon>Matching Pairs *
           </label>
           <p class="text-xs text-gray-500 mb-4">
-            <i class="fas fa-info-circle mr-1"></i>
+            <fa-icon [icon]="faInfoCircle" class="mr-1"></fa-icon>
             Create pairs where students will match items from the left column with the correct items from the right column.
             The right column items will be shuffled for students.
           </p>
@@ -85,10 +85,10 @@
           <!-- Column Headers -->
           <div class="grid grid-cols-2 gap-4 mb-3">
             <div class="text-sm font-semibold text-indigo-700">
-              <i class="fas fa-arrow-left mr-1"></i>Left Side (Questions/Terms)
+              <fa-icon [icon]="faArrowLeft" class="mr-1"></fa-icon>Left Side (Questions/Terms)
             </div>
             <div class="text-sm font-semibold text-emerald-700">
-              <i class="fas fa-arrow-right mr-1"></i>Right Side (Answers/Matches)
+              <fa-icon [icon]="faArrowRight" class="mr-1"></fa-icon>Right Side (Answers/Matches)
             </div>
           </div>
 
@@ -102,7 +102,7 @@
                   placeholder="e.g., Apple"
                   class="flex-1 px-4 py-2 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-indigo-50 outline-none transition"
                 />
-                <i class="fas fa-arrows-alt-h text-gray-400"></i>
+                <fa-icon [icon]="faArrowsAltH" class="text-gray-400"></fa-icon>
                 <input
                   type="text"
                   formControlName="right"
@@ -116,7 +116,7 @@
                     class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
                     title="Remove pair"
                   >
-                    <i class="fas fa-times"></i>
+                    <fa-icon [icon]="faTimes"></fa-icon>
                   </button>
                 }
               </div>
@@ -129,14 +129,14 @@
             (click)="addPair()"
             class="mt-4 text-indigo-600 hover:text-indigo-700 text-sm font-medium transition"
           >
-            <i class="fas fa-plus-circle mr-1"></i>Add Another Pair
+            <fa-icon [icon]="faPlusCircle" class="mr-1"></fa-icon>Add Another Pair
           </button>
         </div>
 
         <!-- Error Message -->
         @if (errorMessage()) {
           <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-start gap-3">
-            <i class="fas fa-exclamation-triangle mt-0.5 flex-shrink-0"></i>
+            <fa-icon [icon]="faExclamationTriangle" class="mt-0.5 flex-shrink-0"></fa-icon>
             <div>{{ errorMessage() }}</div>
           </div>
         }
@@ -155,7 +155,7 @@
             [disabled]="form.invalid || isSaving()"
             class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium"
           >
-            <i class="fas fa-save mr-2"></i>
+            <fa-icon [icon]="faSave" class="mr-2"></fa-icon>
             {{ isSaving() ? 'Saving...' : 'Save Question' }}
           </button>
         </div>

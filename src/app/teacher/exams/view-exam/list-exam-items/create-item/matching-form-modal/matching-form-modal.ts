@@ -18,10 +18,25 @@ import { CommonModule } from '@angular/common';
 import { environment } from '../../../../../../../environments/environment.development';
 import { ExamItem, ViewExamService } from '../../../view-exam.service';
 import { ExamItemApiService } from '../../../../../services/exam-item-api.service';
+import {
+  faQuestionCircle,
+  faStar,
+  faSignal,
+  faLink,
+  faArrowLeft,
+  faArrowRight,
+  faInfoCircle,
+  faArrowsAltH,
+  faTimes,
+  faPlusCircle,
+  faExclamationTriangle,
+  faSave,
+} from '@fortawesome/free-solid-svg-icons';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-matching-form-modal',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, FaIconComponent],
   templateUrl: './matching-form-modal.html',
   styleUrl: './matching-form-modal.css',
 })
@@ -30,6 +45,20 @@ export class MatchingFormModal {
   http = inject(HttpClient);
   examItemApi = inject(ExamItemApiService);
   viewExamSvc = inject(ViewExamService);
+
+  // FontAwesome icons
+  faQuestionCircle = faQuestionCircle;
+  faStar = faStar;
+  faSignal = faSignal;
+  faLink = faLink;
+  faArrowLeft = faArrowLeft;
+  faArrowRight = faArrowRight;
+  faInfoCircle = faInfoCircle;
+  faArrowsAltH = faArrowsAltH;
+  faTimes = faTimes;
+  faPlusCircle = faPlusCircle;
+  faExclamationTriangle = faExclamationTriangle;
+  faSave = faSave;
 
   level = input.required<'easy' | 'moderate' | 'difficult'>();
   examId = input.required<number>();
