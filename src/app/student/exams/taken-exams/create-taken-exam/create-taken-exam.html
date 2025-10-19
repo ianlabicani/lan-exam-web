@@ -2,7 +2,6 @@
 @let examItemsSig = examItems();
 @let activityEventsList = activityEvents();
 @let summary = activitySummary();
-@let currentQuestionIndexSig = currentQuestionIndex();
 
 <div class="min-h-screen bg-gray-100 py-8" (window:beforeunload)="handleBeforeUnload($event)">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -23,142 +22,77 @@
         />
       </app-exam-header>
 
-      <!-- Main Content Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- Question Navigation Sidebar -->
-        <div class="lg:col-span-1">
-          <div class="bg-white rounded-xl shadow-md p-6 sticky top-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-4">
-              <i class="fas fa-list text-indigo-600 mr-2"></i>Questions
-            </h3>
+      <!-- Main Content -->
+      <div class="grid grid-cols-1 gap-6">
+        <!-- Questions List -->
+        <div class="space-y-6">
+          @for (item of examItemsSig; track item.id; let idx = $index) {
+            <div class="bg-white rounded-xl shadow-md p-8">
+              <!-- Question Header -->
+              <div class="flex items-start justify-between mb-6">
+                <div class="flex-1">
+                  <span class="text-sm font-semibold text-indigo-600 uppercase tracking-wide">
+                    Question <span>{{ idx + 1 }}</span> of <span>{{ examItemsSig.length }}</span>
+                  </span>
+                  <h2 class="text-xl font-bold text-gray-900 mt-2">{{ item.question }}</h2>
+                </div>
+                <div class="ml-4">
+                  <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded-full">
+                    <i class="fas fa-star mr-1"></i>{{ item.points }} pts
+                  </span>
+                </div>
+              </div>
 
-            <!-- Question Grid -->
-            <div class="grid grid-cols-5 lg:grid-cols-4 gap-2 mb-6">
-              @for (item of examItemsSig; track item.id; let idx = $index) {
-                <button
-                  (click)="goToQuestion(idx)"
-                  [class.bg-indigo-600]="currentQuestionIndexSig === idx"
-                  [class.text-white]="currentQuestionIndexSig === idx"
-                  [class.bg-green-100]="currentQuestionIndexSig !== idx && answers()[item.id]"
-                  [class.text-green-700]="currentQuestionIndexSig !== idx && answers()[item.id]"
-                  [class.hover:bg-green-200]="currentQuestionIndexSig !== idx && answers()[item.id]"
-                  [class.bg-gray-100]="currentQuestionIndexSig !== idx && !answers()[item.id]"
-                  [class.text-gray-700]="currentQuestionIndexSig !== idx && !answers()[item.id]"
-                  [class.hover:bg-gray-200]="currentQuestionIndexSig !== idx && !answers()[item.id]"
-                  class="aspect-square rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center"
-                >
-                  {{ idx + 1 }}
-                </button>
-              }
+              <!-- Question Type Badge -->
+              <div class="mb-6">
+                <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full uppercase">
+                  {{ getTypeLabel(item.type) }}
+                </span>
+              </div>
+
+              <!-- Answer Input -->
+              <div class="mb-6">
+                <app-exam-question
+                  [item]="item"
+                  [index]="idx"
+                  [currentAnswer]="answers()[item.id]"
+                  (answerChange)="onAnswerChange(item, $event)"
+                  [isReadonlySig]="wasSubmitted()"
+                />
+              </div>
+
+              <!-- Save Indicator -->
+              <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                <p class="text-sm" [class.text-yellow-600]="isSaving()" [class.text-green-600]="!isSaving()">
+                  <i [class.fa-spinner]="isSaving()" [class.fa-spin]="isSaving()" [class.fa-check-circle]="!isSaving()" class="fas mr-1"></i>
+                  <span>{{ isSaving() ? 'Saving...' : 'Answer saved' }}</span>
+                </p>
+                @if (answers()[item.id]) {
+                  <span class="text-xs font-medium text-green-600 flex items-center">
+                    <i class="fas fa-check-circle mr-1"></i>Answered
+                  </span>
+                }
+              </div>
             </div>
+          }
 
-            <!-- Legend -->
-            <div class="mt-6 space-y-2 text-xs border-t border-gray-200 pt-6">
-              <div class="flex items-center">
-                <div class="w-6 h-6 bg-green-100 rounded mr-2"></div>
-                <span class="text-gray-600">Answered</span>
-              </div>
-              <div class="flex items-center">
-                <div class="w-6 h-6 bg-gray-100 rounded mr-2"></div>
-                <span class="text-gray-600">Unanswered</span>
-              </div>
-              <div class="flex items-center">
-                <div class="w-6 h-6 bg-indigo-600 rounded mr-2"></div>
-                <span class="text-gray-600">Current</span>
-              </div>
-            </div>
-
-            <!-- Submit Button -->
-            @if (!wasSubmitted()) {
+          <!-- Submit Button at the End -->
+          @if (!wasSubmitted()) {
+            <div class="bg-white rounded-xl shadow-md p-8 text-center">
+              <p class="text-gray-600 mb-4">You have answered <strong>{{ answeredCount() }}</strong> out of <strong>{{ examItemsSig.length }}</strong> questions.</p>
               <button
                 (click)="openSubmitModal()"
-                class="w-full mt-6 px-4 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition duration-200"
+                class="px-8 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition duration-200"
               >
                 <i class="fas fa-check-circle mr-2"></i>Submit Exam
               </button>
-            }
-          </div>
-        </div>
-
-        <!-- Question Display -->
-        <div class="lg:col-span-3">
-          <div class="bg-white rounded-xl shadow-md p-8">
-            @if (currentQuestion()) {
-              <div>
-                <!-- Question Header -->
-                <div class="flex items-start justify-between mb-6">
-                  <div class="flex-1">
-                    <span class="text-sm font-semibold text-indigo-600 uppercase tracking-wide">
-                      Question <span>{{ currentQuestionIndexSig + 1 }}</span> of <span>{{ examItemsSig.length }}</span>
-                    </span>
-                    <h2 class="text-xl font-bold text-gray-900 mt-2">{{ currentQuestion()!.question }}</h2>
-                  </div>
-                  <div class="ml-4">
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded-full">
-                      <i class="fas fa-star mr-1"></i>{{ currentQuestion()!.points }} pts
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Question Type Badge -->
-                <div class="mb-6">
-                  <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full uppercase">
-                    {{ getTypeLabel(currentQuestion()!.type) }}
-                  </span>
-                </div>
-
-                <!-- Answer Input Based on Type -->
-                <div class="mb-8">
-                  <app-exam-question
-                    [item]="currentQuestion()!"
-                    [index]="currentQuestionIndexSig"
-                    [currentAnswer]="answers()[currentQuestion()!.id]"
-                    (answerChange)="onAnswerChange(currentQuestion()!, $event)"
-                    [isReadonlySig]="wasSubmitted()"
-                  />
-                </div>
-
-                <!-- Save Indicator -->
-                <div class="mb-6">
-                  <p class="text-sm" [class.text-yellow-600]="isSaving()" [class.text-green-600]="!isSaving()">
-                    <i [class.fa-spinner]="isSaving()" [class.fa-spin]="isSaving()" [class.fa-check-circle]="!isSaving()" class="fas mr-1"></i>
-                    <span>{{ isSaving() ? 'Saving...' : 'Answer saved' }}</span>
-                  </p>
-                </div>
-
-                <!-- Navigation Buttons -->
-                <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-                  <button
-                    (click)="previousQuestion()"
-                    [disabled]="currentQuestionIndexSig === 0"
-                    [class.opacity-50]="currentQuestionIndexSig === 0"
-                    [class.cursor-not-allowed]="currentQuestionIndexSig === 0"
-                    [class.hover:bg-gray-100]="currentQuestionIndexSig !== 0"
-                    class="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-medium transition duration-200"
-                  >
-                    <i class="fas fa-chevron-left mr-2"></i>Previous
-                  </button>
-
-                  <span class="text-gray-500 text-sm font-medium">
-                    <span>{{ currentQuestionIndexSig + 1 }}</span> / <span>{{ examItemsSig.length }}</span>
-                  </span>
-
-                  <button
-                    (click)="nextQuestion()"
-                    [disabled]="currentQuestionIndexSig === examItemsSig.length - 1"
-                    [class.opacity-50]="currentQuestionIndexSig === examItemsSig.length - 1"
-                    [class.cursor-not-allowed]="currentQuestionIndexSig === examItemsSig.length - 1"
-                    [class.hover:bg-indigo-700]="currentQuestionIndexSig !== examItemsSig.length - 1"
-                    class="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium transition duration-200"
-                  >
-                    Next<i class="fas fa-chevron-right ml-2"></i>
-                  </button>
-                </div>
-              </div>
-            } @else {
-              <p class="text-gray-500 italic">No questions available for this exam.</p>
-            }
-          </div>
+            </div>
+          } @else {
+            <div class="bg-green-50 rounded-xl shadow-md p-8 text-center border-2 border-green-200">
+              <i class="fas fa-check-circle text-green-600 text-4xl mb-4"></i>
+              <p class="text-green-700 font-semibold">Exam Submitted Successfully!</p>
+            </div>
+          }
         </div>
       </div>
     }

@@ -13,7 +13,6 @@ import { StudentExamItemService } from '../../../services/student-exam-item.serv
 import { ExamHeader } from './exam-header/exam-header';
 import { ExamProgress } from './exam-progress/exam-progress';
 import { ExamQuestion } from './exam-question/exam-question';
-import { ExamTimer, type ExamTimerData } from './exam-timer/exam-timer';
 import {
   ActivityMonitor,
   type ActivityEvent,
@@ -60,23 +59,11 @@ export class CreateTakenExam implements OnInit, OnDestroy {
   showEventPanel = signal(false);
   showSubmitModal = signal(false);
   isSaving = signal(false);
-  currentQuestionIndex = signal(0);
 
   private essayDebounceHandles: Record<string, any> = {};
   private savingTimeouts: Record<string, any> = {};
 
   // Computed properties for child components
-  examTimerData = computed<ExamTimerData | null>(() => {
-    const exam = this.takenExam();
-    if (!exam?.exam) return null;
-
-    return {
-      startedAt: exam.started_at,
-      endsAt: exam.exam.ends_at,
-      submittedAt: exam.submitted_at,
-    };
-  });
-
   activityEvents = computed<ActivityEvent[]>(() => {
     return this.sessionEvents().map((e) => ({
       event_type: e.event_type,
@@ -107,13 +94,6 @@ export class CreateTakenExam implements OnInit, OnDestroy {
 
   wasSubmitted = computed(() => this.takenExam()?.submitted_at !== null);
 
-  // Current question based on index
-  currentQuestion = computed(() => {
-    const items = this.examItems();
-    const index = this.currentQuestionIndex();
-    return items[index] || null;
-  });
-
   // Computed - answered count
   answeredCount = computed(() => {
     const answers = this.answers();
@@ -127,47 +107,6 @@ export class CreateTakenExam implements OnInit, OnDestroy {
 
   // Activity tracking
   sessionEvents = this.examActivityService.examActivityEvents$;
-
-  eventSummary = computed(() => {
-    const events = this.sessionEvents();
-    const tabSwitches = events.filter(
-      (e: any) =>
-        e.event_type === 'tab_hidden' || e.event_type === 'tab_visible'
-    ).length;
-    const windowSwitches = events.filter(
-      (e: any) =>
-        e.event_type === 'window_blur' || e.event_type === 'window_focus'
-    ).length;
-
-    return {
-      totalEvents: events.length,
-      tabSwitches,
-      windowSwitches,
-      questionsAnswered: events.filter(
-        (e: any) => e.event_type === 'question_answered'
-      ).length,
-      lastActivity: events[events.length - 1]?.created_at,
-    };
-  });
-
-  // ===== Navigation Methods =====
-  goToQuestion(index: number): void {
-    if (index >= 0 && index < this.examItems().length) {
-      this.currentQuestionIndex.set(index);
-    }
-  }
-
-  previousQuestion(): void {
-    if (this.currentQuestionIndex() > 0) {
-      this.currentQuestionIndex.update((idx) => idx - 1);
-    }
-  }
-
-  nextQuestion(): void {
-    if (this.currentQuestionIndex() < this.examItems().length - 1) {
-      this.currentQuestionIndex.update((idx) => idx + 1);
-    }
-  }
 
   // ===== Answer & Saving =====
   onAnswerChange(item: IExamItem, value: any): void {
