@@ -28,11 +28,6 @@
           </span>
         </div>
       </div>
-
-       <pre>
-  {{exam()?.items?.length}}
-</pre>
-
       <!-- Requirements Check (only show if draft or published) -->
       @if (showRequirementsCheck()) {
         @if (!requirementsMet()) {
