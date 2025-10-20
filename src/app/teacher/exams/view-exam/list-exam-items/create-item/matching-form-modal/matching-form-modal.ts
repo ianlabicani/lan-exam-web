@@ -62,6 +62,7 @@ export class MatchingFormModal {
 
   level = input<'easy' | 'moderate' | 'difficult'>('moderate');
   examId = input.required<number>();
+  topic = input<string>('');
   isModalOpen = input.required<boolean>();
   itemToEdit = input<ExamItem | null>(null);
   openModal = output<void>();
@@ -176,6 +177,7 @@ export class MatchingFormModal {
       points: this.pairCount(),
       pairs: this.form.value.pairs!,
       level: this.level(),
+      topic: this.topic(),
     };
 
     const isEdit = this.isEditMode();

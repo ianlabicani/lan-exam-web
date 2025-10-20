@@ -1,264 +1,226 @@
-@let easyItemsSig = easyItems();
-@let moderateItemsSig = moderateItems();
-@let difficultItemsSig = difficultItems();
 @let exam = viewExamSvc.viewingExam();
 
 @if (exam) {
   <div class="space-y-6">
-    <!-- Easy Items Section -->
-    <div class="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
-      <!-- Header / Collapsible Button -->
-      <button
-        type="button"
-        (click)="isEasyOpen.set(!isEasyOpen())"
-        class="w-full flex items-center justify-between px-6 py-4 bg-gradient-to-r from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 transition border-b border-gray-200">
-        <div class="flex items-center gap-3">
-          <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-green-600 text-white text-sm font-bold">E</span>
-          <div class="text-left">
-            <h3 class="text-lg font-semibold text-gray-900">Easy Items</h3>
-            <p class="text-xs text-gray-600">{{ easyItemsSig.length }} / {{ exam.tos[0]?.distribution?.easy?.allocation ?? 0 }} items</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="px-3 py-1 bg-white rounded-full text-sm font-medium text-green-700">
-            {{ isEasyOpen() ? '−' : '+' }}
-          </span>
-        </div>
-      </button>
+    <!-- Topics Loop -->
+    @for (topic of exam.tos; track $index) {
+      @let topicIndex = $index;
 
-      <!-- Content -->
-      @if (isEasyOpen()) {
-        <div class="p-6 space-y-4">
-          <!-- Add Button -->
-          @if (exam?.status === 'draft' && (exam.tos[0]?.distribution?.easy?.allocation ?? 0) > easyItemsSig.length) {
-            <div class="mb-6 pb-6 border-b border-gray-200">
-              <button
-                (click)="openAddQuestionModal('easy')"
-                type="button"
-                class="w-full px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition">
-                + Add Question
-              </button>
+      <div class="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+        <!-- Topic Header / Collapsible Button -->
+        <button
+          type="button"
+          (click)="toggleTopic(topicIndex)"
+          class="w-full flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 transition border-b border-gray-200">
+          <div class="flex items-center gap-3">
+            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-600 text-white text-sm font-bold">{{ topicIndex + 1 }}</span>
+            <div class="text-left">
+              <h3 class="text-lg font-semibold text-gray-900">{{ topic.topic }}</h3>
+              <p class="text-xs text-gray-600">{{ topic.no_of_items }} questions • {{ topic.time_allotment }} hours</p>
             </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 bg-white rounded-full text-sm font-medium text-blue-700">
+              {{ isTopicExpanded(topicIndex) ? '−' : '+' }}
+            </span>
+          </div>
+        </button>
 
-            <!-- Modals -->
-            <app-mcq-form-modal [examId]="exam.id" [level]="'easy'" (openModal)="isEasyMcqModalOpen.set(true)" (closeModal)="isEasyMcqModalOpen.set(false)" [isModalOpen]="isEasyMcqModalOpen()"></app-mcq-form-modal>
-            <app-true-or-false-form-modal [examId]="exam.id" [level]="'easy'" (openModal)="isEasyTOFModalOpen.set(true)" (closeModal)="isEasyTOFModalOpen.set(false)" [isModalOpen]="isEasyTOFModalOpen()"></app-true-or-false-form-modal>
-            <app-essay-form-modal [examId]="exam.id" [level]="'easy'" (openModal)="isEasyEssayModalOpen.set(true)" (closeModal)="isEasyEssayModalOpen.set(false)" [isModalOpen]="isEasyEssayModalOpen()"></app-essay-form-modal>
-            <app-fill-blank-form-modal [examId]="exam.id" [level]="'easy'" (openModal)="isEasyFillBlankModalOpen.set(true)" (closeModal)="isEasyFillBlankModalOpen.set(false)" [isModalOpen]="isEasyFillBlankModalOpen()"></app-fill-blank-form-modal>
-            <app-short-answer-form-modal [examId]="exam.id" [level]="'easy'" (openModal)="isEasyShortAnswerModalOpen.set(true)" (closeModal)="isEasyShortAnswerModalOpen.set(false)" [isModalOpen]="isEasyShortAnswerModalOpen()"></app-short-answer-form-modal>
-            <app-matching-form-modal [examId]="exam.id" [level]="'easy'" (openModal)="isEasyMatchingModalOpen.set(true)" (closeModal)="isEasyMatchingModalOpen.set(false)" [isModalOpen]="isEasyMatchingModalOpen()"></app-matching-form-modal>
-          }
+        <!-- Topic Content -->
+        @if (isTopicExpanded(topicIndex)) {
+          <div class="p-6 space-y-6">
+            <!-- Easy Difficulty Section -->
+            <div class="rounded-lg border border-green-200 bg-green-50 overflow-hidden">
+              <div class="px-4 py-3 bg-green-100 border-b border-green-200">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-green-600 text-white text-xs font-bold">E</span>
+                    <h4 class="text-sm font-semibold text-gray-900">Easy</h4>
+                    <span class="text-xs text-gray-600">{{ getItemsByTopicAndLevel(topic.topic, 'easy').length }} / {{ topic.distribution.easy.allocation }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 space-y-3">
+                <!-- Add Easy Button -->
+                @if (exam?.status === 'draft' && topic.distribution.easy.allocation > getItemsByTopicAndLevel(topic.topic, 'easy').length) {
+                  <button
+                    (click)="openAddQuestionModal('easy')"
+                    type="button"
+                    class="w-full px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition">
+                    + Add Easy Question
+                  </button>
 
-          <!-- Items List -->
-          <div class="space-y-3">
-            @for(item of easyItemsSig; track item.id) {
-              <div class="border border-gray-200 rounded-lg p-4 hover:border-green-300 hover:bg-green-50 transition">
-                <!-- Edit/Delete Actions -->
-                @if (exam?.status === 'draft') {
-                  <div class="flex justify-end gap-2 mb-3">
-                    <button (click)="openEditModal(item)" class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition">Edit</button>
-                    <button (click)="openDeleteModal(item)" class="text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded transition">Delete</button>
+                  <!-- Easy Modals -->
+                  <app-mcq-form-modal [examId]="exam.id" [level]="'easy'" [topic]="topic.topic" (openModal)="isEasyMcqModalOpen.set(true)" (closeModal)="isEasyMcqModalOpen.set(false)" [isModalOpen]="isEasyMcqModalOpen()"></app-mcq-form-modal>
+                  <app-true-or-false-form-modal [examId]="exam.id" [level]="'easy'" [topic]="topic.topic" (openModal)="isEasyTOFModalOpen.set(true)" (closeModal)="isEasyTOFModalOpen.set(false)" [isModalOpen]="isEasyTOFModalOpen()"></app-true-or-false-form-modal>
+                  <app-essay-form-modal [examId]="exam.id" [level]="'easy'" [topic]="topic.topic" (openModal)="isEasyEssayModalOpen.set(true)" (closeModal)="isEasyEssayModalOpen.set(false)" [isModalOpen]="isEasyEssayModalOpen()"></app-essay-form-modal>
+                  <app-fill-blank-form-modal [examId]="exam.id" [level]="'easy'" [topic]="topic.topic" (openModal)="isEasyFillBlankModalOpen.set(true)" (closeModal)="isEasyFillBlankModalOpen.set(false)" [isModalOpen]="isEasyFillBlankModalOpen()"></app-fill-blank-form-modal>
+                  <app-short-answer-form-modal [examId]="exam.id" [level]="'easy'" [topic]="topic.topic" (openModal)="isEasyShortAnswerModalOpen.set(true)" (closeModal)="isEasyShortAnswerModalOpen.set(false)" [isModalOpen]="isEasyShortAnswerModalOpen()"></app-short-answer-form-modal>
+                  <app-matching-form-modal [examId]="exam.id" [level]="'easy'" [topic]="topic.topic" (openModal)="isEasyMatchingModalOpen.set(true)" (closeModal)="isEasyMatchingModalOpen.set(false)" [isModalOpen]="isEasyMatchingModalOpen()"></app-matching-form-modal>
+                }
+
+                <!-- Easy Items List -->
+                @if (getItemsByTopicAndLevel(topic.topic, 'easy').length > 0) {
+                  <div class="space-y-2">
+                    @for(item of getItemsByTopicAndLevel(topic.topic, 'easy'); track item.id) {
+                      <div class="border border-green-200 rounded-lg p-3 bg-white hover:border-green-400 hover:bg-green-50 transition">
+                        <!-- Edit/Delete Actions -->
+                        @if (exam?.status === 'draft') {
+                          <div class="flex justify-end gap-2 mb-2">
+                            <button (click)="openEditModal(item)" class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition">Edit</button>
+                            <button (click)="openDeleteModal(item)" class="text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded transition">Delete</button>
+                          </div>
+                        }
+                        <!-- Item Display -->
+                        @if(item.type === 'mcq') {
+                          <app-mcq-item [item]="item"></app-mcq-item>
+                        } @else if(item.type === 'truefalse') {
+                          <app-true-false-item [itemSig]="item"></app-true-false-item>
+                        } @else if(item.type === 'essay') {
+                          <app-essay-item [itemSig]="item"></app-essay-item>
+                        } @else if(item.type === 'fillblank') {
+                          <app-fill-blank-item [itemSig]="item"></app-fill-blank-item>
+                        } @else if(item.type === 'shortanswer') {
+                          <app-short-answer-item [itemSig]="item"></app-short-answer-item>
+                        } @else if(item.type === 'matching') {
+                          <app-matching-item [itemSig]="item"></app-matching-item>
+                        }
+                      </div>
+                    }
                   </div>
                 }
-
-                <!-- Item Display -->
-                @if(item.type === 'mcq') {
-                  <app-mcq-item [item]="item"></app-mcq-item>
-                } @else if(item.type === 'truefalse') {
-                  <app-true-false-item [itemSig]="item"></app-true-false-item>
-                } @else if(item.type === 'essay') {
-                  <app-essay-item [itemSig]="item"></app-essay-item>
-                } @else if(item.type === 'fillblank') {
-                  <app-fill-blank-item [itemSig]="item"></app-fill-blank-item>
-                } @else if(item.type === 'shortanswer') {
-                  <app-short-answer-item [itemSig]="item"></app-short-answer-item>
-                } @else if(item.type === 'matching') {
-                  <app-matching-item [itemSig]="item"></app-matching-item>
-                }
               </div>
-            } @empty {
-              <div class="p-8 text-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
-                <svg class="mx-auto h-12 w-12 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m0 0h6m-6-6h6m0 0v6m0-6V6m-6 6v6m0-6h-6m0 0v6" />
-                </svg>
-                <p class="text-gray-600 font-medium">No easy items yet</p>
-                <p class="text-sm text-gray-500">Add your first easy question to get started</p>
-              </div>
-            }
-          </div>
-        </div>
-      }
-    </div>
-
-    <!-- Moderate Items Section -->
-    <div class="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
-      <!-- Header / Collapsible Button -->
-      <button
-        type="button"
-        (click)="isModerateOpen.set(!isModerateOpen())"
-        class="w-full flex items-center justify-between px-6 py-4 bg-gradient-to-r from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 transition border-b border-gray-200">
-        <div class="flex items-center gap-3">
-          <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-yellow-600 text-white text-sm font-bold">M</span>
-          <div class="text-left">
-            <h3 class="text-lg font-semibold text-gray-900">Moderate Items</h3>
-            <p class="text-xs text-gray-600">{{ moderateItemsSig.length }} / {{ exam.tos[0]?.distribution?.moderate?.allocation ?? 0 }} items</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="px-3 py-1 bg-white rounded-full text-sm font-medium text-yellow-700">
-            {{ isModerateOpen() ? '−' : '+' }}
-          </span>
-        </div>
-      </button>
-
-      <!-- Content -->
-      @if (isModerateOpen()) {
-        <div class="p-6 space-y-4">
-          <!-- Add Button -->
-          @if (exam?.status === 'draft' && (exam.tos[0]?.distribution?.moderate?.allocation ?? 0) > moderateItemsSig.length) {
-            <div class="mb-6 pb-6 border-b border-gray-200">
-              <button
-                (click)="openAddQuestionModal('moderate')"
-                type="button"
-                class="w-full px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition">
-                + Add Question
-              </button>
             </div>
 
-            <!-- Modals -->
-            <app-mcq-form-modal [examId]="exam.id" [level]="'moderate'" (openModal)="isModerateMcqModalOpen.set(true)" (closeModal)="isModerateMcqModalOpen.set(false)" [isModalOpen]="isModerateMcqModalOpen()"></app-mcq-form-modal>
-            <app-true-or-false-form-modal [examId]="exam.id" [level]="'moderate'" (openModal)="isModerateTOFModalOpen.set(true)" (closeModal)="isModerateTOFModalOpen.set(false)" [isModalOpen]="isModerateTOFModalOpen()"></app-true-or-false-form-modal>
-            <app-essay-form-modal [examId]="exam.id" [level]="'moderate'" (openModal)="isModerateEssayModalOpen.set(true)" (closeModal)="isModerateEssayModalOpen.set(false)" [isModalOpen]="isModerateEssayModalOpen()"></app-essay-form-modal>
-            <app-fill-blank-form-modal [examId]="exam.id" [level]="'moderate'" (openModal)="isModerateFillBlankModalOpen.set(true)" (closeModal)="isModerateFillBlankModalOpen.set(false)" [isModalOpen]="isModerateFillBlankModalOpen()"></app-fill-blank-form-modal>
-            <app-short-answer-form-modal [examId]="exam.id" [level]="'moderate'" (openModal)="isModerateShortAnswerModalOpen.set(true)" (closeModal)="isModerateShortAnswerModalOpen.set(false)" [isModalOpen]="isModerateShortAnswerModalOpen()"></app-short-answer-form-modal>
-            <app-matching-form-modal [examId]="exam.id" [level]="'moderate'" (openModal)="isModerateMatchingModalOpen.set(true)" (closeModal)="isModerateMatchingModalOpen.set(false)" [isModalOpen]="isModerateMatchingModalOpen()"></app-matching-form-modal>
-          }
+            <!-- Moderate Difficulty Section -->
+            <div class="rounded-lg border border-yellow-200 bg-yellow-50 overflow-hidden">
+              <div class="px-4 py-3 bg-yellow-100 border-b border-yellow-200">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-yellow-600 text-white text-xs font-bold">M</span>
+                    <h4 class="text-sm font-semibold text-gray-900">Moderate</h4>
+                    <span class="text-xs text-gray-600">{{ getItemsByTopicAndLevel(topic.topic, 'moderate').length }} / {{ topic.distribution.moderate.allocation }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 space-y-3">
+                <!-- Add Moderate Button -->
+                @if (exam?.status === 'draft' && topic.distribution.moderate.allocation > getItemsByTopicAndLevel(topic.topic, 'moderate').length) {
+                  <button
+                    (click)="openAddQuestionModal('moderate')"
+                    type="button"
+                    class="w-full px-3 py-2 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 transition">
+                    + Add Moderate Question
+                  </button>
 
-          <!-- Items List -->
-          <div class="space-y-3">
-            @for(item of moderateItemsSig; track item.id) {
-              <div class="border border-gray-200 rounded-lg p-4 hover:border-yellow-300 hover:bg-yellow-50 transition">
-                <!-- Edit/Delete Actions -->
-                @if (exam?.status === 'draft') {
-                  <div class="flex justify-end gap-2 mb-3">
-                    <button (click)="openEditModal(item)" class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition">Edit</button>
-                    <button (click)="openDeleteModal(item)" class="text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded transition">Delete</button>
+                  <!-- Moderate Modals -->
+                  <app-mcq-form-modal [examId]="exam.id" [level]="'moderate'" [topic]="topic.topic" (openModal)="isModerateMcqModalOpen.set(true)" (closeModal)="isModerateMcqModalOpen.set(false)" [isModalOpen]="isModerateMcqModalOpen()"></app-mcq-form-modal>
+                  <app-true-or-false-form-modal [examId]="exam.id" [level]="'moderate'" [topic]="topic.topic" (openModal)="isModerateTOFModalOpen.set(true)" (closeModal)="isModerateTOFModalOpen.set(false)" [isModalOpen]="isModerateTOFModalOpen()"></app-true-or-false-form-modal>
+                  <app-essay-form-modal [examId]="exam.id" [level]="'moderate'" [topic]="topic.topic" (openModal)="isModerateEssayModalOpen.set(true)" (closeModal)="isModerateEssayModalOpen.set(false)" [isModalOpen]="isModerateEssayModalOpen()"></app-essay-form-modal>
+                  <app-fill-blank-form-modal [examId]="exam.id" [level]="'moderate'" [topic]="topic.topic" (openModal)="isModerateFillBlankModalOpen.set(true)" (closeModal)="isModerateFillBlankModalOpen.set(false)" [isModalOpen]="isModerateFillBlankModalOpen()"></app-fill-blank-form-modal>
+                  <app-short-answer-form-modal [examId]="exam.id" [level]="'moderate'" [topic]="topic.topic" (openModal)="isModerateShortAnswerModalOpen.set(true)" (closeModal)="isModerateShortAnswerModalOpen.set(false)" [isModalOpen]="isModerateShortAnswerModalOpen()"></app-short-answer-form-modal>
+                  <app-matching-form-modal [examId]="exam.id" [level]="'moderate'" [topic]="topic.topic" (openModal)="isModerateMatchingModalOpen.set(true)" (closeModal)="isModerateMatchingModalOpen.set(false)" [isModalOpen]="isModerateMatchingModalOpen()"></app-matching-form-modal>
+                }
+
+                <!-- Moderate Items List -->
+                @if (getItemsByTopicAndLevel(topic.topic, 'moderate').length > 0) {
+                  <div class="space-y-2">
+                    @for(item of getItemsByTopicAndLevel(topic.topic, 'moderate'); track item.id) {
+                      <div class="border border-yellow-200 rounded-lg p-3 bg-white hover:border-yellow-400 hover:bg-yellow-50 transition">
+                        <!-- Edit/Delete Actions -->
+                        @if (exam?.status === 'draft') {
+                          <div class="flex justify-end gap-2 mb-2">
+                            <button (click)="openEditModal(item)" class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition">Edit</button>
+                            <button (click)="openDeleteModal(item)" class="text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded transition">Delete</button>
+                          </div>
+                        }
+                        <!-- Item Display -->
+                        @if(item.type === 'mcq') {
+                          <app-mcq-item [item]="item"></app-mcq-item>
+                        } @else if(item.type === 'truefalse') {
+                          <app-true-false-item [itemSig]="item"></app-true-false-item>
+                        } @else if(item.type === 'essay') {
+                          <app-essay-item [itemSig]="item"></app-essay-item>
+                        } @else if(item.type === 'fillblank') {
+                          <app-fill-blank-item [itemSig]="item"></app-fill-blank-item>
+                        } @else if(item.type === 'shortanswer') {
+                          <app-short-answer-item [itemSig]="item"></app-short-answer-item>
+                        } @else if(item.type === 'matching') {
+                          <app-matching-item [itemSig]="item"></app-matching-item>
+                        }
+                      </div>
+                    }
                   </div>
                 }
-
-                <!-- Item Display -->
-                @if(item.type === 'mcq') {
-                  <app-mcq-item [item]="item"></app-mcq-item>
-                } @else if(item.type === 'truefalse') {
-                  <app-true-false-item [itemSig]="item"></app-true-false-item>
-                } @else if(item.type === 'essay') {
-                  <app-essay-item [itemSig]="item"></app-essay-item>
-                } @else if(item.type === 'fillblank') {
-                  <app-fill-blank-item [itemSig]="item"></app-fill-blank-item>
-                } @else if(item.type === 'shortanswer') {
-                  <app-short-answer-item [itemSig]="item"></app-short-answer-item>
-                } @else if(item.type === 'matching') {
-                  <app-matching-item [itemSig]="item"></app-matching-item>
-                }
               </div>
-            } @empty {
-              <div class="p-8 text-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
-                <svg class="mx-auto h-12 w-12 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m0 0h6m-6-6h6m0 0v6m0-6V6m-6 6v6m0-6h-6m0 0v6" />
-                </svg>
-                <p class="text-gray-600 font-medium">No moderate items yet</p>
-                <p class="text-sm text-gray-500">Add your first moderate question to get started</p>
-              </div>
-            }
-          </div>
-        </div>
-      }
-    </div>
-
-    <!-- Difficult Items Section -->
-    <div class="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
-      <!-- Header / Collapsible Button -->
-      <button
-        type="button"
-        (click)="isDifficultOpen.set(!isDifficultOpen())"
-        class="w-full flex items-center justify-between px-6 py-4 bg-gradient-to-r from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 transition border-b border-gray-200">
-        <div class="flex items-center gap-3">
-          <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-red-600 text-white text-sm font-bold">D</span>
-          <div class="text-left">
-            <h3 class="text-lg font-semibold text-gray-900">Difficult Items</h3>
-            <p class="text-xs text-gray-600">{{ difficultItemsSig.length }} / {{ exam.tos[0]?.distribution?.difficult?.allocation ?? 0 }} items</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="px-3 py-1 bg-white rounded-full text-sm font-medium text-red-700">
-            {{ isDifficultOpen() ? '−' : '+' }}
-          </span>
-        </div>
-      </button>
-
-      <!-- Content -->
-      @if (isDifficultOpen()) {
-        <div class="p-6 space-y-4">
-          <!-- Add Button -->
-          @if (exam?.status === 'draft' && (exam.tos[0]?.distribution?.difficult?.allocation ?? 0) > difficultItemsSig.length) {
-            <div class="mb-6 pb-6 border-b border-gray-200">
-              <button
-                (click)="openAddQuestionModal('difficult')"
-                type="button"
-                class="w-full px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition">
-                + Add Question
-              </button>
             </div>
 
-            <!-- Modals -->
-            <app-mcq-form-modal [examId]="exam.id" [level]="'difficult'" (openModal)="isDifficultMcqModalOpen.set(true)" (closeModal)="isDifficultMcqModalOpen.set(false)" [isModalOpen]="isDifficultMcqModalOpen()"></app-mcq-form-modal>
-            <app-true-or-false-form-modal [examId]="exam.id" [level]="'difficult'" (openModal)="isDifficultTOFModalOpen.set(true)" (closeModal)="isDifficultTOFModalOpen.set(false)" [isModalOpen]="isDifficultTOFModalOpen()"></app-true-or-false-form-modal>
-            <app-essay-form-modal [examId]="exam.id" [level]="'difficult'" (openModal)="isDifficultEssayModalOpen.set(true)" (closeModal)="isDifficultEssayModalOpen.set(false)" [isModalOpen]="isDifficultEssayModalOpen()"></app-essay-form-modal>
-            <app-fill-blank-form-modal [examId]="exam.id" [level]="'difficult'" (openModal)="isDifficultFillBlankModalOpen.set(true)" (closeModal)="isDifficultFillBlankModalOpen.set(false)" [isModalOpen]="isDifficultFillBlankModalOpen()"></app-fill-blank-form-modal>
-            <app-short-answer-form-modal [examId]="exam.id" [level]="'difficult'" (openModal)="isDifficultShortAnswerModalOpen.set(true)" (closeModal)="isDifficultShortAnswerModalOpen.set(false)" [isModalOpen]="isDifficultShortAnswerModalOpen()"></app-short-answer-form-modal>
-            <app-matching-form-modal [examId]="exam.id" [level]="'difficult'" (openModal)="isDifficultMatchingModalOpen.set(true)" (closeModal)="isDifficultMatchingModalOpen.set(false)" [isModalOpen]="isDifficultMatchingModalOpen()"></app-matching-form-modal>
-          }
+            <!-- Difficult Difficulty Section -->
+            <div class="rounded-lg border border-red-200 bg-red-50 overflow-hidden">
+              <div class="px-4 py-3 bg-red-100 border-b border-red-200">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-red-600 text-white text-xs font-bold">D</span>
+                    <h4 class="text-sm font-semibold text-gray-900">Difficult</h4>
+                    <span class="text-xs text-gray-600">{{ getItemsByTopicAndLevel(topic.topic, 'difficult').length }} / {{ topic.distribution.difficult.allocation }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 space-y-3">
+                <!-- Add Difficult Button -->
+                @if (exam?.status === 'draft' && topic.distribution.difficult.allocation > getItemsByTopicAndLevel(topic.topic, 'difficult').length) {
+                  <button
+                    (click)="openAddQuestionModal('difficult')"
+                    type="button"
+                    class="w-full px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition">
+                    + Add Difficult Question
+                  </button>
 
-          <!-- Items List -->
-          <div class="space-y-3">
-            @for(item of difficultItemsSig; track item.id) {
-              <div class="border border-gray-200 rounded-lg p-4 hover:border-red-300 hover:bg-red-50 transition">
-                <!-- Edit/Delete Actions -->
-                @if (exam?.status === 'draft') {
-                  <div class="flex justify-end gap-2 mb-3">
-                    <button (click)="openEditModal(item)" class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition">Edit</button>
-                    <button (click)="openDeleteModal(item)" class="text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded transition">Delete</button>
+                  <!-- Difficult Modals -->
+                  <app-mcq-form-modal [examId]="exam.id" [level]="'difficult'" [topic]="topic.topic" (openModal)="isDifficultMcqModalOpen.set(true)" (closeModal)="isDifficultMcqModalOpen.set(false)" [isModalOpen]="isDifficultMcqModalOpen()"></app-mcq-form-modal>
+                  <app-true-or-false-form-modal [examId]="exam.id" [level]="'difficult'" [topic]="topic.topic" (openModal)="isDifficultTOFModalOpen.set(true)" (closeModal)="isDifficultTOFModalOpen.set(false)" [isModalOpen]="isDifficultTOFModalOpen()"></app-true-or-false-form-modal>
+                  <app-essay-form-modal [examId]="exam.id" [level]="'difficult'" [topic]="topic.topic" (openModal)="isDifficultEssayModalOpen.set(true)" (closeModal)="isDifficultEssayModalOpen.set(false)" [isModalOpen]="isDifficultEssayModalOpen()"></app-essay-form-modal>
+                  <app-fill-blank-form-modal [examId]="exam.id" [level]="'difficult'" [topic]="topic.topic" (openModal)="isDifficultFillBlankModalOpen.set(true)" (closeModal)="isDifficultFillBlankModalOpen.set(false)" [isModalOpen]="isDifficultFillBlankModalOpen()"></app-fill-blank-form-modal>
+                  <app-short-answer-form-modal [examId]="exam.id" [level]="'difficult'" [topic]="topic.topic" (openModal)="isDifficultShortAnswerModalOpen.set(true)" (closeModal)="isDifficultShortAnswerModalOpen.set(false)" [isModalOpen]="isDifficultShortAnswerModalOpen()"></app-short-answer-form-modal>
+                  <app-matching-form-modal [examId]="exam.id" [level]="'difficult'" [topic]="topic.topic" (openModal)="isDifficultMatchingModalOpen.set(true)" (closeModal)="isDifficultMatchingModalOpen.set(false)" [isModalOpen]="isDifficultMatchingModalOpen()"></app-matching-form-modal>
+                }
+
+                <!-- Difficult Items List -->
+                @if (getItemsByTopicAndLevel(topic.topic, 'difficult').length > 0) {
+                  <div class="space-y-2">
+                    @for(item of getItemsByTopicAndLevel(topic.topic, 'difficult'); track item.id) {
+                      <div class="border border-red-200 rounded-lg p-3 bg-white hover:border-red-400 hover:bg-red-50 transition">
+                        <!-- Edit/Delete Actions -->
+                        @if (exam?.status === 'draft') {
+                          <div class="flex justify-end gap-2 mb-2">
+                            <button (click)="openEditModal(item)" class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition">Edit</button>
+                            <button (click)="openDeleteModal(item)" class="text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded transition">Delete</button>
+                          </div>
+                        }
+                        <!-- Item Display -->
+                        @if(item.type === 'mcq') {
+                          <app-mcq-item [item]="item"></app-mcq-item>
+                        } @else if(item.type === 'truefalse') {
+                          <app-true-false-item [itemSig]="item"></app-true-false-item>
+                        } @else if(item.type === 'essay') {
+                          <app-essay-item [itemSig]="item"></app-essay-item>
+                        } @else if(item.type === 'fillblank') {
+                          <app-fill-blank-item [itemSig]="item"></app-fill-blank-item>
+                        } @else if(item.type === 'shortanswer') {
+                          <app-short-answer-item [itemSig]="item"></app-short-answer-item>
+                        } @else if(item.type === 'matching') {
+                          <app-matching-item [itemSig]="item"></app-matching-item>
+                        }
+                      </div>
+                    }
                   </div>
                 }
-
-                <!-- Item Display -->
-                @if(item.type === 'mcq') {
-                  <app-mcq-item [item]="item"></app-mcq-item>
-                } @else if(item.type === 'truefalse') {
-                  <app-true-false-item [itemSig]="item"></app-true-false-item>
-                } @else if(item.type === 'essay') {
-                  <app-essay-item [itemSig]="item"></app-essay-item>
-                } @else if(item.type === 'fillblank') {
-                  <app-fill-blank-item [itemSig]="item"></app-fill-blank-item>
-                } @else if(item.type === 'shortanswer') {
-                  <app-short-answer-item [itemSig]="item"></app-short-answer-item>
-                } @else if(item.type === 'matching') {
-                  <app-matching-item [itemSig]="item"></app-matching-item>
-                }
               </div>
-            } @empty {
-              <div class="p-8 text-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
-                <svg class="mx-auto h-12 w-12 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m0 0h6m-6-6h6m0 0v6m0-6V6m-6 6v6m0-6h-6m0 0v6" />
-                </svg>
-                <p class="text-gray-600 font-medium">No difficult items yet</p>
-                <p class="text-sm text-gray-500">Add your first difficult question to get started</p>
-              </div>
-            }
+            </div>
           </div>
-        </div>
-      }
-    </div>
+        }
+      </div>
+    }
   </div>
 
   <!-- Add Question Modal -->
@@ -276,6 +238,7 @@
   <!-- Edit Modals (with itemToEdit for all types) -->
   <app-mcq-form-modal
     [examId]="selectedForUpdateSig()?.exam_id ?? 0"
+    [topic]="selectedForUpdateSig()?.topic ?? ''"
     [isModalOpen]="isEditingItemType('mcq')"
     [itemToEdit]="selectedForUpdateSig()"
     (closeModal)="closeEditModal()"
@@ -284,6 +247,7 @@
 
   <app-true-or-false-form-modal
     [examId]="selectedForUpdateSig()?.exam_id ?? 0"
+    [topic]="selectedForUpdateSig()?.topic ?? ''"
     [isModalOpen]="isEditingItemType('truefalse')"
     [itemToEdit]="selectedForUpdateSig()"
     (closeModal)="closeEditModal()"
@@ -292,6 +256,7 @@
 
   <app-essay-form-modal
     [examId]="selectedForUpdateSig()?.exam_id ?? 0"
+    [topic]="selectedForUpdateSig()?.topic ?? ''"
     [isModalOpen]="isEditingItemType('essay')"
     [itemToEdit]="selectedForUpdateSig()"
     (closeModal)="closeEditModal()"
@@ -300,6 +265,7 @@
 
   <app-fill-blank-form-modal
     [examId]="selectedForUpdateSig()?.exam_id ?? 0"
+    [topic]="selectedForUpdateSig()?.topic ?? ''"
     [isModalOpen]="isEditingItemType('fillblank')"
     [itemToEdit]="selectedForUpdateSig()"
     (closeModal)="closeEditModal()"
@@ -308,6 +274,7 @@
 
   <app-short-answer-form-modal
     [examId]="selectedForUpdateSig()?.exam_id ?? 0"
+    [topic]="selectedForUpdateSig()?.topic ?? ''"
     [isModalOpen]="isEditingItemType('shortanswer')"
     [itemToEdit]="selectedForUpdateSig()"
     (closeModal)="closeEditModal()"
@@ -316,6 +283,7 @@
 
   <app-matching-form-modal
     [examId]="selectedForUpdateSig()?.exam_id ?? 0"
+    [topic]="selectedForUpdateSig()?.topic ?? ''"
     [isModalOpen]="isEditingItemType('matching')"
     [itemToEdit]="selectedForUpdateSig()"
     (closeModal)="closeEditModal()"

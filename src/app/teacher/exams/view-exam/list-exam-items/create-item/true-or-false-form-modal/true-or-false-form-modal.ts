@@ -46,6 +46,7 @@ export class TrueOrFalseFormModal {
 
   level = input<'easy' | 'moderate' | 'difficult'>('moderate');
   examId = input.required<number>();
+  topic = input<string>('');
   itemToEdit = input<ExamItem | null>(null);
   isSaving = signal(false);
   errorMessage = signal<string | null>(null);
@@ -100,6 +101,7 @@ export class TrueOrFalseFormModal {
       answer: answerValue,
       points: this.tfForm.value.points!,
       level: this.level(),
+      topic: this.topic(),
     };
 
     const examId = this.examId();

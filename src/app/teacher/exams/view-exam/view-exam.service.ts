@@ -114,6 +114,7 @@ export interface ViewingExam {
 export interface ExamItem {
   id: number;
   exam_id: number;
+  topic: string;
   type: string;
   level: string;
   question: string;

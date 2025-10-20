@@ -59,6 +59,7 @@ export class McqFormModal implements OnInit {
 
   level = input<'easy' | 'moderate' | 'difficult'>('moderate');
   examId = input.required<number>();
+  topic = input<string>(''); // Add topic input
   itemToEdit = input<ExamItem | null>(null);
   isSaving = signal(false);
   errorMessage = signal<string | null>(null);
@@ -169,6 +170,7 @@ export class McqFormModal implements OnInit {
       points: val.points || 1,
       options: opts.map((o) => ({ text: o.text, correct: o.correct })),
       level: this.level(),
+      topic: this.topic(), // Add topic to payload
     };
 
     const examId = this.examId();

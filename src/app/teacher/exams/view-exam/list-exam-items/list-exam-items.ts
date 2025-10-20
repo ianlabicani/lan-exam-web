@@ -87,10 +87,29 @@ export class ListExamItems implements OnInit {
   isDifficultShortAnswerModalOpen = signal(false);
   isDifficultMatchingModalOpen = signal(false);
 
-  // collapsible states
+  // collapsible states by difficulty
   isEasyOpen = signal(true);
   isModerateOpen = signal(true);
   isDifficultOpen = signal(true);
+
+  // collapsible states by topic
+  expandedTopics = signal<Set<number>>(new Set());
+
+  toggleTopic(index: number): void {
+    this.expandedTopics.update((topics) => {
+      const newTopics = new Set(topics);
+      if (newTopics.has(index)) {
+        newTopics.delete(index);
+      } else {
+        newTopics.add(index);
+      }
+      return newTopics;
+    });
+  }
+
+  isTopicExpanded(index: number): boolean {
+    return this.expandedTopics().has(index);
+  }
 
   items = computed(() => this.viewExamSvc.viewingExam()?.items ?? []);
 
@@ -100,6 +119,18 @@ export class ListExamItems implements OnInit {
   easyItems = computed(() =>
     this.items().filter((item) => item.level === 'easy')
   );
+
+  /**
+   * Get items filtered by topic and level
+   */
+  getItemsByTopicAndLevel(
+    topic: string,
+    level: 'easy' | 'moderate' | 'difficult'
+  ): ExamItem[] {
+    return this.items().filter(
+      (item) => item.level === level && item.topic === topic
+    );
+  }
 
   /**
    * Computed accessor for moderate difficulty items
@@ -114,6 +145,39 @@ export class ListExamItems implements OnInit {
   difficultItems = computed(() =>
     this.items().filter((item) => item.level === 'difficult')
   );
+
+  /**
+   * Computed total easy allocation from all topics
+   */
+  totalEasyAllocation = computed(() => {
+    const exam = this.viewExamSvc.viewingExam();
+    return (exam?.tos ?? []).reduce(
+      (sum, topic) => sum + (topic.distribution?.easy?.allocation ?? 0),
+      0
+    );
+  });
+
+  /**
+   * Computed total moderate allocation from all topics
+   */
+  totalModerateAllocation = computed(() => {
+    const exam = this.viewExamSvc.viewingExam();
+    return (exam?.tos ?? []).reduce(
+      (sum, topic) => sum + (topic.distribution?.moderate?.allocation ?? 0),
+      0
+    );
+  });
+
+  /**
+   * Computed total difficult allocation from all topics
+   */
+  totalDifficultAllocation = computed(() => {
+    const exam = this.viewExamSvc.viewingExam();
+    return (exam?.tos ?? []).reduce(
+      (sum, topic) => sum + (topic.distribution?.difficult?.allocation ?? 0),
+      0
+    );
+  });
 
   ngOnInit(): void {}
 

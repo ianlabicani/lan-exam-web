@@ -219,7 +219,7 @@
 
 <!-- Logout Confirmation Modal -->
 @if (logoutModalOpen()) {
-<div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" (click)="closeLogoutModal()">
+<div class="fixed inset-0 bg-black/50 bg-opacity-50 z-50 flex items-center justify-center p-4" (click)="closeLogoutModal()">
   <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6" (click)="$event.stopPropagation()">
     <div class="text-center">
       <div class="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">

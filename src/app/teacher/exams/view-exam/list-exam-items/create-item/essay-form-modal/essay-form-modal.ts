@@ -44,6 +44,7 @@ export class EssayFormModal {
 
   level = input<'easy' | 'moderate' | 'difficult'>('moderate');
   examId = input.required<number>();
+  topic = input<string>('');
   itemToEdit = input<ExamItem | null>(null);
   close = output<void>();
   isSaving = signal(false);
@@ -97,7 +98,12 @@ export class EssayFormModal {
     const isEdit = this.isEditMode();
     const itemId = isEdit ? this.itemToEdit()?.id : null;
 
-    const payload = { ...newItem, level: this.level(), type: 'essay' };
+    const payload = {
+      ...newItem,
+      level: this.level(),
+      type: 'essay',
+      topic: this.topic(),
+    };
 
     (isEdit && itemId
       ? this.examItemApi.updateItem(examId, itemId, payload)

@@ -47,6 +47,7 @@ export class ShortAnswerFormModal {
 
   level = input<'easy' | 'moderate' | 'difficult'>('moderate');
   examId = input.required<number>();
+  topic = input<string>('');
   itemToEdit = input<ExamItem | null>(null);
   isModalOpen = input.required<boolean>();
   openModal = output<void>();
@@ -105,6 +106,7 @@ export class ShortAnswerFormModal {
       expected_answer: this.form.value.expected_answer!,
       points: this.form.value.points!,
       level: this.level(),
+      topic: this.topic(),
     };
 
     (isEdit && itemId
