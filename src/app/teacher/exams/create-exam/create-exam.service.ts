@@ -126,38 +126,22 @@ export class CreateExamService {
   // ========== DISTRIBUTION CALCULATION ==========
 
   /**
-   * Auto-calculate question distribution based on time allotment.
+   * Auto-calculate question distribution based on topic's items.
    * Distribution: 30% easy, 50% moderate, 20% difficult.
    */
   autoCalculateDistribution(formGroup: FormGroup, topicIndex: number): void {
     const tosArray = formGroup.get('tos') as FormArray;
     const topic = tosArray.at(topicIndex) as FormGroup;
 
-    const totalTimeAllotment = (tosArray.value as any[]).reduce(
-      (sum, t) => sum + (parseFloat(t.time_allotment || 0) || 0),
-      0
-    );
-
-    if (totalTimeAllotment === 0) return;
-
-    const topicTimeAllotment = parseFloat(
-      topic.get('time_allotment')?.value || 0
-    );
-    const totalItems = (tosArray.value as any[]).reduce(
-      (sum, t) => sum + (parseInt(t.no_of_items || 0) || 0),
-      0
-    );
+    const totalItems = parseInt(topic.get('no_of_items')?.value || 0) || 0;
 
     if (totalItems <= 0) return;
 
-    const proportion = topicTimeAllotment / totalTimeAllotment;
-    const itemsForTopic = Math.round(proportion * totalItems);
-
     // Calculate distribution: 30% easy, 50% moderate, 20% difficult
     const distribution = topic.get('distribution') as FormGroup;
-    const easy = Math.round(itemsForTopic * 0.3);
-    const difficult = Math.round(itemsForTopic * 0.2);
-    const moderate = itemsForTopic - easy - difficult;
+    const easy = Math.round(totalItems * 0.3);
+    const difficult = Math.round(totalItems * 0.2);
+    const moderate = totalItems - easy - difficult;
 
     distribution.patchValue({
       easy: { allocation: Math.max(0, easy) },
