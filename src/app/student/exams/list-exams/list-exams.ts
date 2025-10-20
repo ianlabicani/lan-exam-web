@@ -64,7 +64,6 @@ export class ListExams implements OnInit {
       next: (res: { data: Exam[] }) => {
         this.exams.set(res.data);
         this.isLoading.set(false);
-        console.log(res.data);
       },
     });
   }
