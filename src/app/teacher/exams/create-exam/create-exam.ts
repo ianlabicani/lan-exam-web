@@ -120,8 +120,8 @@ export class CreateExam implements OnInit {
       .filter(([_, checked]) => !!checked)
       .map(([letter]) => letter.toLowerCase());
 
-    // Year must be sent as an array
-    const yearArray = [raw.year];
+    // Year must be sent as an array of strings
+    const yearArray = [String(raw.year)];
 
     const payload = {
       title: raw.title,
