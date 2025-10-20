@@ -162,7 +162,7 @@ export interface Exam {
   updated_at: Date;
   items_count: number;
   taken: boolean;
-  taken_exam: TakenExam;
+  taken_exam: TakenExam | null;
   is_available: boolean;
   taken_exams: TakenExam[];
 }
