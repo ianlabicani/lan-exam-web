@@ -1,198 +1,18 @@
 <div class="min-h-screen bg-gray-50 py-8">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Page Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-        <fa-icon [icon]="faCalendar" class="text-indigo-600"></fa-icon>
-        My Exams
-      </h1>
-      <p class="text-gray-600">Create, manage, and monitor your examinations</p>
-    </div>
-
-    <!-- Filters and Search -->
-    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-      <!-- Status Filter -->
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-3">Filter by Status:</label>
-        <div class="flex flex-wrap gap-2">
-          <button
-            (click)="onStatusFilterChange('draft')"
-            [class.bg-yellow-100]="isStatusSelected('draft')"
-            [class.text-yellow-700]="isStatusSelected('draft')"
-            [class.ring-2]="isStatusSelected('draft')"
-            [class.ring-yellow-500]="isStatusSelected('draft')"
-            [class.bg-gray-100]="!isStatusSelected('draft')"
-            [class.text-gray-700]="!isStatusSelected('draft')"
-            class="px-4 py-2 rounded-full text-sm font-medium transition duration-200 hover:shadow-sm cursor-pointer">
-            Draft
-          </button>
-          <button
-            (click)="onStatusFilterChange('ready')"
-            [class.bg-blue-100]="isStatusSelected('ready')"
-            [class.text-blue-700]="isStatusSelected('ready')"
-            [class.ring-2]="isStatusSelected('ready')"
-            [class.ring-blue-500]="isStatusSelected('ready')"
-            [class.bg-gray-100]="!isStatusSelected('ready')"
-            [class.text-gray-700]="!isStatusSelected('ready')"
-            class="px-4 py-2 rounded-full text-sm font-medium transition duration-200 hover:shadow-sm cursor-pointer">
-            Ready
-          </button>
-          <button
-            (click)="onStatusFilterChange('published')"
-            [class.bg-green-100]="isStatusSelected('published')"
-            [class.text-green-700]="isStatusSelected('published')"
-            [class.ring-2]="isStatusSelected('published')"
-            [class.ring-green-500]="isStatusSelected('published')"
-            [class.bg-gray-100]="!isStatusSelected('published')"
-            [class.text-gray-700]="!isStatusSelected('published')"
-            class="px-4 py-2 rounded-full text-sm font-medium transition duration-200 hover:shadow-sm cursor-pointer">
-            Published
-          </button>
-          <button
-            (click)="onStatusFilterChange('ongoing')"
-            [class.bg-purple-100]="isStatusSelected('ongoing')"
-            [class.text-purple-700]="isStatusSelected('ongoing')"
-            [class.ring-2]="isStatusSelected('ongoing')"
-            [class.ring-purple-500]="isStatusSelected('ongoing')"
-            [class.bg-gray-100]="!isStatusSelected('ongoing')"
-            [class.text-gray-700]="!isStatusSelected('ongoing')"
-            class="px-4 py-2 rounded-full text-sm font-medium transition duration-200 hover:shadow-sm cursor-pointer">
-            Ongoing
-          </button>
-          <button
-            (click)="onStatusFilterChange('closed')"
-            [class.bg-orange-100]="isStatusSelected('closed')"
-            [class.text-orange-700]="isStatusSelected('closed')"
-            [class.ring-2]="isStatusSelected('closed')"
-            [class.ring-orange-500]="isStatusSelected('closed')"
-            [class.bg-gray-100]="!isStatusSelected('closed')"
-            [class.text-gray-700]="!isStatusSelected('closed')"
-            class="px-4 py-2 rounded-full text-sm font-medium transition duration-200 hover:shadow-sm cursor-pointer">
-            Closed
-          </button>
-          <button
-            (click)="onStatusFilterChange('graded')"
-            [class.bg-cyan-100]="isStatusSelected('graded')"
-            [class.text-cyan-700]="isStatusSelected('graded')"
-            [class.ring-2]="isStatusSelected('graded')"
-            [class.ring-cyan-500]="isStatusSelected('graded')"
-            [class.bg-gray-100]="!isStatusSelected('graded')"
-            [class.text-gray-700]="!isStatusSelected('graded')"
-            class="px-4 py-2 rounded-full text-sm font-medium transition duration-200 hover:shadow-sm cursor-pointer">
-            Graded
-          </button>
-          <button
-            (click)="onStatusFilterChange('archived')"
-            [class.bg-gray-200]="isStatusSelected('archived')"
-            [class.text-gray-800]="isStatusSelected('archived')"
-            [class.ring-2]="isStatusSelected('archived')"
-            [class.ring-gray-500]="isStatusSelected('archived')"
-            [class.bg-gray-100]="!isStatusSelected('archived')"
-            [class.text-gray-700]="!isStatusSelected('archived')"
-            class="px-4 py-2 rounded-full text-sm font-medium transition duration-200 hover:shadow-sm cursor-pointer">
-            Archived
-          </button>
-        </div>
+    <div class="mb-8 flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+          <fa-icon [icon]="faCalendar" class="text-indigo-600"></fa-icon>
+          My Exams
+        </h1>
+        <p class="text-gray-600">Create and manage your examinations</p>
       </div>
-
-      <!-- Search Input -->
-      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div class="relative flex-1 md:max-w-md">
-          <input
-            type="text"
-            [(ngModel)]="searchQuery"
-            (keyup)="searchSubject.next(searchQuery())"
-            placeholder="Search by title or description..."
-            class="pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full"
-          />
-          <fa-icon [icon]="faSearch" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></fa-icon>
-          @if (searchQuery()) {
-            <button
-              (click)="clearSearch()"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-              <fa-icon [icon]="faTimes"></fa-icon>
-            </button>
-          }
-        </div>
-        <a routerLink="./create" class="px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200 flex items-center gap-2 shadow-md whitespace-nowrap">
-          <fa-icon [icon]="faPlus"></fa-icon>
-          <span>Create New Exam</span>
-        </a>
-      </div>
-
-      <!-- Advanced Filters (Collapsible) -->
-      <div class="border-t pt-4 mt-4">
-        <button
-          (click)="showAdvanced.set(!showAdvanced())"
-          class="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-2">
-          <fa-icon [icon]="showAdvanced() ? faChevronUp : faChevronDown"></fa-icon>
-          <span>{{ showAdvanced() ? 'Hide Advanced Filters' : 'Show Advanced Filters' }}</span>
-        </button>
-
-        @if (showAdvanced()) {
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            <!-- Year Filter -->
-            <div>
-              <label for="year" class="block text-sm font-medium text-gray-700 mb-2">Year Level</label>
-              <select
-                id="year"
-                [(ngModel)]="yearFilter"
-                (change)="onAdvancedFilterChange()"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
-                <option value="">All Years</option>
-                <option value="1">Year 1</option>
-                <option value="2">Year 2</option>
-                <option value="3">Year 3</option>
-                <option value="4">Year 4</option>
-              </select>
-            </div>
-
-            <!-- Section Filter -->
-            <div>
-              <label for="section" class="block text-sm font-medium text-gray-700 mb-2">Section</label>
-              <select
-                id="section"
-                [(ngModel)]="sectionFilter"
-                (change)="onAdvancedFilterChange()"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
-                <option value="">All Sections</option>
-                <option value="a">Section A</option>
-                <option value="b">Section B</option>
-                <option value="c">Section C</option>
-                <option value="d">Section D</option>
-                <option value="e">Section E</option>
-                <option value="f">Section F</option>
-                <option value="g">Section G</option>
-              </select>
-            </div>
-
-            <!-- Date Filter -->
-            <div>
-              <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">Date From</label>
-              <input
-                type="date"
-                id="date_from"
-                [(ngModel)]="dateFromFilter"
-                (change)="onAdvancedFilterChange()"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            <div class="md:col-span-3 flex justify-end gap-2">
-              <button
-                (click)="clearFilters()"
-                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition duration-200">
-                Clear Filters
-              </button>
-              <button
-                (click)="onAdvancedFilterChange()"
-                class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200">
-                Apply Filters
-              </button>
-            </div>
-          </div>
-        }
-      </div>
+      <a routerLink="./create" class="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200 flex items-center gap-2 shadow-md">
+        <fa-icon [icon]="faPlus"></fa-icon>
+        <span>Create New Exam</span>
+      </a>
     </div>
 
     <!-- Loading State -->
@@ -210,221 +30,144 @@
       </div>
     }
 
-    <!-- Exams Table -->
+    <!-- Exams List -->
     @if (!loading()) {
-      @if (filteredExams().length > 0) {
-        <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Title</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Year/Section</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Start Date</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Duration</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Questions</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Points</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700">Actions</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
-                @for (exam of filteredExams(); track exam.id) {
-                  <tr class="hover:bg-gray-50 transition duration-200">
-                    <!-- Title -->
-                    <td class="px-6 py-4">
-                      <div>
-                        <p class="text-sm font-medium text-gray-900">{{ exam.title }}</p>
-                        <p class="text-xs text-gray-500 mt-1">{{ exam.description || 'No description' }}</p>
-                      </div>
-                    </td>
-
-                    <!-- Year/Section -->
-                    <td class="px-6 py-4">
-                      <div class="flex flex-wrap gap-2">
-                        @if (Array.isArray(exam.year)) {
-                          @for (year of exam.year; track $index) {
-                            <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
-                              Yr{{ year }}
-                            </span>
-                          }
-                        } @else {
-                          @if (exam.year) {
-                            <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
-                              Yr{{ exam.year }}
-                            </span>
-                          }
-                        }
-                        @if (exam.sections && exam.sections.length > 0) {
-                          @for (section of exam.sections; track $index) {
-                            <span class="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded uppercase">
-                              {{ section }}
-                            </span>
-                          }
-                        }
-                      </div>
-                    </td>
-
-                    <!-- Start Date -->
-                    <td class="px-6 py-4 text-sm text-gray-600">
-                      {{ exam.starts_at | date: 'MMM dd, y' }}
-                    </td>
-
-                    <!-- Duration -->
-                    <td class="px-6 py-4">
-                      <span class="text-sm text-gray-900 font-medium">{{ exam.durationDisplay }}</span>
-                    </td>
-
-                    <!-- Questions -->
-                    <td class="px-6 py-4">
-                      <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <fa-icon [icon]="faQuestion" class="text-indigo-600"></fa-icon>
-                        <span>{{ exam.items?.length || 0 }}</span>
-                      </div>
-                    </td>
-
-                    <!-- Points -->
-                    <td class="px-6 py-4">
-                      <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <fa-icon [icon]="faStar" class="text-indigo-600"></fa-icon>
-                        <span>{{ exam.total_points }}</span>
-                      </div>
-                    </td>
-
-                    <!-- Status -->
-                    <td class="px-6 py-4">
-                      @switch (exam.status) {
-                        @case ('draft') {
-                          <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
-                            <fa-icon [icon]="faPencil" class="text-xs"></fa-icon>Draft
-                          </span>
-                        }
-                        @case ('ready') {
-                          <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
-                            <fa-icon [icon]="faCheckCircle" class="text-xs"></fa-icon>Ready
-                          </span>
-                        }
-                        @case ('published') {
-                          <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
-                            <fa-icon [icon]="faCheckCircle" class="text-xs"></fa-icon>Published
-                          </span>
-                        }
-                        @case ('ongoing') {
-                          <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
-                            <fa-icon [icon]="faList" class="text-xs"></fa-icon>Ongoing
-                          </span>
-                        }
-                        @case ('closed') {
-                          <span class="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
-                            <fa-icon [icon]="faArchive" class="text-xs"></fa-icon>Closed
-                          </span>
-                        }
-                        @case ('graded') {
-                          <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
-                            <fa-icon [icon]="faStar" class="text-xs"></fa-icon>Graded
-                          </span>
-                        }
-                        @case ('archived') {
-                          <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
-                            <fa-icon [icon]="faArchive" class="text-xs"></fa-icon>Archived
-                          </span>
-                        }
-                        @default {
-                          <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full inline-flex items-center gap-2">
-                            <fa-icon [icon]="faArchive" class="text-xs"></fa-icon>{{ exam.status }}
-                          </span>
-                        }
-                      }
-                    </td>
-
-                    <!-- Actions -->
-                    <td class="px-6 py-4">
-                      <div class="flex items-center justify-center gap-2">
-                        <a
-                          [routerLink]="['/teacher/exams', exam.id]"
-                          class="px-3 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200 inline-flex items-center gap-1 text-xs">
-                          <fa-icon [icon]="faEye"></fa-icon>
-                          View
-                        </a>
-                        <button
-                          (click)="deleteExam(exam.id)"
-                          class="px-3 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition duration-200 inline-flex items-center gap-1 text-xs">
-                          <fa-icon [icon]="faTrash"></fa-icon>
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Pagination -->
-        @if (totalPages() > 1) {
-          <div class="mt-8 flex items-center justify-between bg-white rounded-xl shadow-md p-6">
-            <span class="text-sm text-gray-600">
-              Showing {{ getStartIndex() }} to {{ getEndIndex() }} of {{ totalExams() }} exams
-            </span>
-
-            <div class="flex items-center gap-2">
-              <button
-                (click)="prevPage()"
-                [disabled]="currentPage() === 1"
-                [class.opacity-50]="currentPage() === 1"
-                [class.cursor-not-allowed]="currentPage() === 1"
-                class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition disabled:hover:bg-transparent">
-                Previous
-              </button>
-
-              <div class="flex gap-1">
-                @for (page of getPageNumbers(); track page) {
-                  @if (typeof page === 'string') {
-                    <span class="px-3 py-2 text-gray-500">{{ page }}</span>
-                  } @else {
-                    <button
-                      (click)="goToPage(page)"
-                      [class.bg-indigo-600]="currentPage() === page"
-                      [class.text-white]="currentPage() === page"
-                      [class.border-indigo-600]="currentPage() === page"
-                      [class.bg-white]="currentPage() !== page"
-                      [class.text-gray-700]="currentPage() !== page"
-                      [class.border-gray-300]="currentPage() !== page"
-                      class="px-3 py-2 border rounded-lg text-sm font-medium transition hover:shadow-sm">
-                      {{ page }}
-                    </button>
-                  }
-                }
+      @if (exams().length > 0) {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (exam of exams(); track exam.id) {
+            <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-200 overflow-hidden border border-gray-200">
+              <!-- Header -->
+              <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 p-4 text-white">
+                <h3 class="text-lg font-semibold line-clamp-2">{{ exam.title }}</h3>
               </div>
 
-              <button
-                (click)="nextPage()"
-                [disabled]="currentPage() === totalPages()"
-                [class.opacity-50]="currentPage() === totalPages()"
-                [class.cursor-not-allowed]="currentPage() === totalPages()"
-                class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition disabled:hover:bg-transparent">
-                Next
-              </button>
+              <!-- Content -->
+              <div class="p-4 space-y-3">
+                <!-- Description -->
+                @if (exam.description) {
+                  <p class="text-sm text-gray-600 line-clamp-2">{{ exam.description }}</p>
+                }
+
+                <!-- Meta Info -->
+                <div class="space-y-2 text-sm">
+                  <!-- Date & Duration -->
+                  <div class="flex items-center gap-2 text-gray-700">
+                    <fa-icon [icon]="faCalendar" class="text-indigo-600"></fa-icon>
+                    <span>{{ exam.starts_at | date: 'MMM dd, y' }} • {{ exam.durationDisplay }}</span>
+                  </div>
+
+                  <!-- Questions -->
+                  <div class="flex items-center gap-2 text-gray-700">
+                    <fa-icon [icon]="faQuestion" class="text-indigo-600"></fa-icon>
+                    <span>{{ exam.items?.length || 0 }} questions</span>
+                  </div>
+
+                  <!-- Points -->
+                  <div class="flex items-center gap-2 text-gray-700">
+                    <fa-icon [icon]="faStar" class="text-indigo-600"></fa-icon>
+                    <span>{{ exam.total_points }} points</span>
+                  </div>
+
+                  <!-- Year/Section -->
+                  <div class="flex flex-wrap gap-1 pt-2">
+                    @if (Array.isArray(exam.year)) {
+                      @for (year of exam.year; track $index) {
+                        <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                          Yr{{ year }}
+                        </span>
+                      }
+                    } @else {
+                      @if (exam.year) {
+                        <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                          Yr{{ exam.year }}
+                        </span>
+                      }
+                    }
+                    @if (exam.sections && exam.sections.length > 0) {
+                      @for (section of exam.sections; track $index) {
+                        <span class="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded uppercase">
+                          {{ section }}
+                        </span>
+                      }
+                    }
+                  </div>
+                </div>
+
+                <!-- Status Badge -->
+                <div class="pt-2">
+                  @switch (exam.status) {
+                    @case ('draft') {
+                      <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full inline-flex items-center gap-1">
+                        <fa-icon [icon]="faPencil" class="text-xs"></fa-icon>Draft
+                      </span>
+                    }
+                    @case ('ready') {
+                      <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full inline-flex items-center gap-1">
+                        <fa-icon [icon]="faCheckCircle" class="text-xs"></fa-icon>Ready
+                      </span>
+                    }
+                    @case ('published') {
+                      <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full inline-flex items-center gap-1">
+                        <fa-icon [icon]="faCheckCircle" class="text-xs"></fa-icon>Published
+                      </span>
+                    }
+                    @case ('ongoing') {
+                      <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full inline-flex items-center gap-1">
+                        <fa-icon [icon]="faCheckCircle" class="text-xs"></fa-icon>Ongoing
+                      </span>
+                    }
+                    @case ('closed') {
+                      <span class="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full inline-flex items-center gap-1">
+                        <fa-icon [icon]="faArchive" class="text-xs"></fa-icon>Closed
+                      </span>
+                    }
+                    @case ('graded') {
+                      <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-semibold rounded-full inline-flex items-center gap-1">
+                        <fa-icon [icon]="faStar" class="text-xs"></fa-icon>Graded
+                      </span>
+                    }
+                    @case ('archived') {
+                      <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full inline-flex items-center gap-1">
+                        <fa-icon [icon]="faArchive" class="text-xs"></fa-icon>Archived
+                      </span>
+                    }
+                    @default {
+                      <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full">
+                        {{ exam.status }}
+                      </span>
+                    }
+                  }
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex gap-2">
+                <a
+                  [routerLink]="['/teacher/exams', exam.id]"
+                  class="flex-1 px-3 py-2 bg-indigo-600 text-white rounded text-sm font-medium hover:bg-indigo-700 transition duration-200 flex items-center justify-center gap-1">
+                  <fa-icon [icon]="faEye" class="text-xs"></fa-icon>
+                  View
+                </a>
+                <button
+                  (click)="openDeleteModal(exam.id, exam.title)"
+                  class="flex-1 px-3 py-2 bg-red-600 text-white rounded text-sm font-medium hover:bg-red-700 transition duration-200 flex items-center justify-center gap-1">
+                  <fa-icon [icon]="faTrash" class="text-xs"></fa-icon>
+                  Delete
+                </button>
+              </div>
             </div>
-          </div>
-        }
+          }
+        </div>
       } @else {
         <!-- Empty State -->
         <div class="bg-white rounded-xl shadow-md p-12 text-center">
-          <div class="bg-gray-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <fa-icon [icon]="faFolderOpen" class="text-4xl text-gray-400"></fa-icon>
-          </div>
+          <div class="text-6xl mb-4">📚</div>
           <h3 class="text-xl font-bold text-gray-900 mb-2">No Exams Found</h3>
           <p class="text-gray-600 mb-6">
-            @if (statusFilters().length > 0) {
-              No exams match your filters. Try adjusting your selection or create a new exam.
-            } @else {
-              You haven't created any exams yet. Get started by creating your first exam.
-            }
+            You haven't created any exams yet. Get started by creating your first exam.
           </p>
           <a
-            routerLink="./create-exam"
+            routerLink="./create"
             class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-200">
             <fa-icon [icon]="faPlus"></fa-icon>
             <span>Create Your First Exam</span>
@@ -441,10 +184,13 @@
     (onClose)="closeErrorModal()"
   />
 
-  <!-- Error Modal -->
-  <app-error-modal
-    [isOpen]="!!error()"
-    [message]="error() || ''"
-    (onClose)="closeErrorModal()"
+  <!-- Delete Confirmation Modal -->
+  <app-delete-confirmation-modal
+    [isOpen]="deleteModalOpen()"
+    [title]="'Delete Exam'"
+    [message]="'Are you sure you want to delete this exam? This action cannot be undone.'"
+    [itemName]="examToDelete()?.title || ''"
+    (onConfirm)="confirmDelete()"
+    (onCancel)="cancelDelete()"
   />
 </div>

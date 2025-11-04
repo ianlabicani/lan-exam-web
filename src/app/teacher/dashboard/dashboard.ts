@@ -13,6 +13,14 @@ import {
   faChartLine,
   faCheckCircle,
   faClock,
+  faFlagCheckered,
+  faClockRotateLeft,
+  faBolt,
+  faClipboardList,
+  faCalendarDays,
+  faPaperPlane,
+  faUpload,
+  faPen,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ExamApiService } from '../services/exam-api.service';
@@ -32,6 +40,14 @@ export class Dashboard implements OnInit {
   protected readonly faChartLine = faChartLine;
   protected readonly faCheckCircle = faCheckCircle;
   protected readonly faClock = faClock;
+  protected readonly faFlagCheckered = faFlagCheckered;
+  protected readonly faClockRotateLeft = faClockRotateLeft;
+  protected readonly faBolt = faBolt;
+  protected readonly faClipboardList = faClipboardList;
+  protected readonly faCalendarDays = faCalendarDays;
+  protected readonly faPaperPlane = faPaperPlane;
+  protected readonly faUpload = faUpload;
+  protected readonly faPen = faPen;
 
   // Signals
   protected exams = signal<any[]>([]);
@@ -133,39 +149,6 @@ export class Dashboard implements OnInit {
       archived: 'bg-yellow-100 text-yellow-700',
     };
     return map[status] || 'bg-gray-100 text-gray-700';
-  }
-
-  protected activityIcon(type: string): {
-    color: string;
-    bg: string;
-    icon: string;
-  } {
-    switch (type) {
-      case 'submission':
-        return {
-          color: 'text-indigo-600',
-          bg: 'bg-indigo-50',
-          icon: 'M9 12h6m-6 4h6M5 8h14',
-        };
-      case 'published':
-        return {
-          color: 'text-green-600',
-          bg: 'bg-green-50',
-          icon: 'M5 13l4 4L19 7',
-        };
-      case 'graded':
-        return {
-          color: 'text-amber-600',
-          bg: 'bg-amber-50',
-          icon: 'M9 17v-6h6v6m2 4H7',
-        };
-      default:
-        return {
-          color: 'text-gray-600',
-          bg: 'bg-gray-50',
-          icon: 'M4 6h16M4 12h16M4 18h16',
-        };
-    }
   }
 
   protected progressPercent(exam: any): number {
