@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faCheckCircle,
   faTimesCircle,
@@ -21,7 +20,6 @@ import { MatchingAnswerComponent } from './answer-components/matching-answer/mat
     DatePipe,
     NgClass,
     TitleCasePipe,
-    FaIconComponent,
     McqAnswerComponent,
     TruefalsAnswerComponent,
     EssayAnswerComponent,

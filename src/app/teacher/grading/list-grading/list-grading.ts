@@ -109,7 +109,7 @@ import {
                       class="bg-indigo-600 text-white w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm"
                     >
                       {{ submission.user.name.split(' ')[0].charAt(0)
-                      }}{{ submission.user.name.split(' ')[1]?.charAt(0) }}
+                      }}{{ submission.user.name.split(' ')[1].charAt(0) }}
                     </div>
                     <div>
                       <p class="font-medium text-gray-900">

@@ -21,11 +21,10 @@ import {
   faSave,
   faInfoCircle,
 } from '@fortawesome/free-solid-svg-icons';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-true-or-false-form-modal',
-  imports: [ReactiveFormsModule, CommonModule, FaIconComponent],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './true-or-false-form-modal.html',
   styleUrl: './true-or-false-form-modal.css',
 })

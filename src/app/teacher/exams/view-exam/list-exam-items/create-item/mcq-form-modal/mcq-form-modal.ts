@@ -18,7 +18,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../../../environments/environment.development';
 import { ExamItemApiService } from '../../../../../services/exam-item-api.service';
 import { CommonModule } from '@angular/common';
 import {
@@ -32,11 +31,10 @@ import {
   faSave,
   faInfoCircle,
 } from '@fortawesome/free-solid-svg-icons';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-mcq-form-modal',
-  imports: [ReactiveFormsModule, CommonModule, FaIconComponent],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './mcq-form-modal.html',
   styleUrl: './mcq-form-modal.css',
 })

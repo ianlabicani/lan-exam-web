@@ -9,7 +9,6 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../../../environments/environment.development';
 import { ExamItem, ViewExamService } from '../../../view-exam.service';
 import { ExamItemApiService } from '../../../../../services/exam-item-api.service';
 import { CommonModule } from '@angular/common';
@@ -22,11 +21,10 @@ import {
   faSave,
   faInfoCircle,
 } from '@fortawesome/free-solid-svg-icons';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-short-answer-form-modal',
-  imports: [ReactiveFormsModule, CommonModule, FaIconComponent],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './short-answer-form-modal.html',
   styleUrl: './short-answer-form-modal.css',
 })

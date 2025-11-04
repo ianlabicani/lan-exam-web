@@ -20,11 +20,10 @@ import {
   faSave,
   faInfoCircle,
 } from '@fortawesome/free-solid-svg-icons';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-fill-blank-form-modal',
-  imports: [ReactiveFormsModule, CommonModule, FaIconComponent],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './fill-blank-form-modal.html',
   styleUrl: './fill-blank-form-modal.css',
 })

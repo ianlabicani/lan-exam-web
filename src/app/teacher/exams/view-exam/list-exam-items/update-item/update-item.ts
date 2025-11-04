@@ -14,9 +14,8 @@ import {
   Validators,
   FormArray,
 } from '@angular/forms';
-import { ExamItem, ViewExamService, Pair } from '../../view-exam.service';
+import { ExamItem, ViewExamService } from '../../view-exam.service';
 import { ExamItemApiService } from '../../../../services/exam-item-api.service';
-import { MatchingFormModal } from '../create-item/matching-form-modal/matching-form-modal';
 import {
   faQuestionCircle,
   faExclamationCircle,
@@ -36,12 +35,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-update-item',
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FaIconComponent,
-    MatchingFormModal,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, FaIconComponent],
   templateUrl: './update-item.html',
   styleUrl: './update-item.css',
 })
